@@ -1,0 +1,5 @@
+SOCKET = connecteurs reseau
+    - de flux (TCP) : connecte , fiable, bidirectionnel, ordonne
+    - de datagrmme (UDP) : non connecte , non fiable , mais plus rapide
+
+
