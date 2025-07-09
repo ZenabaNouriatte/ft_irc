@@ -1,0 +1,3 @@
+integrer poll() et epoll () pour verifier si le client existe ou pas = inegrer dans le vector fd 
+comparer poll epoll select et kqeue
+Class client / server / 

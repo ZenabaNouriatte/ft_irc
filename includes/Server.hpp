@@ -5,6 +5,10 @@
 #include <netinet/in.h> // sockaddr_in, htons, INADDR_ANY
 #include <unistd.h>
 #include <vector>
+#include <algorithm>
+#include <string>
+
+#define BUFFER_SIZE 1024
 
 
 
@@ -15,6 +19,7 @@ class Server
     int                 _port;
     std::string         _password;
     int                 _server_fd;
+    int                 _socket_fd;
     std::vector<int>    _clients_fd;
     int                 _max_fd;
 

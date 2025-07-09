@@ -11,8 +11,12 @@ int main(int argc, char **argv)
     }
 
     int port = std::atoi(argv[1]);
+    if (port < 1024 || port > 65535) 
+    {
+        std::cerr << "Error: Port number must be between 1024 and 65535." << std::endl;
+        return (1);
+    }
     std::string password = argv[2];
-
     Server server(port, password);
     server.start();
 
