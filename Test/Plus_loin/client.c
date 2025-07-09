@@ -7,7 +7,7 @@
 #include <arpa/inet.h>
 
 #define CONNEXION_HOST "127.0.0.1"
-#define LISTENING_PORT 5094
+#define LISTENING_PORT 5095
 #define BUFFER_SIZE 1024
 
 int main ()

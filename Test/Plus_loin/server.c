@@ -5,7 +5,7 @@
 #include <sys/socket.h>
 #include <unistd.h>
 
-#define LISTENING_PORT 5094
+#define LISTENING_PORT 5095
 #define PENDING_QUEUE_MAXLENGHT 1
 #define BUFFER_SIZE 1024
 
