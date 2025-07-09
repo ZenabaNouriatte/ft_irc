@@ -7,10 +7,14 @@
 #include <vector>
 #include <algorithm>
 #include <string>
+#include <poll.h>
+#include <map>
+#include <fcntl.h>
+
 
 #define BUFFER_SIZE 1024
 
-
+class Client;
 
 class Server
 {
@@ -19,19 +23,21 @@ class Server
     int                 _port;
     std::string         _password;
     int                 _server_fd;
-    int                 _socket_fd;
-    std::vector<int>    _clients_fd;
     int                 _max_fd;
+    std::vector<pollfd> _poll_fds;
+    std::map<int, Client*> _clients;
+
+
 
     public :
     Server(int port, const std::string& password);
     ~Server();
     void start();
-    void handleError(const std::string& message);
-    void acceptNewClient();         
-    void handleClient(int fd);     
-    void closeClient(int fd);     
-    void stop();        
+    void handleError(const std::string& message);      
+    void acceptNewClient();
+    void handleClient(int client_fd);
+    void removeClient(int client_fd);
+
 };
 
 

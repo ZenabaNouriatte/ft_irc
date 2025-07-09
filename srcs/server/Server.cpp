@@ -24,59 +24,90 @@ void Server::start()
     if (_server_fd == -1)
         return handleError ("Fail socket\n");
 
-    sockaddr_in addr; // structure pour ipv4
-    addr.sin_family = AF_INET; // type d'adresse
-    addr.sin_port = htons(_port); //port choisi converti au format reseau
-    addr.sin_addr.s_addr = INADDR_ANY; // ecoute toutes les interface 
-    // écouter sur ce port sur toutes les IPs de cette machine
+    fcntl(_server_fd, F_SETFL, O_NONBLOCK);  // socket non bloquant
+
+    sockaddr_in addr;
+    addr.sin_family = AF_INET;
+    addr.sin_port = htons(_port);
+    addr.sin_addr.s_addr = INADDR_ANY;
     socklen_t f_addr_len = sizeof(addr);
-    if (bind(_server_fd, (sockaddr*)&addr, f_addr_len) == -1) // spécifier le type de communication associé au socket (protocole TCP ou UDP) 
+    if (bind(_server_fd, (sockaddr*)&addr, f_addr_len) == -1)
         return handleError ("Fail bind\n");
-    //bind() lie le socket _server_fd a l’adresse configurer
-    if (listen(_server_fd, 5)  == -1) //placer le socket en mode passif (à l'écoute des messages).
+    if (listen(_server_fd, 5)  == -1)
         return handleError ("Fail listen\n");
-    //Attend des connexions
-    //5 = nombre max de client en attente 
     std::cout << "Server ready on port: " << _port << std::endl;
+    // construire les pollfd pour chaque socket a surveiller 
+    pollfd pfd;
+    pfd.fd = _server_fd;
+    pfd.events = POLLIN;
+    _poll_fds.push_back(pfd);
 
-    socklen_t addr_len = sizeof(addr);
-    std::cout << "Waiting for a client..." << std::endl;
-    _socket_fd = accept(_server_fd, (sockaddr*)&addr, &addr_len);
-    if (_socket_fd == -1)
-        return handleError("Fail accept");
-    std::cout << "Client connected !" << std::endl;
 
-    std::string buffer (BUFFER_SIZE, '\0');
-    std::string input;
-    // si utilisation de poll()
-    while (1)
+    while (true) 
     {
-        int receivedBytes = recv(_socket_fd, &buffer[0], BUFFER_SIZE, 0);
-        if (receivedBytes == 0) 
+        // Appel de poll() avec un tableau de pollfd
+        int poll_count = poll(_poll_fds.data(), _poll_fds.size(), -1);
+        if (poll_count < 0)
+            return handleError("poll failed");
+
+        for (size_t i = 0; i < _poll_fds.size(); ++i) 
         {
-            std::cout << "Client disconnected." << std::endl;
-            break;
+            // Examiner revents pour chaque socket
+            if (_poll_fds[i].revents & POLLIN) {
+                if (_poll_fds[i].fd == _server_fd) 
+                {
+                    acceptNewClient();
+                }
+                else 
+                {
+                    handleClient(_poll_fds[i].fd);
+                }
+            } 
+            else if (_poll_fds[i].revents & (POLLHUP | POLLERR)) 
+            {
+                removeClient(_poll_fds[i].fd);
+                i--; // car on modifie le vector
+            }
         }
-        if (receivedBytes == -1)
-            return handleError("Serveur - erreur reception du msg du clint");
-        
-        buffer.resize(receivedBytes);
-        buffer.erase(std::remove(buffer.begin(), buffer.end(), '\r'), buffer.end());
-        buffer.erase(std::remove(buffer.begin(), buffer.end(), '\n'), buffer.end());
-        std::cout << "Client > " << buffer << std::endl;
-        if (std::string(buffer) == "exit")
-            break;
-        std::cout << "Serveur > ";
-        std::getline(std::cin, input);
-        int sentBytes = send (_socket_fd, input.c_str(), input.length(), 0);
-        if (sentBytes == -1)
-            handleError("Serveur - fail envoi msg");
-        input += "\n"; 
-        if (std::string(buffer) == "exit")
-            break;        
     }
-    close (_socket_fd);
-    close (_server_fd);
+    // socklen_t addr_len = sizeof(addr);
+    // std::cout << "Waiting for a client..." << std::endl;
+    // _socket_fd = accept(_server_fd, (sockaddr*)&addr, &addr_len);
+    // if (_socket_fd == -1)
+    //     return handleError("Fail accept");
+    // std::cout << "Client connected !" << std::endl;
+
+    // std::string buffer (BUFFER_SIZE, '\0');
+    // std::string input;
+    // // si utilisation de poll()
+    // while (1)
+    // {
+    //     int receivedBytes = recv(_socket_fd, &buffer[0], BUFFER_SIZE, 0);
+    //     if (receivedBytes == 0) 
+    //     {
+    //         std::cout << "Client disconnected." << std::endl;
+    //         break;
+    //     }
+    //     if (receivedBytes == -1)
+    //         return handleError("Serveur - erreur reception du msg du clint");
+        
+    //     buffer.resize(receivedBytes);
+    //     buffer.erase(std::remove(buffer.begin(), buffer.end(), '\r'), buffer.end());
+    //     buffer.erase(std::remove(buffer.begin(), buffer.end(), '\n'), buffer.end());
+    //     std::cout << "Client > " << buffer << std::endl;
+    //     if (std::string(buffer) == "exit")
+    //         break;
+    //     std::cout << "Serveur > ";
+    //     std::getline(std::cin, input);
+    //     int sentBytes = send (_socket_fd, input.c_str(), input.length(), 0);
+    //     if (sentBytes == -1)
+    //         handleError("Serveur - fail envoi msg");
+    //     input += "\n"; 
+    //     if (std::string(buffer) == "exit")
+    //         break;        
+    // }
+    // close (_socket_fd);
+    // close (_server_fd);
 }
 
 
