@@ -10,6 +10,8 @@
 #include <poll.h>
 #include <map>
 #include <fcntl.h>
+#include "Client.hpp"
+#include "Message.hpp"
 
 
 #define BUFFER_SIZE 1024
@@ -23,7 +25,6 @@ class Server
     int                 _port;
     std::string         _password;
     int                 _server_fd;
-    int                 _max_fd;
     std::vector<pollfd> _poll_fds;
     std::map<int, Client*> _clients;
 

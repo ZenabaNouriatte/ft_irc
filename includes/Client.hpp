@@ -11,10 +11,14 @@
 
 class Client 
 {
-    public:
-        int fd;
-        std::string nickname;
-        std::string buffer; // Pour stocker les messages en attente
+    private:
+        int _fd;
+        std::string _nickname;
+        std::string _buffer; // Pour stocker les messages en attente
 
-        Client(int fd) : fd(fd) {}
+    public :
+        Client(int fd);
+        ~Client();
+        void appendToBuffer(const std::string& data);
+        std::string& getBuffer();
 };

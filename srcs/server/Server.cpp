@@ -24,15 +24,21 @@ void Server::start()
     if (_server_fd == -1)
         return handleError ("Fail socket\n");
 
-    fcntl(_server_fd, F_SETFL, O_NONBLOCK);  // socket non bloquant
+    int opt = 1;
+    if (setsockopt(_server_fd, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt)) == -1)
+        return handleError("Fail setsockopt SO_REUSEADDR\n");
+    //pour relancer le server avec le meme port
+    fcntl(_server_fd, F_SETFL, O_NONBLOCK);  // socket non bloquant garanti que accept recv ne bloquerons pqs 
 
     sockaddr_in addr;
     addr.sin_family = AF_INET;
     addr.sin_port = htons(_port);
     addr.sin_addr.s_addr = INADDR_ANY;
     socklen_t f_addr_len = sizeof(addr);
+
     if (bind(_server_fd, (sockaddr*)&addr, f_addr_len) == -1)
         return handleError ("Fail bind\n");
+    // associe adresse ip et port 
     if (listen(_server_fd, 5)  == -1)
         return handleError ("Fail listen\n");
     std::cout << "Server ready on port: " << _port << std::endl;
@@ -53,7 +59,8 @@ void Server::start()
         for (size_t i = 0; i < _poll_fds.size(); ++i) 
         {
             // Examiner revents pour chaque socket
-            if (_poll_fds[i].revents & POLLIN) {
+            if (_poll_fds[i].revents & POLLIN) 
+            {
                 if (_poll_fds[i].fd == _server_fd) 
                 {
                     acceptNewClient();
@@ -66,48 +73,101 @@ void Server::start()
             else if (_poll_fds[i].revents & (POLLHUP | POLLERR)) 
             {
                 removeClient(_poll_fds[i].fd);
-                i--; // car on modifie le vector
+                i--; // car on modifi le vector
             }
         }
     }
-    // socklen_t addr_len = sizeof(addr);
-    // std::cout << "Waiting for a client..." << std::endl;
-    // _socket_fd = accept(_server_fd, (sockaddr*)&addr, &addr_len);
-    // if (_socket_fd == -1)
-    //     return handleError("Fail accept");
-    // std::cout << "Client connected !" << std::endl;
-
-    // std::string buffer (BUFFER_SIZE, '\0');
-    // std::string input;
-    // // si utilisation de poll()
-    // while (1)
-    // {
-    //     int receivedBytes = recv(_socket_fd, &buffer[0], BUFFER_SIZE, 0);
-    //     if (receivedBytes == 0) 
-    //     {
-    //         std::cout << "Client disconnected." << std::endl;
-    //         break;
-    //     }
-    //     if (receivedBytes == -1)
-    //         return handleError("Serveur - erreur reception du msg du clint");
-        
-    //     buffer.resize(receivedBytes);
-    //     buffer.erase(std::remove(buffer.begin(), buffer.end(), '\r'), buffer.end());
-    //     buffer.erase(std::remove(buffer.begin(), buffer.end(), '\n'), buffer.end());
-    //     std::cout << "Client > " << buffer << std::endl;
-    //     if (std::string(buffer) == "exit")
-    //         break;
-    //     std::cout << "Serveur > ";
-    //     std::getline(std::cin, input);
-    //     int sentBytes = send (_socket_fd, input.c_str(), input.length(), 0);
-    //     if (sentBytes == -1)
-    //         handleError("Serveur - fail envoi msg");
-    //     input += "\n"; 
-    //     if (std::string(buffer) == "exit")
-    //         break;        
-    // }
-    // close (_socket_fd);
-    // close (_server_fd);
 }
 
+void Server::acceptNewClient()
+{
+    sockaddr_in client_addr; // stock les info client qui se connect
+    socklen_t addr_len = sizeof(client_addr); //taille
+
+    int client_fd = accept(_server_fd, (sockaddr*)&client_addr, &addr_len); // on rempli la structure client_adrr avec les information trouve via accept
+    if (client_fd == -1)
+        return handleError("Fail accept");
+    std::cout << "DEBUG : New client connected on fd: " << client_fd << std::endl;
+    
+    // Mettre le socket client en mode non bloquant
+    fcntl(client_fd, F_SETFL, O_NONBLOCK);
+
+    //On ajoute une entree pollfd pour ce client dans _poll_fds pour que poll() suveille le socket
+    pollfd pfd;
+    pfd.fd = client_fd;
+    pfd.events = POLLIN;
+    _poll_fds.push_back(pfd);
+
+    Client *client = new Client(client_fd); // on creer un nouveau client via son fd
+    _clients[client_fd] = client; //stock le client dans le map avec cles = fd
+
+}
+
+void Server::handleClient(int client_fd)
+{
+    char buffer[1024]; // recv attend un tableau de char , 1024 taille suffisament grand pour un msg
+    ssize_t received_bytes = recv(client_fd, buffer, sizeof(buffer) - 1, 0);
+
+    if (received_bytes > 0)
+    {
+        buffer[received_bytes] = '\0';  // Termine proprement la chaîne
+        std::cout << "[RECV fd=" << client_fd << "] " << buffer << std::endl;
+
+        // Ajouter donnee au buffer client
+        Client* client = _clients[client_fd];
+        client->appendToBuffer(buffer); // copier buffer de rcv dans _buffer.client
+
+        // Traiter les lignes completes qui termine par \r\n
+        std::string& buf = client->getBuffer(); // reference pour acceder a _buffer et non faire une copie
+        size_t pos =buf.find("\r\n");
+        while (pos != std::string::npos)
+        {
+            std::string raw_message = buf.substr(0, pos); // recupere la prochaine ligne
+            buf.erase(0, pos + 2); // supprime la ligne + \r\n
+
+            // Creation obj msg
+            Message msg(raw_message);
+            pos = buf.find("\r\n"); // mettre à jour pos a la fin
+
+        }
+
+    }
+    else if (received_bytes == 0)
+    {
+        std::cout << "[INFO] Client " << client_fd << " a fermé la connexion." << std::endl;
+        removeClient(client_fd);
+    }
+    else
+    {
+        handleError("[ERROR] recv()");
+        removeClient(client_fd);
+    }
+}
+
+
+void Server::removeClient(int client_fd)
+{
+    std::cout << "DEBUG Supp du client " << client_fd << std::endl;
+
+    // Fermer la socket
+    close(client_fd);
+
+    //Supprimer le pollfd associé
+    for (std::vector<pollfd>::iterator it = _poll_fds.begin(); it != _poll_fds.end(); ++it)
+    {
+        if (it->fd == client_fd)
+        {
+            _poll_fds.erase(it);
+            break;
+        }
+    }
+
+    // Supprimer le client de la map + memoire
+    std::map<int, Client*>::iterator it = _clients.find(client_fd);
+    if (it != _clients.end())
+    {
+        delete it->second;
+        _clients.erase(it);
+    }
+}
 
