@@ -30,6 +30,7 @@ class Server
     int                 _server_fd;
     std::vector<pollfd> _poll_fds;
     std::map<int, Client*> _clients;
+    void handleConsoleInput();
 
 
     public :
@@ -45,6 +46,7 @@ class Server
     static int signal;
     static void catchSignal(int);
 
+    void broadcast(const std::string& text);
 };
 
 
