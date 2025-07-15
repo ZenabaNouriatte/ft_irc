@@ -5,8 +5,8 @@ int Server::signal = 0;
 Server::Server(int port, const std::string& password) : _port(port), _password(password), _server_fd(-1)
 {
     _server_name = "gossip.irc.localhost";
-    std::cout << "Arg[1] = port : " << this->_port
-                << "\nArg[2] = password : " << this->_password << std::endl;
+    //std::cout << "Arg[1] = port : " << this->_port
+    //           << "\nArg[2] = password : " << this->_password << std::endl;
 }
 
 Server::~Server() 
@@ -134,7 +134,7 @@ void Server::acceptNewClient()
     int client_fd = accept(_server_fd, (sockaddr*)&client_addr, &addr_len); // on rempli la structure client_adrr avec les information trouve via accept
     if (client_fd == -1)
         return handleError("Fail accept");
-    std::cout << "DEBUG : New client connected on fd: " << client_fd << std::endl;
+    //std::cout << "DEBUG : New client connected on fd: " << client_fd << std::endl;
     
     // Mettre le socket client en mode non bloquant
     fcntl(client_fd, F_SETFL, O_NONBLOCK);
@@ -196,7 +196,7 @@ void Server::handleClient(int client_fd)
 
 void Server::removeClient(int client_fd)
 {
-    std::cout << "DEBUG Supp du client " << client_fd << std::endl;
+    //std::cout << "DEBUG Supp du client " << client_fd << std::endl;
 
     // Fermer la socket
     close(client_fd);
@@ -235,7 +235,7 @@ void Server::cleanExit()
     _poll_fds.clear();
     _clients.clear();
 
-    std::cout << "DEBUG Propre exit ...\n";
+    //std::cout << "DEBUG Propre exit ...\n";
 }
 
 void Server::broadcast(const std::string& text)

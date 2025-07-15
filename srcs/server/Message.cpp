@@ -4,10 +4,10 @@ Message::Message(std::string raw_msg): raw(raw_msg)
 {
         //std::cout << "Raw msg: " << raw << std::endl;
         msgParsing(raw);
-        std::cout << "DEBUG Prefix = [" << prefix << "]\n";
-        std::cout << "DEBUG Command= [" << command << "]\n";
-        for (size_t i = 0; i < params.size(); ++i)
-                std::cout << "DEBUG Param[" << i << "] = [" << params[i] << "]\n";
+        //std::cout << "DEBUG Prefix = [" << prefix << "]\n";
+        //std::cout << "DEBUG Command= [" << command << "]\n";
+        //for (size_t i = 0; i < params.size(); ++i)
+        //        std::cout << "DEBUG Param[" << i << "] = [" << params[i] << "]\n";
 }
 
 void Message::msgParsing(std::string msg)
