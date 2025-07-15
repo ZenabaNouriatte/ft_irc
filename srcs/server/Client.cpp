@@ -16,9 +16,7 @@ std::string& Client::getBuffer()
     return _buffer;
 }
 
-int Client::getFd(void) const
-{
-	std::cout << "getFd member function called" << std::endl;
+int Client::getFd(void) const{
 	return (_fd);
 }
 
@@ -30,11 +28,6 @@ void Client::send_msg(const std::string& message)
 
     if (sent == -1)
     {
-        std::cerr << "[ERROR] Echec de l'envoi du message au client fd " << _fd << std::endl;
-    }
-    else
-    {
-        std::cout << "[SEND] (" << sent << " octets) --> Client fd " << _fd
-                  << " : " << message << std::endl;
+        std::cerr << "[ERROR] Echec de l'envoi du message au client." << _fd << std::endl;
     }
 }

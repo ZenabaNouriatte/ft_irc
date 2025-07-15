@@ -18,70 +18,107 @@ void Server::handleError(const std::string& message)
         close(_server_fd);
 }
 
+
+void Server::handleConsoleInput()
+{
+    char    buf[BUFFER_SIZE];
+    ssize_t n = read(STDIN_FILENO, buf, sizeof(buf) - 1);
+
+    if (n <= 0)
+        return;
+    buf[n] = '\0';
+    std::string input(buf);
+    while (!input.empty() &&
+           (input[input.size() - 1] == '\n' || input[input.size() - 1] == '\r'))
+    {
+        input.erase(input.size() - 1, 1);
+    }
+    if (!input.empty())
+        broadcast(input);
+}
+
 void Server::start()
 {
-    _server_fd = socket(AF_INET, SOCK_STREAM,0); // creer un socket : famille d'adresse ipv4 , type TCP , protocole par default (tcp)
+    int          opt = 1;
+    sockaddr_in  addr;
+    socklen_t    addr_len = sizeof(addr);
+    pollfd       pfd;
+
+    /* ───── Création du socket serveur ───── */
+    _server_fd = socket(AF_INET, SOCK_STREAM, 0);
     if (_server_fd == -1)
-        return handleError ("Fail socket\n");
+        return handleError("Fail socket\n");
 
-    int opt = 1;
-    if (setsockopt(_server_fd, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt)) == -1)
+    if (setsockopt(_server_fd, SOL_SOCKET, SO_REUSEADDR,
+                   &opt, sizeof(opt)) == -1)
         return handleError("Fail setsockopt SO_REUSEADDR\n");
-    //pour relancer le server avec le meme port
-    fcntl(_server_fd, F_SETFL, O_NONBLOCK);  // socket non bloquant garanti que accept recv ne bloquerons pqs 
 
-    sockaddr_in addr;
-    addr.sin_family = AF_INET;
-    addr.sin_port = htons(_port);
+    fcntl(_server_fd, F_SETFL, O_NONBLOCK);              // non‑bloquant
+
+    memset(&addr, 0, sizeof(addr));
+    addr.sin_family      = AF_INET;
+    addr.sin_port        = htons(_port);
     addr.sin_addr.s_addr = INADDR_ANY;
-    socklen_t f_addr_len = sizeof(addr);
 
-    if (bind(_server_fd, (sockaddr*)&addr, f_addr_len) == -1)
-        return handleError ("Fail bind\n");
-    // associe adresse ip et port 
-    if (listen(_server_fd, 5)  == -1)
-        return handleError ("Fail listen\n");
+    if (bind(_server_fd, (sockaddr *)&addr, addr_len) == -1)
+        return handleError("Fail bind\n");
+
+    if (listen(_server_fd, 5) == -1)
+        return handleError("Fail listen\n");
+
     std::cout << "Server ready on port: " << _port << std::endl;
-    // construire les pollfd pour chaque socket a surveiller 
-    pollfd pfd;
-    pfd.fd = _server_fd;
+
+    /* ───── Ajout du socket serveur à poll() ───── */
+    pfd.fd     = _server_fd;
     pfd.events = POLLIN;
     _poll_fds.push_back(pfd);
 
+    /* ───── Ajout de l’entrée standard (clavier) à poll() ───── */
+    fcntl(STDIN_FILENO, F_SETFL, O_NONBLOCK);            // stdin non‑bloquant
+    pollfd p_stdin;
+    p_stdin.fd     = STDIN_FILENO;
+    p_stdin.events = POLLIN;
+    _poll_fds.push_back(p_stdin);
 
-    while (true) 
+    /* ───── Boucle principale ───── */
+    while (true)
     {
-        // Appel de poll() avec un tableau de pollfd
-        int poll_count = poll(_poll_fds.data(), _poll_fds.size(), -1);
+        int poll_count = poll(_poll_fds.data(),
+                              _poll_fds.size(), -1);
         if (poll_count < 0)
             return handleError("poll failed");
 
-        for (size_t i = 0; i < _poll_fds.size(); ++i) 
+        for (size_t i = 0; i < _poll_fds.size(); ++i)
         {
-            // Examiner revents pour chaque socket
-            if (_poll_fds[i].revents & POLLIN) 
+            if (_poll_fds[i].revents & POLLIN)
             {
-                if (_poll_fds[i].fd == _server_fd) 
+                if (_poll_fds[i].fd == _server_fd)
                 {
                     acceptNewClient();
                 }
-                else 
+                else if (_poll_fds[i].fd == STDIN_FILENO)
+                {
+                    handleConsoleInput();
+                }
+                else
                 {
                     handleClient(_poll_fds[i].fd);
                 }
-            } 
-            else if (_poll_fds[i].revents & (POLLHUP | POLLERR)) 
+            }
+            else if (_poll_fds[i].revents & (POLLHUP | POLLERR))
             {
                 removeClient(_poll_fds[i].fd);
-                i--; // car on modifi le vector
+                i--;
             }
         }
     }
 }
 
+
 void Server::acceptNewClient()
 {
     sockaddr_in client_addr; // stock les info client qui se connect
+    memset(&client_addr, 0, sizeof(client_addr));
     socklen_t addr_len = sizeof(client_addr); //taille
 
     int client_fd = accept(_server_fd, (sockaddr*)&client_addr, &addr_len); // on rempli la structure client_adrr avec les information trouve via accept
@@ -96,6 +133,7 @@ void Server::acceptNewClient()
     pollfd pfd;
     pfd.fd = client_fd;
     pfd.events = POLLIN;
+    pfd.revents = 0;
     _poll_fds.push_back(pfd);
 
     Client *client = new Client(client_fd); // on creer un nouveau client via son fd
@@ -128,6 +166,7 @@ void Server::handleClient(int client_fd)
             // Creation obj msg
             Message msg(raw_message);
             pos = buf.find("\r\n"); // mettre à jour pos a la fin
+            //msg.parsing(); //ici parsing
 
         }
 
@@ -171,4 +210,16 @@ void Server::removeClient(int client_fd)
     }
 }
 
+void Server::broadcast(const std::string& text)
+{
+    const std::string prefix = ":irc.localhost NOTICE ** :";
+
+    std::string irc_line = prefix + text + "\r\n";
+    for (std::map<int, Client*>::iterator it = _clients.begin();
+         it != _clients.end(); ++it)
+    {
+        it->second->send_msg(irc_line);
+    }
+    std::cout << "[Serveur] " << irc_line;
+}
 

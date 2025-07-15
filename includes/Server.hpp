@@ -6,12 +6,14 @@
 #include <unistd.h>
 #include <vector>
 #include <algorithm>
-#include <string>
+#include <string.h>
 #include <poll.h>
 #include <map>
 #include <fcntl.h>
 #include "Client.hpp"
 #include "Message.hpp"
+
+
 
 #define BUFFER_SIZE 1024
 
@@ -26,7 +28,7 @@ class Server
     int                 _server_fd;
     std::vector<pollfd> _poll_fds;
     std::map<int, Client*> _clients;
-
+    void handleConsoleInput();
 
 
     public :
@@ -37,6 +39,7 @@ class Server
     void acceptNewClient();
     void handleClient(int client_fd);
     void removeClient(int client_fd);
+    void broadcast(const std::string& text);
 };
 
 
