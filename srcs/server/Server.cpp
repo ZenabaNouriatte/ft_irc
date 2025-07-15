@@ -1,5 +1,7 @@
 #include "Server.hpp"
 
+int Server::signal = 0;
+
 Server::Server(int port, const std::string& password) : _port(port), _password(password), _server_fd(-1)
 {
     std::cout << "Arg[1] = port : " << this->_port
@@ -8,7 +10,8 @@ Server::Server(int port, const std::string& password) : _port(port), _password(p
 
 Server::~Server() 
 {
-    std::cout << "Server destroyed\n";
+    cleanExit();
+    std::cout << "DEBUG Server destroyed\n";
 }
 
 void Server::handleError(const std::string& message) 
@@ -50,12 +53,16 @@ void Server::start()
     _poll_fds.push_back(pfd);
 
 
-    while (true) 
+    while (Server::signal == 0)
     {
         // Appel de poll() avec un tableau de pollfd
-        int poll_count = poll(_poll_fds.data(), _poll_fds.size(), -1);
+        int poll_count = poll(_poll_fds.data(), _poll_fds.size(), 1000);
         if (poll_count < 0)
+        {
+            if (errno == EINTR)
+                continue; // en cas de ctrc c pour ne pas que polle failed 
             return handleError("poll failed");
+        }
 
         for (size_t i = 0; i < _poll_fds.size(); ++i) 
         {
@@ -74,9 +81,11 @@ void Server::start()
             else if (_poll_fds[i].revents & (POLLHUP | POLLERR)) 
             {
                 removeClient(_poll_fds[i].fd);
-                i--; // car on modifi le vector
+                i--; //modifi le vector
             }
         }
+        if (Server::signal != 0)
+            break;
     }
 }
 
@@ -175,3 +184,20 @@ void Server::removeClient(int client_fd)
     }
 }
 
+void Server::catchSignal(int signum)
+{
+    signal = signum;
+}
+void Server::cleanExit() 
+{
+    for (size_t i = 0; i < _poll_fds.size(); ++i)
+        close(_poll_fds[i].fd);
+
+    for (std::map<int, Client*>::iterator it = _clients.begin(); it != _clients.end(); ++it)
+        delete it->second;
+
+    _poll_fds.clear();
+    _clients.clear();
+
+    std::cout << "DEBUG Propre exit ...\n";
+}

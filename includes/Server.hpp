@@ -12,6 +12,8 @@
 #include <fcntl.h>
 #include "Client.hpp"
 #include "Message.hpp"
+#include <errno.h>
+#include <csignal> 
 
 
 
@@ -38,6 +40,10 @@ class Server
     void acceptNewClient();
     void handleClient(int client_fd);
     void removeClient(int client_fd);
+    void cleanExit();
+
+    static int signal;
+    static void catchSignal(int);
 
 };
 
