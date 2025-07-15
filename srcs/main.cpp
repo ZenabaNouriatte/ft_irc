@@ -20,6 +20,5 @@ int main(int argc, char **argv)
     Server server(port, password);
     signal(SIGINT, Server::catchSignal);
     server.start();
-
     return 0;
 }

@@ -4,6 +4,7 @@ int Server::signal = 0;
 
 Server::Server(int port, const std::string& password) : _port(port), _password(password), _server_fd(-1)
 {
+    _server_name = "gossip.irc.localhost";
     std::cout << "Arg[1] = port : " << this->_port
                 << "\nArg[2] = password : " << this->_password << std::endl;
 }
@@ -72,14 +73,15 @@ void Server::start()
     std::cout << "Server ready on port: " << _port << std::endl;
 
     /* ───── Ajout du socket serveur à poll() ───── */
-    pfd.fd     = _server_fd;
+    pfd.fd = _server_fd;
     pfd.events = POLLIN;
     _poll_fds.push_back(pfd);
 
     /* ───── Ajout de l’entrée standard (clavier) à poll() ───── */
     fcntl(STDIN_FILENO, F_SETFL, O_NONBLOCK);            // stdin non‑bloquant
+    
     pollfd p_stdin;
-    p_stdin.fd     = STDIN_FILENO;
+    p_stdin.fd = STDIN_FILENO;
     p_stdin.events = POLLIN;
     _poll_fds.push_back(p_stdin);
 
@@ -157,24 +159,24 @@ void Server::handleClient(int client_fd)
     if (received_bytes > 0)
     {
         buffer[received_bytes] = '\0';  // Termine proprement la chaîne
-        std::cout << "[RECV fd=" << client_fd << "] " << buffer << std::endl;
-
         // Ajouter donnee au buffer client
         Client* client = _clients[client_fd];
         client->appendToBuffer(buffer); // copier buffer de rcv dans _buffer.client
 
         // Traiter les lignes completes qui termine par \r\n
         std::string& buf = client->getBuffer(); // reference pour acceder a _buffer et non faire une copie
-        size_t pos =buf.find("\r\n");
+
+        size_t pos =buf.find("\n");
         while (pos != std::string::npos)
         {
             std::string raw_message = buf.substr(0, pos); // recupere la prochaine ligne
-            buf.erase(0, pos + 2); // supprime la ligne + \r\n
+            buf.erase(0, pos + 1); // supprime la ligne + \r\n
 
             // Creation obj msg
             Message msg(raw_message);
-            pos = buf.find("\r\n"); // mettre à jour pos a la fin
-            //msg.parsing(); //ici parsing
+            std::cout << raw_message << std::endl;
+            handleCommand(client, raw_message);  
+            pos = buf.find("\n"); // mettre à jour pos a la fin
 
         }
 
@@ -235,9 +237,10 @@ void Server::cleanExit()
 
     std::cout << "DEBUG Propre exit ...\n";
 }
+
 void Server::broadcast(const std::string& text)
 {
-    const std::string prefix = ":irc.localhost NOTICE ** :";
+    const std::string prefix = ":gossip.irc.localhost NOTICE ** :";
 
     std::string irc_line = prefix + text + "\r\n";
     for (std::map<int, Client*>::iterator it = _clients.begin();
@@ -247,4 +250,6 @@ void Server::broadcast(const std::string& text)
     }
     std::cout << "[Serveur] " << irc_line;
 }
+
+
 

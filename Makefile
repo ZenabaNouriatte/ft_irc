@@ -3,10 +3,10 @@
 #                                                         :::      ::::::::    #
 #    Makefile                                           :+:      :+:    :+:    #
 #                                                     +:+ +:+         +:+      #
-#    By: cschmid <cschmid@student.42.fr>            +#+  +:+       +#+         #
+#    By: zmogne <zmogne@student.42.fr>              +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2025/07/04 16:33:23 by zmogne            #+#    #+#              #
-#    Updated: 2025/07/15 10:19:23 by cschmid          ###   ########.fr        #
+#    Updated: 2025/07/15 19:29:17 by zmogne           ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -23,7 +23,9 @@ HEADER_NAMES := Channel.hpp Client.hpp CommandHanler.hpp Message.hpp Server.hpp
 SRC_FILES    := main.cpp \
                 server/Server.cpp \
                 server/Message.cpp \
-                server/Client.cpp
+                server/Client.cpp \
+				server/CommandHandler.cpp 
+				
 
 SRC := $(addprefix $(SRC_DIR)/, $(SRC_FILES))
 HEADER_FILES := $(addprefix includes/, $(HEADER_NAMES))

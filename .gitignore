@@ -2,7 +2,9 @@ ircserv
 *.o
 a.out
 .gitignore
+.json
 
 **/a.out
 **/*.o
 **/ircserv
+**/.json

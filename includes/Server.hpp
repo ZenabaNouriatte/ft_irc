@@ -15,8 +15,6 @@
 #include <errno.h>
 #include <csignal> 
 
-
-
 #define BUFFER_SIZE 1024
 
 class Client;
@@ -29,7 +27,9 @@ class Server
     std::string         _password;
     int                 _server_fd;
     std::vector<pollfd> _poll_fds;
+    std::string         _server_name;
     std::map<int, Client*> _clients;
+
     void handleConsoleInput();
 
 
@@ -47,6 +47,16 @@ class Server
     static void catchSignal(int);
 
     void broadcast(const std::string& text);
+
+    void handleCommand(Client* client, const Message& msg);
+    void handlePASS (Client* client, const Message& msg);
+    void handleNICK (Client* client, const Message& msg);
+    void handleUSER (Client* client, const Message& msg);
+    void handlePING (Client* client, const Message& msg);
+
+    void sendError(int fd, const std::string& code, const std::string& target, const std::string& message);
+
+
 };
 
 

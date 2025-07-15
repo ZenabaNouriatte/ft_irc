@@ -1,6 +1,8 @@
 #pragma once
 #include <iostream>
 #include <vector>
+#include <string>
+
 
 
 class Message 
@@ -12,5 +14,6 @@ class Message
         std::string raw;
         std::vector<std::string> params;
 
-        Message(const std::string& raw_msg); // constructeur
+        Message(std::string raw_msg); // constructeur
+        void msgParsing(std::string raw_msg);
 };
