@@ -12,5 +12,5 @@ class Message
         std::string raw;
         std::vector<std::string> params;
 
-        Message(const std::string& raw_msg);
+        Message(const std::string& raw_msg); // constructeur
 };

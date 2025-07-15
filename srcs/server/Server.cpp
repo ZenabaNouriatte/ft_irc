@@ -31,6 +31,7 @@ void Server::start()
     fcntl(_server_fd, F_SETFL, O_NONBLOCK);  // socket non bloquant garanti que accept recv ne bloquerons pqs 
 
     sockaddr_in addr;
+    memset(&addr, 0, sizeof(addr));
     addr.sin_family = AF_INET;
     addr.sin_port = htons(_port);
     addr.sin_addr.s_addr = INADDR_ANY;
@@ -82,6 +83,7 @@ void Server::start()
 void Server::acceptNewClient()
 {
     sockaddr_in client_addr; // stock les info client qui se connect
+    memset(&client_addr, 0, sizeof(client_addr));
     socklen_t addr_len = sizeof(client_addr); //taille
 
     int client_fd = accept(_server_fd, (sockaddr*)&client_addr, &addr_len); // on rempli la structure client_adrr avec les information trouve via accept
@@ -96,6 +98,7 @@ void Server::acceptNewClient()
     pollfd pfd;
     pfd.fd = client_fd;
     pfd.events = POLLIN;
+    pfd.revents = 0;
     _poll_fds.push_back(pfd);
 
     Client *client = new Client(client_fd); // on creer un nouveau client via son fd
@@ -128,6 +131,7 @@ void Server::handleClient(int client_fd)
             // Creation obj msg
             Message msg(raw_message);
             pos = buf.find("\r\n"); // mettre à jour pos a la fin
+            //msg.parsing(); //ici parsing
 
         }
 
