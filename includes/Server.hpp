@@ -13,7 +13,6 @@
 #include "Client.hpp"
 #include "Message.hpp"
 
-
 #define BUFFER_SIZE 1024
 
 class Client;
@@ -38,7 +37,6 @@ class Server
     void acceptNewClient();
     void handleClient(int client_fd);
     void removeClient(int client_fd);
-
 };
 
 
