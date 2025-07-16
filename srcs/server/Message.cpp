@@ -1,5 +1,7 @@
+
 #include "Message.hpp"
 
+/*========== METHODES ==========*/
 Message::Message(std::string raw_msg): raw(raw_msg)
 {
         //std::cout << "Raw msg: " << raw << std::endl;

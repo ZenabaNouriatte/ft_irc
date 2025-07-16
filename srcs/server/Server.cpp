@@ -1,7 +1,9 @@
 #include "Server.hpp"
 
+
 int Server::signal = 0;
 
+/*========== CONSTRUCTEUR ==========*/
 Server::Server(int port, const std::string& password) : _port(port), _password(password), _server_fd(-1)
 {
     _server_name = "gossip.irc.localhost";
@@ -9,12 +11,15 @@ Server::Server(int port, const std::string& password) : _port(port), _password(p
     //           << "\nArg[2] = password : " << this->_password << std::endl;
 }
 
+/*========== DESTRUCTEUR ==========*/
 Server::~Server() 
 {
     cleanExit();
     std::cout << "DEBUG Server destroyed\n";
 }
 
+
+/*========== METHODES ==========*/
 void Server::handleError(const std::string& message) 
 {
     std::cerr << message << std::endl;
@@ -78,12 +83,20 @@ void Server::start()
     _poll_fds.push_back(pfd);
 
     /* ───── Ajout de l’entrée standard (clavier) à poll() ───── */
-    fcntl(STDIN_FILENO, F_SETFL, O_NONBLOCK);            // stdin non‑bloquant
-    
+
+    // On configure STDIN (le clavier) en mode NON-BLOQUANT
+    // Cela signifie que la lecture avec read() ne bloquera pas le programme
+    fcntl(STDIN_FILENO, F_SETFL, O_NONBLOCK);
+
+    // Création d'une structure pollfd qui va surveiller STDIN
     pollfd p_stdin;
-    p_stdin.fd = STDIN_FILENO;
-    p_stdin.events = POLLIN;
+    p_stdin.fd = STDIN_FILENO;   // Descripteur : 0 (stdin)
+    p_stdin.events = POLLIN;     // On surveille si des données sont prêtes à être lues (événement POLLIN)
+
+    // On ajoute cette pollfd à notre vecteur _poll_fds
+    // Ainsi, poll() surveillera à la fois le socket serveur et le clavier
     _poll_fds.push_back(p_stdin);
+
 
     while (Server::signal == 0)
     {
@@ -238,16 +251,25 @@ void Server::cleanExit()
     //std::cout << "DEBUG Propre exit ...\n";
 }
 
+
+// Diffuse un message à TOUS les clients co
 void Server::broadcast(const std::string& text)
 {
+    // Préfixe pour identifier le serveur
     const std::string prefix = ":gossip.irc.localhost NOTICE ** :";
 
+    // préfixe + texte + fin de ligne (\r\n)
     std::string irc_line = prefix + text + "\r\n";
+
+    // Boucle sur tous les clients actuellement connectés
     for (std::map<int, Client*>::iterator it = _clients.begin();
          it != _clients.end(); ++it)
     {
+        // Envoie le message au client via sa socket
         it->second->send_msg(irc_line);
     }
+
+    // Affiche également le message sur la console du serveur (pour logging)
     std::cout << "[Serveur] " << irc_line;
 }
 

@@ -30,5 +30,14 @@ class Client
         std::string& getBuffer();
 
         int getFd(void) const;
+        void setHasPass(bool value);
         void send_msg(const std::string& message);
+        void setNickname(const std::string& nick);
+        std::string getNickname() const;
+        void setHasNick(bool value);
+        void setUsername(const std::string& name);
+        void setRealname(const std::string& name);
+        void setHasUser(bool value);
+        void setRegistered(bool value);
+
 };

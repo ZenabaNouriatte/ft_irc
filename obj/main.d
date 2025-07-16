@@ -1,2 +1,2 @@
-obj/main.o: srcs/main.cpp srcs/../includes/Server.hpp includes/Client.hpp \
-  includes/Message.hpp
+obj/main.o: srcs/main.cpp srcs/../includes/Server.hpp \
+ srcs/../includes/Client.hpp srcs/../includes/Message.hpp
