@@ -21,4 +21,6 @@ class Client
         ~Client();
         void appendToBuffer(const std::string& data);
         std::string& getBuffer();
+
+		int getFd(void) const;
 };

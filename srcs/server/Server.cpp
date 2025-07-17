@@ -201,3 +201,13 @@ void Server::cleanExit()
 
     std::cout << "DEBUG Propre exit ...\n";
 }
+
+
+	void Server::suppressChannel(const Channel & channel)  
+	{
+		if (channel.isChannelEmpty() == 0)
+	{
+		// supprimer le channel du vecteur channel du serveur
+	}
+	}
+	

@@ -10,6 +10,7 @@
 #include <poll.h>
 #include <map>
 #include <fcntl.h>
+#include "Channel.hpp"
 #include "Client.hpp"
 #include "Message.hpp"
 #include <errno.h>
@@ -30,6 +31,7 @@ class Server
     int                 _server_fd;
     std::vector<pollfd> _poll_fds;
     std::map<int, Client*> _clients;
+	std::vector<Channel> _channels;
 
 
     public :
@@ -45,6 +47,7 @@ class Server
     static int signal;
     static void catchSignal(int);
 
+	void suppressChannel(const Channel & channel);
 };
 
 
