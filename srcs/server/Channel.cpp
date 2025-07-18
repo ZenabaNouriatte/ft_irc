@@ -99,43 +99,105 @@ Channel::~Channel()
 	void Channel::addUser(const Client &user) {
 		if (_operators.empty())
 			_operators.push_back(user);
+
 		else if (_hasLimit == true && (_users.size() + _operators.size()) < _limit) {
 			std::cout << "Too much users in this channel" << std::endl;
 			//// refuser acces ////
-		}
+			///message///
+			}	
+		if (_inviteOnly == true)
+			// utilisateur sur invitation
+	
 		else
 			_users.push_back(user);
 		return;
 	}
 
-	void Channel::addOperator(const Client &user)   // a la creation : operator = user numero 1. Si user#1 quitte : definir un nouvel operator // ajouter un op
+	void Channel::addOperator(const Client &client)   // a la creation : operator = user numero 1. Si user#1 quitte : definir un nouvel operator // ajouter un op
 	{
-		 if (std::find(_users.begin(), _users.end(), user.getName()) != _users.end()) 
-			userToOperator(user);
+		if (verifClientisOperator (& client) == true )
+				userToOperator(client);
 		else
-			_operators.push_back(user);
+			_operators.push_back(client);
 	}
 
-	void removeUser(int fd) {
+	void Channel::removeUser(int fd) {
     for (std::vector<Client>::iterator it = _users.begin(); it != _users.end(); ++it) {
         if (it->getFd() == fd) 
             _users.erase(it);
             return;
 		}
+	}
 
-	void removeOperator(const Client &user){
+	void Channel::removeOperator(const Client &user){
 		_operators.erase(user);	
 	}
-	void userToOperator (const Client &user) {
+	void Channel::userToOperator (const Client &user) {
 		_operators.push_back(user);
 		_users.erase(user);
 	}
-	void operatorToUser (const Client &user) {
+	void Channel::operatorToUser (const Client &user) {
 		_users.push_back(user);
-		_operator.erase(user);
+		_operators.erase(user);
 	}
 
+	bool Channel::verifClientisOperator (Client & client) {
+		if (std::find(_users.begin(), _users.end(), client.getNick()) != _users.end()) 
+			return true;
+		return false;
+	}
+// MODE #channel i
+// +i : seuls ls invites accedent
+//-i : tout le monde accede
+	void Channel::changeModeI(Client & client, std::string arg) {
+		if (verifClientisOperator (client) == true )
+		{
+			if (arg == "-i" && _inviteOnly = true)
+				this->_inviteOnly = false;	
+				// message confirmation
+				// reponse q envoyer : <server> MODE #chan -i
 
+			if (arg == "+i" && _inviteOnly = false)
+				this->_inviteOnly = true;	
+				//message confirmation
+		}
+		else
+		// message pas de droit pour changer le mode
+		}
+
+	void Channel::changeModeT(Client client, std::string arg) {
+		if (verifClientisOperator (client) == true )
+		{
+			if (arg == "+t") 
+				this->_topicRestriction == true;
+				//message
+			if (arg == "-t")
+				this->_topicRestriction == false;
+				//message
+		}
+	}
+
+	void Channel::changeTopic(Client client, std::string topic) {}
+		if (_topicRestriction == true && && verifClientisOperator (client) == false)
+			std::cout << "DEBUG : refus de changement" << std::endl;
+			// refus de changement
+			// message
+		else
+			this->_topic = topic;
+			//message
+	
+	void Channel::changeModeK(Client client, std::string arg, std::string newKey, std::string oldKey) {
+			if (verifClientisOperator (client) == true )
+			{
+				if (arg == "+k")
+				{
+					if (this->_key == true && this->_password == oldKey)
+						this->_password == newKey
+				}
+				
+
+			}
+	
 
 
 // arrivee de la commande :

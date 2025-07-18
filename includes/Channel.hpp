@@ -62,6 +62,16 @@ class Channel
 	void removeOperator(int fd);
 	int isChannelEmpty(); // renvoie le nombre d'utilisateurs du channel
 
+	void removeOperator(const Client &user);
+	void userToOperator (const Client &user);
+	void operatorToUser (const Client &user);
+	bool verifClientisOperator (Client & client);
+
+	// modes
+
+	void changeModeI(Client & client, std::string arg);
+	void changeModeT(Client client, std::string arg);
+	void changeTopic(Client client, std::string topic);
 
 };
 

@@ -23,4 +23,5 @@ class Client
         std::string& getBuffer();
 
 		int getFd(void) const;
+		int getNick(void) const;
 };
