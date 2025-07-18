@@ -11,6 +11,7 @@ int main(int argc, char **argv)
     }
 
     int port = std::atoi(argv[1]);
+    // ?? must be an integer between 6660 and 6669 ??
     if (port < 1024 || port > 65535) 
     {
         std::cerr << "Error: Port number must be between 1024 and 65535." << std::endl;

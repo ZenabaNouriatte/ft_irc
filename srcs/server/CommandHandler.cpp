@@ -3,6 +3,7 @@
 /*========== METHODES ==========*/
 void Server::handleCommand(Client* client, const Message& msg)
 {
+    std::cout << "COMMAND " << msg.command << std::endl;
     if (msg.command == "PASS")
         handlePASS(client, msg);
     else if (msg.command == "NICK")
@@ -86,13 +87,13 @@ void Server::handleUSER(Client* client, const Message& msg)
         sendError(client->getFd(), "462", "*", "You may not reregister");
         return;
     }
-    if (msg.params.size() < 4)
+    if (msg.params.size() < 2)
     {
         sendError(client->getFd(), "461", "USER", "Not enough parameters");
         return;
     }
     client->setUsername(msg.params[0]);
-    client->setRealname(msg.params[3]);
+    client->setRealname(msg.params[1]);
     client->setHasUser(true);
     if (client->isRegistered())
     {
@@ -117,5 +118,5 @@ void Server::completeRegistration(Client* client)
                      " :This server was created July 2025");
 
     client->send_msg(":" + _server_name + " 004 " + nick +
-                     " " + _server_name °;
+                     " " + _server_name );
 }
