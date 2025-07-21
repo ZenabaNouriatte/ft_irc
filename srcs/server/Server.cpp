@@ -108,10 +108,16 @@ void Server::start()
                 continue; // en cas de ctrc c pour ne pas que polle failed 
             return handleError("poll failed");
         }
-
+        if (Server::signal != 0)
+            break;
         for (size_t i = 0; i < _poll_fds.size(); ++i)
         {
-            if (_poll_fds[i].revents & POLLIN)
+            if (_poll_fds[i].revents & (POLLHUP | POLLERR))
+            {
+                removeClient(_poll_fds[i].fd);
+                i--;
+            }
+            else if (_poll_fds[i].revents & POLLIN)
             {
                 if (_poll_fds[i].fd == _server_fd)
                 {
@@ -126,14 +132,9 @@ void Server::start()
                     handleClient(_poll_fds[i].fd);
                 }
             }
-            else if (_poll_fds[i].revents & (POLLHUP | POLLERR))
-            {
-                removeClient(_poll_fds[i].fd);
-                i--;
-            }
+
         }
-        if (Server::signal != 0)
-            break;
+
     }
 }
 
