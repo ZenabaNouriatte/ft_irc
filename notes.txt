@@ -1,9 +1,5 @@
-integrer poll() et epoll () pour verifier si le client existe ou pas = inegrer dans le vector fd 
-comparer poll epoll select et kqeue
-Class client / server / 
 
-15/07/2025
-Chloe :  communication server vers client
-Sandrine : doc channel
-Nouriatte : parsing du msg ( mettre dans les variables)
-
+"irssi"
+"/connect dalnet <port> "  et pas irc.dal.net
+"/rawlog save <nom du fichier> "
+le fichier de log sera sauvegarder sur le home
