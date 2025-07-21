@@ -58,7 +58,6 @@ int Client::getFd(void) const{
 /*========== METHODES ==========*/
 bool Client::isRegistered() const 
 {
-    (void)_registred;
     if (_has_pass && _has_nick && _has_user)
         return true;
     else
@@ -79,7 +78,7 @@ void Client::send_msg(const std::string& message)
 
     if (sent == -1)
     {
-        std::cerr << "[ERROR] Echec de l'envoi du message au client." << _fd << std::endl;
+        std::cerr << RED << BOLD << "[ERROR] Echec de l'envoi du message au client." << _fd << RESET << std::endl;
     }
 
 }

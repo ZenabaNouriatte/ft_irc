@@ -196,7 +196,7 @@ void Server::handleClient(int client_fd)
     }
     else if (received_bytes == 0)
     {
-        std::cout << "[INFO] Client " << client_fd << " a fermé la connexion." << std::endl;
+        std::cout << RED << BOLD << "[INFO] Client " << client_fd << " a fermé la connexion." << RESET << std::endl;
         removeClient(client_fd);
     }
     else
