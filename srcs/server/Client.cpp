@@ -10,6 +10,17 @@ Client::~Client() {
     close(_fd);
 }
 
+/*========== GETTERS ==========*/
+
+bool Client::hasPass() const { return _has_pass; }
+bool Client::hasNick() const { return _has_nick; }
+bool Client::hasUser() const { return _has_user; }
+
+const std::string &Client::getPass() const { return _pass;}
+const std::string &Client::getNick() const { return _nickname;}
+const std::string &Client::getUser() const { return _username;}
+
+
 /*========== SETTER ==========*/
 
 void Client::setHasPass(bool value){
@@ -30,6 +41,10 @@ void Client::setUsername(const std::string& name){
 
 void Client::setRealname(const std::string& name){
     _realname = name;
+}
+
+void Client::setPass(const std::string& pass){
+    _pass = pass;
 }
 
 void Client::setHasUser(bool value){

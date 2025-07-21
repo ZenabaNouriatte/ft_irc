@@ -24,6 +24,7 @@ class Client
         std::string _nickname;
         std::string _username;
         std::string _realname;
+        std::string _pass;
         bool _has_pass;
         bool _has_nick;
         bool _has_user;
@@ -47,5 +48,15 @@ class Client
         void setRealname(const std::string& name);
         void setHasUser(bool value);
         void setRegistered(bool value);
+        void setPass(const std::string &pass);
+
+        bool hasPass() const;
+        bool hasNick() const;
+        bool hasUser() const;
+
+        const std::string &getPass() const;
+        const std::string &getNick() const;
+        const std::string &getUser() const;
+
 
 };

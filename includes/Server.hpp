@@ -53,6 +53,11 @@ class Server
     void handleNICK (Client* client, const Message& msg);
     void handleUSER (Client* client, const Message& msg);
     void completeRegistration(Client* client);
+    void handleRegistred(Client* client, const Message& msg);
+    void handleServerCommand (Client* client, const Message& msg);
+    void handlePING (Client* client, const Message& msg);
+    void handleMODE (Client* client, const Message& msg);
+
 
     void sendError(int fd, const std::string& code, const std::string& target, const std::string& message);
 
