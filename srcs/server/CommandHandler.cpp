@@ -6,7 +6,7 @@
 /*   By: cschmid <cschmid@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/21 14:30:34 by cschmid           #+#    #+#             */
-/*   Updated: 2025/07/21 14:30:37 by cschmid          ###   ########.fr       */
+/*   Updated: 2025/07/21 16:03:57 by cschmid          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -74,8 +74,6 @@ void Server::handlePASS(Client* client, const Message& msg)
         return;
     }
     client->setPass(msg.params[0]);
-        std::cout <<"SERVER DEBUG PASS " << client->getPass() << std::endl;
-
     client->setHasPass(true);
     if (client->hasNick() && client->hasUser() && client->hasPass())
     {
@@ -109,14 +107,11 @@ void Server::handleNICK(Client* client, const Message& msg)
         return;
     }
     client->setNickname(newNick);
-    std::cout <<"SERVER DEBUG Nick name " << client->getNickname() << std::endl;
     client->setHasNick(true);
     if (client->hasNick() && client->hasUser() && client->hasPass())
     {
         completeRegistration(client);
     }
-
-
 }
 
 void Server::handleUSER(Client* client, const Message& msg)
@@ -134,7 +129,6 @@ void Server::handleUSER(Client* client, const Message& msg)
     client->setUsername(msg.params[0]);
     client->setRealname(msg.params[1]);
     client->setHasUser(true);
-        std::cout <<"SERVER DEBUG User " << client->getUser() << std::endl;
     if (client->hasNick() && client->hasUser() && client->hasPass())
     {
         completeRegistration(client);
@@ -164,9 +158,24 @@ void Server::completeRegistration(Client* client)
 
 void Server::handlePING (Client* client, const Message& msg) 
 {
-    (void)client;
-    (void)msg;
+    if (msg.params.empty())
+    { 
+        sendError(client->getFd(), "409", "*", "No origin specified");
+        return;
+    }
+
+    const std::string& origin = msg.params[0];
+    // Determiner la destination
+    std::string dest;
+    if (msg.params.size() > 1)
+        dest = msg.params[1];
+    else
+        dest = _server_name;
+
+    std::string response = ":" + _server_name + " PONG " + dest + " :" + origin;
+    client->send_msg(response);
 }
+
 void Server::handleMODE (Client* client, const Message& msg)
 {
     (void)client;

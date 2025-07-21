@@ -6,7 +6,7 @@
 /*   By: cschmid <cschmid@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/21 14:30:56 by cschmid           #+#    #+#             */
-/*   Updated: 2025/07/21 14:30:57 by cschmid          ###   ########.fr       */
+/*   Updated: 2025/07/21 15:42:05 by cschmid          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -200,7 +200,7 @@ void Server::handleClient(int client_fd)
             // Creation obj msg
             Message msg(raw_message);
             std::cout << raw_message << std::endl;
-            handleCommand(client, raw_message);  
+            handleCommand(client, msg);  // objet message et non raw string  
             pos = buf.find("\n"); // mettre à jour pos a la fin
         }
 
