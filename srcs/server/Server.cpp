@@ -190,13 +190,12 @@ void Server::handleClient(int client_fd)
             std::cout << raw_message << std::endl;
             handleCommand(client, raw_message);  
             pos = buf.find("\n"); // mettre à jour pos a la fin
-
         }
 
     }
     else if (received_bytes == 0)
     {
-        std::cout << "[INFO] Client " << client_fd << " a fermé la connexion." << std::endl;
+        std::cout << RED << BOLD << "[INFO] Client " << client_fd << " a fermé la connexion." << RESET << std::endl;
         removeClient(client_fd);
     }
     else
@@ -256,7 +255,7 @@ void Server::cleanExit()
 void Server::broadcast(const std::string& text)
 {
     // Préfixe pour identifier le serveur
-    const std::string prefix = ":gossip.irc.localhost NOTICE ** :";
+    const std::string prefix = ":gossip.irc.localhost NOTICE * :";
 
     // préfixe + texte + fin de ligne (\r\n)
     std::string irc_line = prefix + text + "\r\n";
@@ -270,7 +269,7 @@ void Server::broadcast(const std::string& text)
     }
 
     // Affiche également le message sur la console du serveur (pour logging)
-    std::cout << "[Serveur] " << irc_line;
+    std::cout << GREEN << BOLD << "[Serveur] " << irc_line << RESET;
 }
 
 
