@@ -16,17 +16,37 @@
 void Server::handleCommand(Client* client, const Message& msg)
 {
     std::cout << BLUE << BOLD << "COMMAND " << msg.command << RESET << std::endl;
+    if (msg.command == "PASS" || msg.command == "NICK" || msg.command == "USER" )
+        handleRegistred(client, msg);
+    else if (msg.command== "PING" || msg.command== "MODE" || msg.command== "JOIN" )
+        handleServerCommand(client, msg);
+    else if (!client->isRegistered())
+        sendError(client->getFd(), "451", "*", "You have not registered");
+    else
+        sendError(client->getFd(), "421", msg.command, "Unknown command");
+}
+
+void Server::handleRegistred(Client* client, const Message& msg)
+{
     if (msg.command == "PASS")
         handlePASS(client, msg);
     else if (msg.command == "NICK")
         handleNICK(client, msg);
     else if (msg.command == "USER")
         handleUSER(client, msg);
-    else if (!client->isRegistered())
-        sendError(client->getFd(), "451", "*", "You have not registered");
-    else
-        sendError(client->getFd(), "421", msg.command, "Unknown command");
+    else 
+        return;
 }
+
+ void Server::handleServerCommand (Client* client, const Message& msg)
+ {
+    if (msg.command == "PING")
+        handlePING(client, msg);
+    else if (msg.command == "MODE")
+        handleMODE(client, msg);
+    else 
+        return;
+ }
 
 void Server::sendError(int fd, const std::string& code, const std::string& target, const std::string& message)
 {
@@ -44,7 +64,7 @@ void Server::handlePASS(Client* client, const Message& msg)
     }
     if (client->isRegistered())
     {
-        sendError(client->getFd(), "462", "*", "You may not reregister");
+        sendError(client->getFd(), "462", "*", "You may not register");
         return;
     }
     if (msg.params[0] != _password)
@@ -53,11 +73,15 @@ void Server::handlePASS(Client* client, const Message& msg)
         removeClient(client->getFd());
         return;
     }
+    client->setPass(msg.params[0]);
+        std::cout <<"SERVER DEBUG PASS " << client->getPass() << std::endl;
+
     client->setHasPass(true);
-    if (client->isRegistered())
+    if (client->hasNick() && client->hasUser() && client->hasPass())
     {
         completeRegistration(client);
     }
+
 
 }
 
@@ -85,11 +109,13 @@ void Server::handleNICK(Client* client, const Message& msg)
         return;
     }
     client->setNickname(newNick);
+    std::cout <<"SERVER DEBUG Nick name " << client->getNickname() << std::endl;
     client->setHasNick(true);
-    if (client->isRegistered())
+    if (client->hasNick() && client->hasUser() && client->hasPass())
     {
         completeRegistration(client);
     }
+
 
 }
 
@@ -97,7 +123,7 @@ void Server::handleUSER(Client* client, const Message& msg)
 {
     if (client->isRegistered())
     {
-        sendError(client->getFd(), "462", "*", "You may not reregister");
+        sendError(client->getFd(), "462", "*", "You may not register");
         return;
     }
     if (msg.params.size() < 2)
@@ -108,10 +134,12 @@ void Server::handleUSER(Client* client, const Message& msg)
     client->setUsername(msg.params[0]);
     client->setRealname(msg.params[1]);
     client->setHasUser(true);
-    if (client->isRegistered())
+        std::cout <<"SERVER DEBUG User " << client->getUser() << std::endl;
+    if (client->hasNick() && client->hasUser() && client->hasPass())
     {
         completeRegistration(client);
     }
+
 }
 
 void Server::completeRegistration(Client* client)
@@ -132,5 +160,16 @@ void Server::completeRegistration(Client* client)
     client->send_msg(":\x03" "03" + _server_name + "\x0F 004 " + nick +
                  " \x03" "03" + _server_name + " 1.0 o o\x0F");
 
+}
+
+void Server::handlePING (Client* client, const Message& msg) 
+{
+    (void)client;
+    (void)msg;
+}
+void Server::handleMODE (Client* client, const Message& msg)
+{
+    (void)client;
+    (void)msg;
 }
 
