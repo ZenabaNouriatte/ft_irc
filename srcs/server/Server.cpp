@@ -1,3 +1,15 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   Server.cpp                                         :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: cschmid <cschmid@student.42.fr>            +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2025/07/21 14:30:56 by cschmid           #+#    #+#             */
+/*   Updated: 2025/07/21 15:42:05 by cschmid          ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #include "Server.hpp"
 
 
@@ -189,9 +201,8 @@ void Server::handleClient(int client_fd)
             // Creation obj msg
             Message msg(raw_message);
             std::cout << raw_message << std::endl;
-            handleCommand(client, raw_message);  
+            handleCommand(client, msg);  // objet message et non raw string  
             pos = buf.find("\n"); // mettre à jour pos a la fin
-
         }
 
     }
@@ -257,7 +268,7 @@ void Server::cleanExit()
 void Server::broadcast(const std::string& text)
 {
     // Préfixe pour identifier le serveur
-    const std::string prefix = ":gossip.irc.localhost NOTICE ** :";
+    const std::string prefix = ":gossip.irc.localhost NOTICE * :";
 
     // préfixe + texte + fin de ligne (\r\n)
     std::string irc_line = prefix + text + "\r\n";
@@ -271,7 +282,7 @@ void Server::broadcast(const std::string& text)
     }
 
     // Affiche également le message sur la console du serveur (pour logging)
-    std::cout << "[Serveur] " << irc_line;
+    std::cout << GREEN << BOLD << "[Serveur] " << irc_line << RESET;
 }
 
 
