@@ -14,6 +14,8 @@
 #include "Message.hpp"
 #include <errno.h>
 #include <csignal> 
+#include <sstream>
+
 
 # define RESET "\033[0m"
 # define BOLD "\033[1m"
@@ -55,14 +57,16 @@ class Server
     static int signal;
     static void catchSignal(int);
 
+    void completeRegistration(Client* client);
+    void handleRegistred(Client* client, const Message& msg);
     void broadcast(const std::string& text);
+    void welcomeServer();
+    void welcomeClient(Client* client);
 
     void handleCommand(Client* client, const Message& msg);
     void handlePASS (Client* client, const Message& msg);
     void handleNICK (Client* client, const Message& msg);
     void handleUSER (Client* client, const Message& msg);
-    void completeRegistration(Client* client);
-    void handleRegistred(Client* client, const Message& msg);
     void handleServerCommand (Client* client, const Message& msg);
     void handlePING (Client* client, const Message& msg);
     void handleMODE (Client* client, const Message& msg);

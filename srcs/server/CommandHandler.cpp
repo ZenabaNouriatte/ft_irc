@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   CommandHandler.cpp                                 :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: cschmid <cschmid@student.42.fr>            +#+  +:+       +#+        */
+/*   By: zmogne <zmogne@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/21 14:30:34 by cschmid           #+#    #+#             */
-/*   Updated: 2025/07/21 16:03:57 by cschmid          ###   ########.fr       */
+/*   Updated: 2025/07/22 20:35:23 by zmogne           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,10 +15,12 @@
 /*========== METHODES ==========*/
 void Server::handleCommand(Client* client, const Message& msg)
 {
-    std::cout << BLUE << BOLD << "COMMAND " << msg.command << RESET << std::endl;
+    //std::cout << BLUE << BOLD << "RAW MSG [" << msg.raw << "]" << RESET << std::endl;
+    //std::cout << BLUE << "COMMAND [" << msg.command << "]" << RESET << std::endl;
+    
     if (msg.command == "PASS" || msg.command == "NICK" || msg.command == "USER" )
         handleRegistred(client, msg);
-    else if (msg.command== "PING" || msg.command== "MODE" || msg.command== "JOIN" )
+    else if (msg.command == "PING" || msg.command== "MODE" || msg.command== "JOIN" )
         handleServerCommand(client, msg);
     else if (!client->isRegistered())
         sendError(client->getFd(), "451", "*", "You have not registered");
@@ -139,42 +141,79 @@ void Server::handleUSER(Client* client, const Message& msg)
 void Server::completeRegistration(Client* client)
 {
     client->setRegistered(true);
-    std::string nick = client->getNickname();
-
-
-    client->send_msg(":\x03" "02" + _server_name + "\x0F 001 " + nick +
-                     " :\x03" "03" "Welcome to the IRC Network, " + nick + "\x0F");
-
-    client->send_msg(":\x03" "02" + _server_name + "\x0F 002 " + nick +
-                     " :\x03" "03" "Your host is " + _server_name + ", running version 1.0\x0F");
-
-    client->send_msg(":\x03" "02" + _server_name + "\x0F 003 " + nick +
-                     " :\x03" "03" "This server was created July 2025\x0F");
-
-    client->send_msg(":\x03" "03" + _server_name + "\x0F 004 " + nick +
-                 " \x03" "03" + _server_name + " 1.0 o o\x0F");
-
+	this->welcomeServer();
+	this->welcomeClient(client);
 }
 
-void Server::handlePING (Client* client, const Message& msg) 
+
+void Server::welcomeServer() 
+{
+	std::stringstream ss;
+	ss << _port;
+
+	std::cout << "\n██████████████████████████████████████" << std::endl;
+	std::cout << "███                               ████" << std::endl;
+	std::cout << "███  ***  GOSSIP.IRC SERVER  ***  ████" << std::endl;
+	std::cout << "███                               ████" << std::endl;
+	std::cout << "██████████████████████████████████████" << std::endl;
+
+	std::cout << "\n────────────────────────────\n";
+	std::cout << "Password : " << _password << std::endl;
+	std::cout << "Port     : " << ss.str() << std::endl;
+	std::cout << "────────────────────────────\n" << std::endl;
+    std::cout << "         SERVER LOG        :\n" << std::endl;
+}
+
+// void Server::welcomeClient(Client* client) 
+// {
+// 	std::string nick = client->getNickname();
+
+// 	client->send_msg(":\x03""02" + _server_name + "\x0F 001 " + nick +
+// 	                 " :\x03""03""Welcome to the GOSSIP.IRC Network, " + nick + "\x0F");
+
+// 	client->send_msg(":\x03""02" + _server_name + "\x0F 002 " + nick +
+// 	                 " :\x03""03""Your host is " + _server_name + ", running version 1.0\x0F");
+
+// 	client->send_msg(":\x03""02" + _server_name + "\x0F 003 " + nick +
+// 	                 " :\x03""03""This server was created July 2025\x0F");
+
+// 	client->send_msg(":\x03""03" + _server_name + "\x0F 004 " + nick +
+// 	                 " \x03""03" + _server_name + " 1.0 o o\x0F");
+// }
+
+void Server::welcomeClient(Client* client) 
+{
+	std::string nick = client->getNickname();
+
+	client->send_msg(":" + _server_name + " 001 " + nick +
+	                 " :\x03""03""Welcome to the GOSSIP.IRC Network, " + nick + "\x0F");
+
+	client->send_msg(":" + _server_name + " 002 " + nick +
+	                 " :\x03""03""Your host is " + _server_name + ", running version 1.0\x0F");
+
+	client->send_msg(":" + _server_name + " 003 " + nick +
+	                 " :\x03""03""This server was created July 2025\x0F");
+
+	client->send_msg(":" + _server_name + " 004 " + nick +
+	                 " :\x03""03" + _server_name + " 1.0 o o\x0F");
+}
+
+
+void Server::handlePING(Client* client, const Message& msg)
 {
     if (msg.params.empty())
-    { 
+    {
         sendError(client->getFd(), "409", "*", "No origin specified");
         return;
     }
+    std::string token = msg.params[0];
 
-    const std::string& origin = msg.params[0];
-    // Determiner la destination
-    std::string dest;
-    if (msg.params.size() > 1)
-        dest = msg.params[1];
-    else
-        dest = _server_name;
-
-    std::string response = ":" + _server_name + " PONG " + dest + " :" + origin;
+    std::string response = ":" + _server_name + " PONG :" + token;
     client->send_msg(response);
+    client->send_msg( _server_name + " :PONG sent by the server");
+
 }
+
 
 void Server::handleMODE (Client* client, const Message& msg)
 {

@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Server.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: cschmid <cschmid@student.42.fr>            +#+  +:+       +#+        */
+/*   By: zmogne <zmogne@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/21 14:30:56 by cschmid           #+#    #+#             */
-/*   Updated: 2025/07/21 15:42:05 by cschmid          ###   ########.fr       */
+/*   Updated: 2025/07/22 20:07:40 by zmogne           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,8 +19,7 @@ int Server::signal = 0;
 Server::Server(int port, const std::string& password) : _port(port), _password(password), _server_fd(-1)
 {
     _server_name = "gossip.irc.localhost";
-    //std::cout << "Arg[1] = port : " << this->_port
-    //           << "\nArg[2] = password : " << this->_password << std::endl;
+    
 }
 
 /*========== DESTRUCTEUR ==========*/
@@ -198,6 +197,11 @@ void Server::handleClient(int client_fd)
             std::string raw_message = buf.substr(0, pos); // recupere la prochaine ligne
             buf.erase(0, pos + 1); // supprime la ligne + \r\n
 
+            if (!raw_message.empty() && raw_message[raw_message.size() - 1] == '\r')
+                raw_message.erase(raw_message.size() - 1, 1);
+
+            //A TESTER / POUR CONFORMITER IRSSI OU NC
+            
             // Creation obj msg
             Message msg(raw_message);
             std::cout << raw_message << std::endl;
