@@ -1,0 +1,122 @@
+<< CAP LS
+<< NICK smolines
+<< USER smolines smolines irc.dal.net :Sandrine Molines
+>> :lair.nl.eu.dal.net NOTICE AUTH :*** Looking up your hostname...
+>> :lair.nl.eu.dal.net NOTICE AUTH :*** Checking Ident
+>> :lair.nl.eu.dal.net NOTICE AUTH :*** Found your hostname
+>> :lair.nl.eu.dal.net NOTICE AUTH :*** No Ident response
+>> :lair.nl.eu.dal.net 001 smolines :Welcome to the DALnet IRC Network smolines!~smolines@62.210.33.58
+<< MODE smolines +i
+>> :lair.nl.eu.dal.net 002 smolines :Your host is lair.nl.eu.dal.net, running version bahamut-2.2.4
+>> :lair.nl.eu.dal.net 003 smolines :This server was created Sun Feb 23 2025 at 23:38:19 CET
+>> :lair.nl.eu.dal.net 004 smolines lair.nl.eu.dal.net bahamut-2.2.4 aAbcCdefFghHiIjkKmnoOPrRsSwxXy AbceiIjklLmMnoOpPrRsStv beIjklov
+>> :lair.nl.eu.dal.net 005 smolines NETWORK=DALnet SAFELIST MAXBANS=200 MAXCHANNELS=50 CHANNELLEN=32 KICKLEN=307 NICKLEN=30 TOPICLEN=307 MODES=6 CHANTYPES=# CHANLIMIT=#:50 PREFIX=(ohv)@%+ STATUSMSG=@%+ :are available on this server
+>> :lair.nl.eu.dal.net 005 smolines CASEMAPPING=ascii WATCH=128 SILENCE=10 ELIST=cmntu EXCEPTS INVEX CHANMODES=beI,k,jl,ciPAmMnOprRsSt MAXLIST=b:200,e:100,I:100 TARGMAX=DCCALLOW:,JOIN:,KICK:4,KILL:20,NOTICE:20,PART:,PRIVMSG:20,WHOIS:,WHOWAS: :are available on this server
+>> :lair.nl.eu.dal.net 251 smolines :There are 76 users and 6901 invisible on 38 servers
+>> :lair.nl.eu.dal.net 252 smolines 76 :IRC Operators online
+>> :lair.nl.eu.dal.net 254 smolines 3392 :channels formed
+>> :lair.nl.eu.dal.net 255 smolines :I have 157 clients and 1 servers
+>> :lair.nl.eu.dal.net 265 smolines :Current local users: 157 Max: 1592
+>> :lair.nl.eu.dal.net 266 smolines :Current global users: 6977 Max: 8274
+>> :lair.nl.eu.dal.net NOTICE smolines :*** Notice -- motd was last changed at 19/6/2023 18:18
+>> :lair.nl.eu.dal.net 375 smolines :- lair.nl.eu.dal.net Message of the Day - 
+>> :lair.nl.eu.dal.net 372 smolines :-19/6/2023 18:18
+>> :lair.nl.eu.dal.net 372 smolines :-     Welcome to,
+>> :lair.nl.eu.dal.net 372 smolines :-      _       _      
+>> :lair.nl.eu.dal.net 372 smolines :-     | |     (_)     
+>> :lair.nl.eu.dal.net 372 smolines :-     | | __ _ _ _ __ 
+>> :lair.nl.eu.dal.net 372 smolines :-     | |/ _` | | '__|
+>> :lair.nl.eu.dal.net 372 smolines :-     | | (_| | | |   
+>> :lair.nl.eu.dal.net 372 smolines :-     |_|\__,_|_|_|.nl.eu.dal.net    
+>> :lair.nl.eu.dal.net 372 smolines :- 
+>> :lair.nl.eu.dal.net 372 smolines :-    *  Host.............: lair.dal.net | lair-v6.dal.net   
+>> :lair.nl.eu.dal.net 372 smolines :-    *  Ports............: 6667 - 6669, 7000 | SSL - 6697  
+>> :lair.nl.eu.dal.net 372 smolines :- 
+>> :lair.nl.eu.dal.net 372 smolines :-      Welcome to DALnet, by connecting to this network you agree to 
+>> :lair.nl.eu.dal.net 372 smolines :-    abide by its acceptable use policy, visit : http://www.dal.net/aup
+>> :lair.nl.eu.dal.net 372 smolines :- 
+>> :lair.nl.eu.dal.net 372 smolines :-        "This server has been sponsored by Psychz Networks"
+>> :lair.nl.eu.dal.net 372 smolines :- 
+>> :lair.nl.eu.dal.net 372 smolines :-              ---===[https://www.psychz.net/]===---
+>> :lair.nl.eu.dal.net 372 smolines :- 
+>> :lair.nl.eu.dal.net 372 smolines :-    -------------------------------------------------------------------
+>> :lair.nl.eu.dal.net 372 smolines :-    [%] Server Staff  =-
+>> :lair.nl.eu.dal.net 372 smolines :- 
+>> :lair.nl.eu.dal.net 372 smolines :-    .::. Administrator....:
+>> :lair.nl.eu.dal.net 372 smolines :-                           sps
+>> :lair.nl.eu.dal.net 372 smolines :- 
+>> :lair.nl.eu.dal.net 372 smolines :-    .::. Operators........:
+>> :lair.nl.eu.dal.net 372 smolines :-                           eddyk0ng
+>> :lair.nl.eu.dal.net 372 smolines :-                           Nando
+>> :lair.nl.eu.dal.net 372 smolines :-                           RallyMaster
+>> :lair.nl.eu.dal.net 372 smolines :-                           Wagoo
+>> :lair.nl.eu.dal.net 372 smolines :-                           Wheemp
+>> :lair.nl.eu.dal.net 372 smolines :-    -------------------------------------------------------------------
+>> :lair.nl.eu.dal.net 372 smolines :-    [%] Server Policies  =-
+>> :lair.nl.eu.dal.net 372 smolines :- 
+>> :lair.nl.eu.dal.net 372 smolines :-    a. No spamming or advertising allowed, if found you will be banned 
+>> :lair.nl.eu.dal.net 372 smolines :-       from this server/network.
+>> :lair.nl.eu.dal.net 372 smolines :-    b. No malicious bots, including flood and nick/channel chasers
+>> :lair.nl.eu.dal.net 372 smolines :-    c. No channel filler bots/clients/psybncs
+>> :lair.nl.eu.dal.net 372 smolines :-       #  A channel filler is a client, bnc, or bot which is connected
+>> :lair.nl.eu.dal.net 372 smolines :-          just to fill a channel and make it look bigger
+>> :lair.nl.eu.dal.net 372 smolines :-    d. Operator impersonation will not be tolerated and cause you to be
+>> :lair.nl.eu.dal.net 372 smolines :-       banned from this server/network.
+>> :lair.nl.eu.dal.net 372 smolines :- 
+>> :lair.nl.eu.dal.net 372 smolines :-            "REMEMBER IRC IS A PRIVILEGE, NOT A RIGHT"
+>> :lair.nl.eu.dal.net 372 smolines :-    -------------------------------------------------------------------
+>> :lair.nl.eu.dal.net 372 smolines :- 
+>> :lair.nl.eu.dal.net 372 smolines :-    For IRC Operator assistance /join #Operhelp
+>> :lair.nl.eu.dal.net 372 smolines :- 
+>> :lair.nl.eu.dal.net 372 smolines :-    For DALnet and General IRC related help, goto #Help
+>> :lair.nl.eu.dal.net 372 smolines :- 
+>> :lair.nl.eu.dal.net 372 smolines :-    For multi-lingual documentation - [http://docs.dal.net]
+>> :lair.nl.eu.dal.net 372 smolines :- 
+>> :lair.nl.eu.dal.net 372 smolines :-    If you have any questions/issues related to this server,
+>> :lair.nl.eu.dal.net 372 smolines :-    contact us using: lion-staff@dal.net
+>> :lair.nl.eu.dal.net 372 smolines :- 
+>> :lair.nl.eu.dal.net 372 smolines :-    Thank you for using DALnet, we hope you enjoy the stay with us.
+>> :lair.nl.eu.dal.net 376 smolines :End of /MOTD command.
+>> :smolines MODE smolines :+iHS
+<< PING lair.nl.eu.dal.net
+>> :lair.nl.eu.dal.net PONG lair.nl.eu.dal.net :smolines
+--> lag pong
+<< PING lair.nl.eu.dal.net
+>> :lair.nl.eu.dal.net PONG lair.nl.eu.dal.net :smolines
+--> lag pong
+<< PING lair.nl.eu.dal.net
+>> :lair.nl.eu.dal.net PONG lair.nl.eu.dal.net :smolines
+--> lag pong
+<< PING lair.nl.eu.dal.net
+>> :lair.nl.eu.dal.net PONG lair.nl.eu.dal.net :smolines
+--> lag pong
+<< JOIN #42
+>> :smolines!~smolines@a031-1034-f768-e5c1-4791.210.62.ip JOIN :#42
+>> :lair.nl.eu.dal.net 353 smolines = #42 :@smolines 
+>> :lair.nl.eu.dal.net 366 smolines #42 :End of /NAMES list.
+<< MODE #42
+>> :lair.nl.eu.dal.net 324 smolines #42 + 
+--> chanquery mode
+<< WHO #42
+>> :lair.nl.eu.dal.net 329 smolines #42 1753193411
+--> event 329
+>> :lair.nl.eu.dal.net 352 smolines #42 ~smolines a031-1034-f768-e5c1-4791.210.62.ip lair.nl.eu.dal.net smolines H@ :0 Sandrine Molines
+--> silent event who
+>> :lair.nl.eu.dal.net 315 smolines #42 :End of /WHO list.
+--> chanquery who end
+<< MODE #42 b
+>> :lair.nl.eu.dal.net 368 smolines #42 :End of Channel Ban List
+--> chanquery ban end
+<< PING lair.nl.eu.dal.net
+>> :lair.nl.eu.dal.net PONG lair.nl.eu.dal.net :smolines
+--> lag pong
+<< PING lair.nl.eu.dal.net
+>> :lair.nl.eu.dal.net PONG lair.nl.eu.dal.net :smolines
+--> lag pong
+<< PING lair.nl.eu.dal.net
+>> :lair.nl.eu.dal.net PONG lair.nl.eu.dal.net :smolines
+--> lag pong
+<< PING lair.nl.eu.dal.net
+>> :lair.nl.eu.dal.net PONG lair.nl.eu.dal.net :smolines
+--> lag pong
+<< PRIVMSG #42 :MODE l 10

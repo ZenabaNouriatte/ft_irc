@@ -97,8 +97,11 @@ Channel::~Channel()
 
 
 	void Channel::addUser(const Client &user) {
+		// rajouter ici condition du not de passe : if (_key == true)		
+
 		if (_operators.empty())
 			_operators.push_back(user);
+			//message
 
 		else if (_hasLimit == true && (_users.size() + _operators.size()) < _limit) {
 			std::cout << "Too much users in this channel" << std::endl;
@@ -110,6 +113,7 @@ Channel::~Channel()
 	
 		else
 			_users.push_back(user);
+			//message
 		return;
 	}
 
@@ -177,6 +181,19 @@ Channel::~Channel()
 		}
 	}
 
+	bool isValidChannelPW(const std::string& password) {
+    	if (password.empty() || password.size() > 23)
+    	    return false;
+		for (size_t i = 0; i < password.size(); ++i) 
+		{
+        	char c = password[i];
+        if (std::isspace(static_cast<unsigned char>(c)) || c == ':' || c == ',')
+            return false;
+    	}
+		return true;
+	}
+
+
 	void Channel::changeTopic(Client client, std::string topic) {}
 		if (_topicRestriction == true && && verifClientisOperator (client) == false)
 			std::cout << "DEBUG : refus de changement" << std::endl;
@@ -186,18 +203,31 @@ Channel::~Channel()
 			this->_topic = topic;
 			//message
 	
-	void Channel::changeModeK(Client client, std::string arg, std::string newKey, std::string oldKey) {
+	void Channel::changeModeK(Client client, std::string arg, std::string key) 
+	{
 			if (verifClientisOperator (client) == true )
 			{
 				if (arg == "+k")
 				{
-					if (this->_key == true && this->_password == oldKey)
-						this->_password == newKey
+					if (this->_key == true)
+						// 467 <nick> #canal :Channel key already set
+						this->_password == key;
+					else if (this->_key == false && isValidChannelPW(key) == true)
+						this->_password == key;
+					else
+						//message mauvais mot de passe : ERR_BADCHANNELKEY
 				}
-				
-
-			}
-	
+				if (arg == "-k")
+				{	
+					if (this->_key == true && this->_password == Key)
+							this->_key == false;
+						//message desactivation key
+					else if (this->_key == false)	
+						//message mode key non active
+					else 
+						//message mauvais mot de passe : ERR_BADCHANNELKEY
+				}
+	}
 
 
 // arrivee de la commande :
