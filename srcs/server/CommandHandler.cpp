@@ -6,7 +6,7 @@
 /*   By: zmogne <zmogne@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/21 14:30:34 by cschmid           #+#    #+#             */
-/*   Updated: 2025/07/24 16:22:49 by zmogne           ###   ########.fr       */
+/*   Updated: 2025/07/24 21:21:14 by zmogne           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -43,6 +43,8 @@ void Server::handleRegistred(Client* client, const Message& msg)
         handlePING(client, msg);
     else if (msg.command == "MODE")
         handleMODE(client, msg);
+    else if (msg.command == "JOIN")
+        handleJOIN(client, msg);
     else 
         return;
  }
@@ -69,7 +71,6 @@ void Server::handlePASS(Client* client, const Message& msg)
     if (msg.params[0] != _password)
     {
         sendError(client->getFd(), "464", "*", "Password incorrect");
-        //removeClient(client->getFd());
         return;
     }
     client->setPass(msg.params[0]);
@@ -197,3 +198,168 @@ void Server::handleMODE (Client* client, const Message& msg)
     (void)msg;
 }
 
+std::string Server::userPrefix(const std::string& prefix)
+{
+    if (prefix.empty())
+        return "";
+		
+    size_t find = prefix.find('!'); // Dans IRC, le '!' sépare le nick du reste (user@host).
+    if (find!= std::string::npos)  // Si on a trouvé un '!', on retourne uniquement la partie avant : le nick.
+        return prefix.substr(0, find);   // Aucun '!' trouvé : le préfixe est soit déjà un simple nick, soit un nom de serveur.
+    return prefix;
+}
+
+bool	Server::PrefixUser(const Message &msg, std::string &User,
+		std::string &channel, std::string &key)
+{
+	User.clear();
+	channel.clear();
+	key.clear();
+	if (msg.prefix.empty())
+		return (false);
+		
+	User = userPrefix(msg.prefix);
+
+	if (!Server::parseJoin(msg, channel, key))
+		return (false);
+	return (true);
+}
+
+bool Server::parseJoin(const Message &msg, std::string &channel,
+	std::string &key)
+{
+	channel.clear(); // reset
+	key.clear();
+	const std::string &p0 = msg.params[0]; // nom du channel
+	if (msg.params.empty())
+		return (false);
+	if (p0.empty() || p0[0] != '#') // nom du channel doit commencer par # donc petite verif
+		return (false);
+	channel = p0;
+	if (msg.params.size() >= 2) // si il y a un deuxieme paramettre c'est le mdp
+		key = msg.params[1];
+	return (true);
+}
+
+void Server::handleJOIN(Client *client, const Message &msg)
+{
+	std::string channel, key, user;
+	if (!client->isRegistered())
+	{
+		sendError(client->getFd(), "451", "*", "You have not registered");
+		return ;
+	}
+	if (msg.params.empty())
+	{
+		sendError(client->getFd(), "461", "JOIN", "Not enough parameters");
+		return ;
+	}
+    if (msg.params[0] == "0")
+	{
+        // a faire
+		std::cout << "[JOIN] User " << client->getNickname() << " leaving all channels\n";
+		return;
+	}
+    std::vector<std::string> channels = splitComma(msg.params[0]);
+	std::vector<std::string> keys;
+    if (msg.params.size() > 1)
+		keys = splitComma(msg.params[1]);
+
+	for (size_t i = 0; i < channels.size(); ++i)
+	{
+		std::string chan = channels[i];
+		std::string key = (i < keys.size()) ? keys[i] : "";
+
+		if (!ValidChannelName(chan))
+		{
+			sendError(client->getFd(), "403", chan, "No such channel");
+			continue;
+		}
+		handleSingleJoin(client, chan, key); // logique unique join
+	}
+}
+
+std::vector<std::string> Server::splitComma(const std::string &input)
+{
+	std::vector<std::string> result;
+	std::stringstream ss(input);
+	std::string item;
+
+	while (std::getline(ss, item, ','))
+		result.push_back(item);
+	return result;
+}
+
+void Server::handleSingleJoin(Client *client, const std::string &channelName, const std::string &key)
+{
+    std::cout << "[JOIN] Handle JOIN request\n";
+	std::cout << "  user    = " << client->getNickname() << "\n";
+	std::cout << "  channel = " << channelName << "\n";
+	std::cout << "  key     = " << (key.empty() ? "(no key)" : key) << "\n";
+	// Vérifie que le nom est valide
+	if (channelName.empty() || channelName[0] != '#')
+	{
+		sendError(client->getFd(), "403", channelName, "No such channel");
+		return;
+	}
+
+	// Cherche le channel
+	Channel* chan = findChannel(channelName);
+
+	// S'il n'existe pas, on le crée
+	if (!chan)
+	{
+		std::cout << "[JOIN] Channel '" << channelName << "' does not exist. Creating it.\n";
+		Channel newChannel(channelName);
+		_channels.push_back(newChannel);
+		chan = &_channels.back();
+	}
+	else
+	{
+		std::cout << "[JOIN] Channel '" << channelName << "' already exists.\n";
+	}
+
+	// Vérifie si le client est déjà dans le channel
+	// if (chan->hasUser(*client))
+	// {
+	// 	std::cout << "[JOIN] Client already in channel '" << channelName << "'. Skipping.\n";
+	// 	return;
+	// }
+
+	// Ajouter le client au channel
+	chan->addUser(*client);
+
+	// ajouter reponse facon IRC a faire demain
+
+	std::cout << "[JOIN] Client " << client->getNickname()
+			  << " joined channel " << channelName
+			  << (key.empty() ? " (no key)" : " with key") << ".\n";
+    std::cout << GREEN << BOLD << "Client successfully added to channel" << RESET << std::endl;
+
+}
+
+
+Channel* Server::findChannel(const std::string& name)
+{
+	for (size_t i = 0; i < _channels.size(); ++i)
+	{
+		if (_channels[i].getName() == name)
+			return &_channels[i];
+	}
+	return NULL;
+}
+bool Server::ValidChannelName(const std::string &name)
+{
+	if (name.empty() || name[0] != '#')
+		return false;
+	if (name.length() > 50)
+		return false;
+
+	for (size_t i = 1; i < name.length(); ++i)
+	{
+		char c = name[i];
+		if (c == ' ' || c == ',' || c == 7 || c == '\n' || c == '\r')
+			return false;
+	}
+	return true;
+}

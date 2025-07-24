@@ -12,6 +12,7 @@
 #include <fcntl.h>
 #include "Client.hpp"
 #include "Message.hpp"
+#include "Channel.hpp"
 #include <errno.h>
 #include <csignal> 
 #include <sstream>
@@ -34,12 +35,13 @@ class Server
 {
     private :
 
-    int                 _port;
-    std::string         _password;
-    int                 _server_fd;
-    std::vector<pollfd> _poll_fds;
-    std::string         _server_name;
-    std::map<int, Client*> _clients;
+    int                     _port;
+    std::string             _password;
+    int                     _server_fd;
+    std::vector<pollfd>     _poll_fds;
+    std::string             _server_name;
+    std::map<int, Client*>  _clients;
+    std::vector<Channel>    _channels;
 
 
     public :
@@ -84,6 +86,15 @@ class Server
     void handleUSER (Client* client, const Message& msg);
     void handlePING (Client* client, const Message& msg);
     void handleMODE (Client* client, const Message& msg);
+    void handleJOIN (Client* client, const Message& msg);
+    bool parseJoin(const Message &msg, std::string &channel, std::string &key);
+	bool PrefixUser(const Message &msg, std::string &User,
+	std::string &channel, std::string &key);
+    std::string userPrefix(const std::string& prefix);
+    Channel* findChannel(const std::string& name);
+    std::vector<std::string> splitComma(const std::string &input);
+    void handleSingleJoin(Client *client, const std::string &channelName, const std::string &key);
+    bool ValidChannelName(const std::string &name);
 
     /*===== Server Console Input =====*/
     void handleConsoleInput();                              // Read from stdin

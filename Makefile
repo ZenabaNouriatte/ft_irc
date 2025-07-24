@@ -6,7 +6,7 @@
 #    By: zmogne <zmogne@student.42.fr>              +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2025/07/04 16:33:23 by zmogne            #+#    #+#              #
-#    Updated: 2025/07/15 19:29:17 by zmogne           ###   ########.fr        #
+#    Updated: 2025/07/24 20:24:24 by zmogne           ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -24,7 +24,8 @@ SRC_FILES    := main.cpp \
                 server/Server.cpp \
                 server/Message.cpp \
                 server/Client.cpp \
-				server/CommandHandler.cpp 
+				server/CommandHandler.cpp \
+				server/Channel.cpp \
 				
 
 SRC := $(addprefix $(SRC_DIR)/, $(SRC_FILES))
