@@ -6,7 +6,7 @@
 /*   By: zmogne <zmogne@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/21 14:30:25 by cschmid           #+#    #+#             */
-/*   Updated: 2025/07/24 15:55:28 by zmogne           ###   ########.fr       */
+/*   Updated: 2025/07/24 17:43:41 by zmogne           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -110,26 +110,33 @@ void Client::send_msg(const std::string& message)
 
 }
 
-std::vector<std::string> Client::extractCompleteCommands() 
-{
+std::vector<std::string> Client::extractCompleteCommands() {
     std::vector<std::string> commands;
-    std::string::size_type pos;
+    std::string::size_type pos = 0;
 
-    while ((pos = _buffer.find('\n')) != std::string::npos) 
-    {
+    while ((pos = _buffer.find('\n')) != std::string::npos) {
         std::string command = _buffer.substr(0, pos);
-        _buffer.erase(0, pos + 1);
+        _buffer.erase(0, pos + 1); // supprimer la ligne + '\n'
 
-        if (!command.empty() && command[command.length() - 1] == '\r') 
-        {
-            command.erase(command.length() - 1, 1);
+        if (!command.empty() && command[command.length() - 1] == '\r') {
+            command.erase(command.length() - 1); // enlever le '\r'
         }
 
-        if (!command.empty())
+        if (!command.empty()) {
             commands.push_back(command);
+        }
     }
+
     return commands;
 }
+
+    // Nouvelle méthode pour forcer l'extraction d'une commande incomplète (en cas de Ctrl+D)
+    std::string Client::extractIncompleteCommand() 
+    {
+        std::string command = _buffer;
+        _buffer.clear();
+        return command;
+    }
 
 bool Client::hasPartialData() const 
 {
