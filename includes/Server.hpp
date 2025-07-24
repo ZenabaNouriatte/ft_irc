@@ -41,40 +41,64 @@ class Server
     std::string         _server_name;
     std::map<int, Client*> _clients;
 
-    void handleConsoleInput();
-
 
     public :
+
+    /*===== Constructors / Destructor =====*/
     Server(int port, const std::string& password);
     ~Server();
-    void start();
-    void handleError(const std::string& message);      
-    void acceptNewClient();
-    void handleClient(int client_fd);
-    void removeClient(int client_fd);
-    void cleanExit();
 
-    static int signal;
-    static void catchSignal(int);
+    /*===== Startup / Signal Handling / Error =====*/
+    void start();                                       // Main loop
+    static void catchSignal(int);                       // Handle Ctrl+C or kill signals
+    void handleError(const std::string& message);       // Print error and close server socket
+    void cleanExit();                                   // Cleanup sockets and memory
+   
+    /*===== Server Setup =====*/
+    bool setupServerSocket();                           // Create, bind, listen on socket
+    void setupPollFds();                                // Add server socket and stdin to poll()
+    void printStart();                                  // Display server start message
+    void handlePollEvents();                            // Process events returned by poll()
 
+    /*===== Client Connection Management =====*/
+    void acceptNewClient();                             // Accept new connection and register client
+    void removeClient(int client_fd);                   // Remove client (socket, pollfd, memory)
+
+
+
+
+    /*===== Client Communication =====*/
+    void handleClient(int client_fd);                                                           // Read data from client
+    void handleClientRead(Client* client, const std::string& input);                            // Handle full commands
+    void handleClientDisconnection(Client* client, int client_fd, ssize_t received_bytes);      // Manage disconnect or error
+
+    
+    /*===== IRC Command Handling =====*/
+    void handleCommand(Client* client, const Message& msg);
     void completeRegistration(Client* client);
     void handleRegistred(Client* client, const Message& msg);
-    void broadcast(const std::string& text);
-    void welcomeServer();
-    void welcomeClient(Client* client);
-
-    void handleCommand(Client* client, const Message& msg);
+    void handleServerCommand (Client* client, const Message& msg);
+    
     void handlePASS (Client* client, const Message& msg);
     void handleNICK (Client* client, const Message& msg);
     void handleUSER (Client* client, const Message& msg);
-    void handleServerCommand (Client* client, const Message& msg);
     void handlePING (Client* client, const Message& msg);
     void handleMODE (Client* client, const Message& msg);
 
+    /*===== Server Console Input =====*/
+    void handleConsoleInput();                              // Read from stdin
+    void sendToAllClients(const std::string& text);         // Send message to all clients
+    void welcomeServer();                                   // Print welcome message
+    void welcomeClient(Client* client);                     // Send welcome message to client
 
-    void sendError(int fd, const std::string& code, const std::string& target, const std::string& message);
-    std::vector<std::string> splitCommand(const std::string& command);
 
+    /*===== Utilities =====*/
+    void sendError(int fd, const std::string& code,
+        const std::string& target, const std::string& message);             // IRC error sender
+    std::vector<std::string> splitCommand(const std::string& command);      // Split input string into tokens
+    
+    /*===== Global Signal Flag =====*/
+    static int signal;
 };
 
 
