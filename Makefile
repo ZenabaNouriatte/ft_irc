@@ -3,10 +3,10 @@
 #                                                         :::      ::::::::    #
 #    Makefile                                           :+:      :+:    :+:    #
 #                                                     +:+ +:+         +:+      #
-#    By: zmogne <zmogne@student.42.fr>              +#+  +:+       +#+         #
+#    By: smolines <smolines@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2025/07/04 16:33:23 by zmogne            #+#    #+#              #
-#    Updated: 2025/07/11 14:37:19 by zmogne           ###   ########.fr        #
+#    Updated: 2025/07/24 09:40:22 by smolines         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -19,6 +19,7 @@ SRCS    = srcs/main.cpp \
           srcs/server/Server.cpp \
 		  srcs/server/Message.cpp \
 		  srcs/server/Client.cpp \
+		  srcs/server/Channel.cpp \
 
 OBJS    = $(SRCS:.cpp=.o)
 

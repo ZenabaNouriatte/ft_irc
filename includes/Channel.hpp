@@ -11,9 +11,9 @@ class Channel
 		std::string _topicName; // theme du channel
 		std::string _password;
 		bool _inviteOnly; // channel sur invitation uniquement : 0 = non, 1 = oui
-		bool _topicRestriction; 
+		bool _topicRestriction; // false = tous les users peuvent changer le topic / true ; que chanop
 		bool _topic; // defini si un topic existe ou non
-		int _limit; // nb max d'utilisateurs sur le channel
+		size_t _limit; // nb max d'utilisateurs sur le channel
 		bool _hasLimit; // defini si une limite max d'user existe
 		bool _key; // defini si un password existe
 		std::vector<Client> _users; // liste des users du channel : peut etre repere par nickname ou par fd
@@ -59,13 +59,12 @@ class Channel
 	void addUser(const Client &user);
 	void addOperator(const Client &user);
 	void removeUser(int fd);
-	void removeOperator(int fd);
-	int isChannelEmpty(); // renvoie le nombre d'utilisateurs du channel
-
+	int isChannelEmpty() const; // renvoie le nombre d'utilisateurs du channel
 	void removeOperator(const Client &user);
 	void userToOperator (const Client &user);
 	void operatorToUser (const Client &user);
-	bool verifClientisOperator (Client & client);
+	bool verifClientisOperator (const Client & client);
+	bool verifClientisUser (Client & client);
 	bool addOperator(const std::string& password);
 	bool isValidChannelPW(const std::string& password);
 
@@ -74,9 +73,11 @@ class Channel
 
 	void changeModeI(Client & client, std::string arg);
 	void changeModeT(Client client, std::string arg);
-	void changeTopic(Client client, std::string topic);
 	void changeModeK(Client client, std::string arg, std::string key);
+	void changeModeO(Client client, std::string arg, Client cible) ;
+	void changeModeL(Client client, std::string arg, int limit);
 
+	void changeTopic(Client client, std::string topic);
 };
 
 

@@ -90,7 +90,7 @@ Channel::~Channel()
 
 
 
-	int Channel::isChannelEmpty()  // renvoie le nombre d'utilisateurs connectes au channel : user + operator
+	int Channel::isChannelEmpty() const // renvoie le nombre d'utilisateurs connectes au channel : user + operator
 	{
 		return (_users.size() + _operators.size()); 
 	}
@@ -108,78 +108,74 @@ Channel::~Channel()
 			//// refuser acces ////
 			///message///
 			}	
-		if (_inviteOnly == true)
-			// utilisateur sur invitation
+		// if (_inviteOnly == true)
+		// 	// utilisateur sur invitation
 	
-		else
-			_users.push_back(user);
-			//message
+		// else
+		// 	_users.push_back(user);
+		// 	//message
 		return;
 	}
 
-	void Channel::addOperator(const Client &client)   // a la creation : operator = user numero 1. Si user#1 quitte : definir un nouvel operator // ajouter un op
+	void Channel::addOperator(const Client &client)   
+	// a la creation : operator = user numero 1. Si user#1 quitte : definir un nouvel operator // ajouter un op
 	{
-		if (verifClientisOperator (& client) == true )
+		if (verifClientisOperator (client) == true )
 				userToOperator(client);
 		else
 			_operators.push_back(client);
 	}
 
 	void Channel::removeUser(int fd) {
-    for (std::vector<Client>::iterator it = _users.begin(); it != _users.end(); ++it) {
-        if (it->getFd() == fd) 
-            _users.erase(it);
-            return;
+    	for (std::vector<Client>::iterator it = _users.begin(); it != _users.end(); ++it) 
+		{
+    	    if (it->getFd() == fd) 
+    	        _users.erase(it);
 		}
+	    return;
 	}
 
 	void Channel::removeOperator(const Client &user){
-		_operators.erase(user);	
-	}
-	void Channel::userToOperator (const Client &user) {
-		_operators.push_back(user);
-		_users.erase(user);
-	}
-	void Channel::operatorToUser (const Client &user) {
-		_users.push_back(user);
-		_operators.erase(user);
+		std::vector<Client>::iterator it = std::find(_operators.begin(), _operators.end(), user);
+		if (it != _operators.end())
+    		_operators.erase(it);
 	}
 
+	void Channel::userToOperator (const Client &user) {
+		_operators.push_back(user);
+		std::vector<Client>::iterator it = std::find(_users.begin(), _users.end(), user);
+		if (it != _users.end())
+    		_users.erase(it);
+	}
+
+	void Channel::operatorToUser (const Client &user) {
+		_users.push_back(user);
+		std::vector<Client>::iterator it = std::find(_operators.begin(), _operators.end(), user);
+		if (it != _operators.end())
+    		_operators.erase(it);
+	}
+
+
+	bool Channel::verifClientisInChannel (Client & client) {
+		if (std::find(_operators.begin(), _operators.end(), client.getNick()) != _operators.end() 
+			&& std::find(_users.begin(), _users.end(), client.getNick()) != _users.end())
+				return true;
+		return false;
+	}
+
+
 	bool Channel::verifClientisOperator (Client & client) {
+		if (std::find(_operators.begin(), _operators.end(), client.getNick()) != _operators.end()) 
+			return true;
+		return false;
+	}
+
+	bool Channel::verifClientisUser (Client & client) {
 		if (std::find(_users.begin(), _users.end(), client.getNick()) != _users.end()) 
 			return true;
 		return false;
 	}
-// MODE #channel i
-// +i : seuls ls invites accedent
-//-i : tout le monde accede
-	void Channel::changeModeI(Client & client, std::string arg) {
-		if (verifClientisOperator (client) == true )
-		{
-			if (arg == "-i" && _inviteOnly = true)
-				this->_inviteOnly = false;	
-				// message confirmation
-				// reponse q envoyer : <server> MODE #chan -i
 
-			if (arg == "+i" && _inviteOnly = false)
-				this->_inviteOnly = true;	
-				//message confirmation
-		}
-		else
-		// message pas de droit pour changer le mode
-		}
-
-	void Channel::changeModeT(Client client, std::string arg) {
-		if (verifClientisOperator (client) == true )
-		{
-			if (arg == "+t") 
-				this->_topicRestriction == true;
-				//message
-			if (arg == "-t")
-				this->_topicRestriction == false;
-				//message
-		}
-	}
 
 	bool isValidChannelPW(const std::string& password) {
     	if (password.empty() || password.size() > 23)
@@ -194,15 +190,58 @@ Channel::~Channel()
 	}
 
 
-	void Channel::changeTopic(Client client, std::string topic) {}
-		if (_topicRestriction == true && && verifClientisOperator (client) == false)
-			std::cout << "DEBUG : refus de changement" << std::endl;
+	// MODE #channel i
+// i = on invitation only
+// +i : seuls ls invites accedent
+//-i : tout le monde accede
+	void Channel::changeModeI(Client & client, std::string arg) {
+		if (verifClientisOperator (client) == true )
+		{
+			if (arg == "-i" && _inviteOnly == true)
+				this->_inviteOnly = false;	
+				// message confirmation
+				// reponse a envoyer : <server> MODE #chan -i
+
+			else if (arg == "+i" && _inviteOnly == false)
+				this->_inviteOnly = true;	
+				//message confirmation
+			//else
+				// le mode demande est deja en cours
+		}
+		//else
+		//error
+		// message pas de droit pour changer le mode
+		}
+
+	void Channel::changeModeT(Client client, std::string arg) {
+		if (verifClientisOperator (client) == true )
+		{
+			if (arg == "+t") 
+				this->_topicRestriction = true;
+				//message
+			if (arg == "-t")
+				this->_topicRestriction = false;
+				//message
+		}
+	}
+
+
+
+	void Channel::changeTopic(Client client, std::string topic) {
+		if (_topicRestriction == true && verifClientisOperator(client) == false)
+		{
+			std::cout << "DEBUG changeTopic : refus de changement" << std::endl;
 			// refus de changement
 			// message
+		}
 		else
-			this->_topic = topic;
+		{
+			this->_topicName = topic;
+			this->_topic = true;
 			//message
-	
+		}
+	}
+
 	void Channel::changeModeK(Client client, std::string arg, std::string key) 
 	{
 			if (verifClientisOperator (client) == true )
@@ -211,39 +250,72 @@ Channel::~Channel()
 				{
 					if (this->_key == true)
 						// 467 <nick> #canal :Channel key already set
-						this->_password == key;
+						this->_password = key;
 					else if (this->_key == false && isValidChannelPW(key) == true)
-						this->_password == key;
-					else
+						this->_password = key;
+					//else
 						//message mauvais mot de passe : ERR_BADCHANNELKEY
 				}
 				if (arg == "-k")
 				{	
-					if (this->_key == true && this->_password == Key)
-							this->_key == false;
+					if (this->_key == true && this->_password == key)
+							this->_key = false;
 						//message desactivation key
-					else if (this->_key == false)	
+					//else if (this->_key == false)	
 						//message mode key non active
-					else 
+					//else 
 						//message mauvais mot de passe : ERR_BADCHANNELKEY
 				}
+			}
+			else
+				//erreur client not operator
+
 	}
 
+void Channel::changeModeO(Client client, std::string arg, Client cible) 
+{
+	if (verifClientisOperator(client) == true )
+	{
+		if (verifClientisInChannel == false)
+			// message client not in channel
+		else		
+		{
+			if (arg == "+o" && verifClientisUser(cible) == true)
+				// remove cible from users
+				// add cible to operator
+			else if (arg == "+o" && verifClientisUser(cible) == false)
+				// message cible already operator
 
-// arrivee de la commande :
-// JOIN <channel>{,<channel>} [<key>{,<key>}]
+			else if (arg == "-o" && verifClientisOperator(cible) == true)
+			// remove cible from operator
+			// add cible to user
+
+			else
+			// // message cible not an operator
+		}
+	}
+	else
+		//erreur client not operator
+}
 
 
-// commandes operateur :
-
- KICK - Ejecter un client du channel
- INVITE - Inviter un client au channel
- TOPIC - Modifier ou afficher le thème du channel
- MODE - Changer le mode du channel :
-— i : Définir/supprimer le canal sur invitation uniquement
-— t : Définir/supprimer les restrictions de la commande TOPIC pour les opérateurs de canaux
-— k : Définir/supprimer la clé du canal (mot de passe)
-— o : Donner/retirer le privilège de l`opérateur de canal
-— l : Définir/supprimer la limite d`utilisateurs pour le canal
-
+void Channel::changeModeL(Client client, std::string arg, int limit) 
+{
+	if (verifClientisOperator(client) == true )
+	{
+		if (arg == "+l" && _hasLimit == false)
+			{
+			_hasLimit == true;
+			_limit = limit;
+			}
+		else if (arg == "+l" && _hasLimit == true)
+			//message error limit already set
+		else if (arg == "-l" && _hasLimit == true)
+			_hasLimit == false;
+		else 
+			//message error no limit is set
+	}
+		else 
+			//erreur client not operator
+}
 
