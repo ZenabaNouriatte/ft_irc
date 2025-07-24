@@ -6,7 +6,7 @@
 /*   By: zmogne <zmogne@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/21 14:30:34 by cschmid           #+#    #+#             */
-/*   Updated: 2025/07/22 20:35:23 by zmogne           ###   ########.fr       */
+/*   Updated: 2025/07/24 11:06:57 by zmogne           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -163,23 +163,6 @@ void Server::welcomeServer()
 	std::cout << "────────────────────────────\n" << std::endl;
     std::cout << "         SERVER LOG        :\n" << std::endl;
 }
-
-// void Server::welcomeClient(Client* client) 
-// {
-// 	std::string nick = client->getNickname();
-
-// 	client->send_msg(":\x03""02" + _server_name + "\x0F 001 " + nick +
-// 	                 " :\x03""03""Welcome to the GOSSIP.IRC Network, " + nick + "\x0F");
-
-// 	client->send_msg(":\x03""02" + _server_name + "\x0F 002 " + nick +
-// 	                 " :\x03""03""Your host is " + _server_name + ", running version 1.0\x0F");
-
-// 	client->send_msg(":\x03""02" + _server_name + "\x0F 003 " + nick +
-// 	                 " :\x03""03""This server was created July 2025\x0F");
-
-// 	client->send_msg(":\x03""03" + _server_name + "\x0F 004 " + nick +
-// 	                 " \x03""03" + _server_name + " 1.0 o o\x0F");
-// }
 
 void Server::welcomeClient(Client* client) 
 {
