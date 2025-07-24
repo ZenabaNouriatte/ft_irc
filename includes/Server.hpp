@@ -70,6 +70,7 @@ class Server
     void handleServerCommand (Client* client, const Message& msg);
     void handlePING (Client* client, const Message& msg);
     void handleMODE (Client* client, const Message& msg);
+    void handleJOIN(Client* client, const Message& msg);
 
 
     void sendError(int fd, const std::string& code, const std::string& target, const std::string& message);
