@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Message.cpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: cschmid <cschmid@student.42.fr>            +#+  +:+       +#+        */
+/*   By: zmogne <zmogne@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/21 14:30:42 by cschmid           #+#    #+#             */
-/*   Updated: 2025/07/21 14:30:43 by cschmid          ###   ########.fr       */
+/*   Updated: 2025/07/24 15:55:58 by zmogne           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,12 +15,7 @@
 /*========== METHODES ==========*/
 Message::Message(std::string raw_msg): raw(raw_msg)
 {
-        //std::cout << "Raw msg: " << raw << std::endl;
         msgParsing(raw);
-        //std::cout << "DEBUG Prefix = [" << prefix << "]\n";
-        //std::cout << "DEBUG Command= [" << command << "]\n";
-        //for (size_t i = 0; i < params.size(); ++i)
-        //        std::cout << "DEBUG Param[" << i << "] = [" << params[i] << "]\n";
 }
 
 void Message::msgParsing(std::string msg)

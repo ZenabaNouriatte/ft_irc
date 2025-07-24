@@ -6,7 +6,7 @@
 /*   By: zmogne <zmogne@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/21 14:30:56 by cschmid           #+#    #+#             */
-/*   Updated: 2025/07/22 20:07:40 by zmogne           ###   ########.fr       */
+/*   Updated: 2025/07/24 16:10:11 by zmogne           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,7 +26,7 @@ Server::Server(int port, const std::string& password) : _port(port), _password(p
 Server::~Server() 
 {
     cleanExit();
-    std::cout << "DEBUG Server destroyed\n";
+    std::cout << RED << "Server exit" << RESET << std::endl;
 }
 
 
@@ -85,8 +85,13 @@ void Server::start()
 
     if (listen(_server_fd, 5) == -1)
         return handleError("Fail listen\n");
-
-    std::cout << "Server ready on port: " << _port << std::endl;
+    
+    //std::stringstream ss;
+	//ss << _port;
+    std::cout << "\n────────────────────────────────\n";
+	std::cout << BOLD << "Password             : " << _password << std::endl;
+	std::cout << BOLD << "Server ready on port : " << _port << std::endl;
+	std::cout << "────────────────────────────────\n" << std::endl;
 
     /* ───── Ajout du socket serveur à poll() ───── */
     pfd.fd = _server_fd;
@@ -159,7 +164,7 @@ void Server::acceptNewClient()
     int client_fd = accept(_server_fd, (sockaddr*)&client_addr, &addr_len); // on rempli la structure client_adrr avec les information trouve via accept
     if (client_fd == -1)
         return handleError("Fail accept");
-    //std::cout << "DEBUG : New client connected on fd: " << client_fd << std::endl;
+    std::cout << GREEN << BOLD << "Client [" << client_fd << "]" << " connected " << RESET << std::endl;
     
     // Mettre le socket client en mode non bloquant
     fcntl(client_fd, F_SETFL, O_NONBLOCK);
@@ -183,41 +188,29 @@ void Server::handleClient(int client_fd)
 
     if (received_bytes > 0)
     {
-        buffer[received_bytes] = '\0';  // Termine proprement la chaîne
-        // Ajouter donnee au buffer client
+        buffer[received_bytes] = '\0';
         Client* client = _clients[client_fd];
-        client->appendToBuffer(buffer); // copier buffer de rcv dans _buffer.client
+        client->appendToBuffer(buffer);
 
-        // Traiter les lignes completes qui termine par \r\n
-        std::string& buf = client->getBuffer(); // reference pour acceder a _buffer et non faire une copie
-
-        size_t pos =buf.find("\n");
-        while (pos != std::string::npos)
+        std::vector<std::string> commands = client->extractCompleteCommands();
+        for (size_t i = 0; i < commands.size(); ++i)
         {
-            std::string raw_message = buf.substr(0, pos); // recupere la prochaine ligne
-            buf.erase(0, pos + 1); // supprime la ligne + \r\n
+            std::string& raw_message = commands[i];
+            std::cout << BOLD << "Client [" << client_fd << "] :" << "[RECV] " << raw_message << RESET << std::endl;
 
-            if (!raw_message.empty() && raw_message[raw_message.size() - 1] == '\r')
-                raw_message.erase(raw_message.size() - 1, 1);
-
-            //A TESTER / POUR CONFORMITER IRSSI OU NC
-            
-            // Creation obj msg
             Message msg(raw_message);
-            std::cout << raw_message << std::endl;
-            handleCommand(client, msg);  // objet message et non raw string  
-            pos = buf.find("\n"); // mettre à jour pos a la fin
+            handleCommand(client, msg);
         }
 
     }
     else if (received_bytes == 0)
     {
-        std::cout << RED << BOLD << "[INFO] Client " << client_fd << " a fermé la connexion." << RESET << std::endl;
+        std::cout << RED << BOLD << "Client " << client_fd << " closed the connexion." << RESET << std::endl;
         removeClient(client_fd);
     }
     else
     {
-        handleError("[ERROR] recv()");
+        handleError("DEBUG ERROR recv()");
         removeClient(client_fd);
     }
 }
@@ -225,12 +218,10 @@ void Server::handleClient(int client_fd)
 
 void Server::removeClient(int client_fd)
 {
-    //std::cout << "DEBUG Supp du client " << client_fd << std::endl;
-
     // Fermer la socket
     close(client_fd);
 
-    //Supprimer le pollfd associé
+    //Supprimer le pollfd associe
     for (std::vector<pollfd>::iterator it = _poll_fds.begin(); it != _poll_fds.end(); ++it)
     {
         if (it->fd == client_fd)
@@ -239,7 +230,6 @@ void Server::removeClient(int client_fd)
             break;
         }
     }
-
     // Supprimer le client de la map + memoire
     std::map<int, Client*>::iterator it = _clients.find(client_fd);
     if (it != _clients.end())
@@ -290,4 +280,15 @@ void Server::broadcast(const std::string& text)
 }
 
 
+std::vector<std::string> Server::splitCommand(const std::string& command) 
+{
+    std::vector<std::string> tokens;
+    std::istringstream iss(command);
+    std::string token;
+
+    while (iss >> token) {
+        tokens.push_back(token);
+    }
+    return tokens;
+}
 

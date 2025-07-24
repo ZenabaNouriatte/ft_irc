@@ -73,7 +73,7 @@ class Server
 
 
     void sendError(int fd, const std::string& code, const std::string& target, const std::string& message);
-
+    std::vector<std::string> splitCommand(const std::string& command);
 
 };
 

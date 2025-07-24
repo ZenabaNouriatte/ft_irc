@@ -58,5 +58,10 @@ class Client
         const std::string &getNick() const;
         const std::string &getUser() const;
 
+        std::vector<std::string> extractCompleteCommands();
+        bool hasPartialData() const;
+        void clearBuffer();
+
+
 
 };

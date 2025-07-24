@@ -6,7 +6,7 @@
 /*   By: zmogne <zmogne@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/21 14:30:34 by cschmid           #+#    #+#             */
-/*   Updated: 2025/07/24 11:06:57 by zmogne           ###   ########.fr       */
+/*   Updated: 2025/07/24 16:22:49 by zmogne           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,9 +15,6 @@
 /*========== METHODES ==========*/
 void Server::handleCommand(Client* client, const Message& msg)
 {
-    //std::cout << BLUE << BOLD << "RAW MSG [" << msg.raw << "]" << RESET << std::endl;
-    //std::cout << BLUE << "COMMAND [" << msg.command << "]" << RESET << std::endl;
-    
     if (msg.command == "PASS" || msg.command == "NICK" || msg.command == "USER" )
         handleRegistred(client, msg);
     else if (msg.command == "PING" || msg.command== "MODE" || msg.command== "JOIN" )
@@ -58,21 +55,21 @@ void Server::sendError(int fd, const std::string& code, const std::string& targe
 
 void Server::handlePASS(Client* client, const Message& msg)
 {
-    std::cout << GREEN << BOLD <<"COMMAND PASS received with: " << RESET << msg.params[0] << std::endl;
+    if (client->isRegistered())
+    {
+        sendError(client->getFd(), "462", "*", "You may not reregister");
+        return;
+    }
     if (msg.params.empty())
     {
         sendError(client->getFd(), "461", "PASS", "Not enough parameters");
         return;
     }
-    if (client->isRegistered())
-    {
-        sendError(client->getFd(), "462", "*", "You may not register");
-        return;
-    }
+
     if (msg.params[0] != _password)
     {
         sendError(client->getFd(), "464", "*", "Password incorrect");
-        removeClient(client->getFd());
+        //removeClient(client->getFd());
         return;
     }
     client->setPass(msg.params[0]);
@@ -81,8 +78,6 @@ void Server::handlePASS(Client* client, const Message& msg)
     {
         completeRegistration(client);
     }
-
-
 }
 
 
@@ -148,8 +143,7 @@ void Server::completeRegistration(Client* client)
 
 void Server::welcomeServer() 
 {
-	std::stringstream ss;
-	ss << _port;
+
 
 	std::cout << "\n██████████████████████████████████████" << std::endl;
 	std::cout << "███                               ████" << std::endl;
@@ -157,10 +151,7 @@ void Server::welcomeServer()
 	std::cout << "███                               ████" << std::endl;
 	std::cout << "██████████████████████████████████████" << std::endl;
 
-	std::cout << "\n────────────────────────────\n";
-	std::cout << "Password : " << _password << std::endl;
-	std::cout << "Port     : " << ss.str() << std::endl;
-	std::cout << "────────────────────────────\n" << std::endl;
+	std::cout << "\n────────────────────────────\n" << std::endl;
     std::cout << "         SERVER LOG        :\n" << std::endl;
 }
 
@@ -179,7 +170,9 @@ void Server::welcomeClient(Client* client)
 
 	client->send_msg(":" + _server_name + " 004 " + nick +
 	                 " :\x03""03" + _server_name + " 1.0 o o\x0F");
+
 }
+
 
 
 void Server::handlePING(Client* client, const Message& msg)

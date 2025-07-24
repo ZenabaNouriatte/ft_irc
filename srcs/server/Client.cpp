@@ -6,7 +6,7 @@
 /*   By: zmogne <zmogne@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/21 14:30:25 by cschmid           #+#    #+#             */
-/*   Updated: 2025/07/22 17:35:19 by zmogne           ###   ########.fr       */
+/*   Updated: 2025/07/24 15:55:28 by zmogne           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -105,7 +105,38 @@ void Client::send_msg(const std::string& message)
 
     if (sent == -1)
     {
-        std::cerr << RED << BOLD << "[ERROR] Echec de l'envoi du message au client." << _fd << RESET << std::endl;
+        std::cerr << RED << BOLD << "[ERROR] Error sending msg to client." << _fd << RESET << std::endl;
     }
 
+}
+
+std::vector<std::string> Client::extractCompleteCommands() 
+{
+    std::vector<std::string> commands;
+    std::string::size_type pos;
+
+    while ((pos = _buffer.find('\n')) != std::string::npos) 
+    {
+        std::string command = _buffer.substr(0, pos);
+        _buffer.erase(0, pos + 1);
+
+        if (!command.empty() && command[command.length() - 1] == '\r') 
+        {
+            command.erase(command.length() - 1, 1);
+        }
+
+        if (!command.empty())
+            commands.push_back(command);
+    }
+    return commands;
+}
+
+bool Client::hasPartialData() const 
+{
+    return !_buffer.empty();
+}
+
+void Client::clearBuffer() 
+{
+    _buffer.clear();
 }
