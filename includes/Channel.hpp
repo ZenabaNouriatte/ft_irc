@@ -63,11 +63,12 @@ class Channel
 	void removeOperator(const Client &user);
 	void userToOperator (const Client &user);
 	void operatorToUser (const Client &user);
-	bool verifClientisOperator (const Client & client);
-	bool verifClientisUser (Client & client);
 	bool addOperator(const std::string& password);
 	bool isValidChannelPW(const std::string& password);
 
+	bool verifClientisOperator (const Client & client);
+	bool verifClientisUser (const Client & client);
+	bool verifClientisInChannel (const Client & client);
 
 	// modes
 

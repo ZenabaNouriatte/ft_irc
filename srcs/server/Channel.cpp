@@ -32,6 +32,13 @@ Channel::~Channel()
 	return;
 }
 
+//////////// OPERATORS //////////////
+
+// bool Channel::operator==(const Client& other) const {
+// 			return this->getFd() == other.getFd(); 
+// 			// ou compare getNick() si plus pertinent
+// 		}
+
 ////// ACCESSSORS //////
 
 
@@ -155,27 +162,24 @@ Channel::~Channel()
     		_operators.erase(it);
 	}
 
-
-	bool Channel::verifClientisInChannel (Client & client) {
+	bool Channel::verifClientisInChannel (const Client & client) {
 		if (std::find(_operators.begin(), _operators.end(), client.getNick()) != _operators.end() 
 			&& std::find(_users.begin(), _users.end(), client.getNick()) != _users.end())
 				return true;
 		return false;
 	}
 
-
-	bool Channel::verifClientisOperator (Client & client) {
+	bool Channel::verifClientisOperator (const Client & client) {
 		if (std::find(_operators.begin(), _operators.end(), client.getNick()) != _operators.end()) 
 			return true;
 		return false;
 	}
 
-	bool Channel::verifClientisUser (Client & client) {
+	bool Channel::verifClientisUser (const Client & client) {
 		if (std::find(_users.begin(), _users.end(), client.getNick()) != _users.end()) 
 			return true;
 		return false;
 	}
-
 
 	bool isValidChannelPW(const std::string& password) {
     	if (password.empty() || password.size() > 23)
@@ -189,8 +193,7 @@ Channel::~Channel()
 		return true;
 	}
 
-
-	// MODE #channel i
+// MODE #channel i
 // i = on invitation only
 // +i : seuls ls invites accedent
 //-i : tout le monde accede
@@ -205,12 +208,14 @@ Channel::~Channel()
 			else if (arg == "+i" && _inviteOnly == false)
 				this->_inviteOnly = true;	
 				//message confirmation
-			//else
+			else
+				std::cout << "DEBUG modeChangeI : mode demande est deja en cours" << std::endl;
 				// le mode demande est deja en cours
 		}
-		//else
-		//error
-		// message pas de droit pour changer le mode
+		else
+			std::cout << "DEBUG modeChangeI : pas de droit pour changer le mode" << std::endl;
+			//error
+			// message pas de droit pour changer le mode
 		}
 
 	void Channel::changeModeT(Client client, std::string arg) {
@@ -224,8 +229,6 @@ Channel::~Channel()
 				//message
 		}
 	}
-
-
 
 	void Channel::changeTopic(Client client, std::string topic) {
 		if (_topicRestriction == true && verifClientisOperator(client) == false)
@@ -249,11 +252,12 @@ Channel::~Channel()
 				if (arg == "+k")
 				{
 					if (this->_key == true)
-						// 467 <nick> #canal :Channel key already set
 						this->_password = key;
+						// 467 <nick> #canal :Channel key already set
 					else if (this->_key == false && isValidChannelPW(key) == true)
 						this->_password = key;
-					//else
+					else
+						std::cout << "DEBUT ChangeModeK : ERR_BADCHANNELKEY" << std::endl;
 						//message mauvais mot de passe : ERR_BADCHANNELKEY
 				}
 				if (arg == "-k")
@@ -261,41 +265,51 @@ Channel::~Channel()
 					if (this->_key == true && this->_password == key)
 							this->_key = false;
 						//message desactivation key
-					//else if (this->_key == false)	
+					else if (this->_key == false)	
+						std::cout << "DEBUT ChangeModeK : mode key non actif" << std::endl;
 						//message mode key non active
-					//else 
+					else 
+						std::cout << "DEBUT ChangeModeK : ERR_BADCHANNELKEY" << std::endl;
 						//message mauvais mot de passe : ERR_BADCHANNELKEY
 				}
 			}
 			else
+			std::cout << "DEBUT ChangeModeK : client not an operator" << std::endl;
 				//erreur client not operator
-
 	}
 
 void Channel::changeModeO(Client client, std::string arg, Client cible) 
 {
 	if (verifClientisOperator(client) == true )
 	{
-		if (verifClientisInChannel == false)
+		if (verifClientisInChannel(client) == false)
 			// message client not in channel
-		else		
+			std::cout << "DEBUT ChangeModeO : Client not in channel" << std::endl;
+ 		else		
 		{
 			if (arg == "+o" && verifClientisUser(cible) == true)
+				std::cout << "DEBUT ChangeModeO : " << std::endl;
 				// remove cible from users
 				// add cible to operator
 			else if (arg == "+o" && verifClientisUser(cible) == false)
+				std::cout << "DEBUT ChangeModeO : cible already operator" << std::endl;
 				// message cible already operator
 
 			else if (arg == "-o" && verifClientisOperator(cible) == true)
+					std::cout << "DEBUT ChangeModeO : " << std::endl;
 			// remove cible from operator
 			// add cible to user
 
 			else
-			// // message cible not an operator
+				std::cout << "DEBUT ChangeModeO : cible not an operator" << std::endl;
+				// message cible not an operator
+			
 		}
 	}
 	else
 		//erreur client not operator
+		std::cout << "DEBUT ChangeModeO : client not an operator" << std::endl;
+
 }
 
 
@@ -304,18 +318,21 @@ void Channel::changeModeL(Client client, std::string arg, int limit)
 	if (verifClientisOperator(client) == true )
 	{
 		if (arg == "+l" && _hasLimit == false)
-			{
-			_hasLimit == true;
+		{
+			_hasLimit = true;
 			_limit = limit;
-			}
+		}
 		else if (arg == "+l" && _hasLimit == true)
+			std::cout << "DEBUT ChangeModeL : limit already set" << std::endl;
 			//message error limit already set
 		else if (arg == "-l" && _hasLimit == true)
-			_hasLimit == false;
+			_hasLimit = false;
 		else 
+			std::cout << "DEBUT ChangeModeL : no limit is set" << std::endl;
 			//message error no limit is set
 	}
 		else 
 			//erreur client not operator
+			std::cout << "DEBUT ChangeModeL : client not an operator" << std::endl;
 }
 
