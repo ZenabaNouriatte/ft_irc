@@ -6,7 +6,7 @@
 /*   By: cschmid <cschmid@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/21 14:30:34 by cschmid           #+#    #+#             */
-/*   Updated: 2025/07/24 15:35:20 by cschmid          ###   ########.fr       */
+/*   Updated: 2025/07/25 12:28:37 by cschmid          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -197,36 +197,27 @@ void Server::handlePING(Client *client, const Message &msg)
 	client->send_msg(_server_name + " :PONG sent by the server");
 }
 
-void Server::handleMODE(Client *client, const Message &msg)
-{
-	(void)client;
-	(void)msg;
-}
-
 /*=============================================*/
 
-std::string Server::userPrefix(const std::string& prefix)
+std::string Server::userPrefix(const std::string &prefix)
 {
-    if (prefix.empty())
-        return "";
-		
-    size_t find = prefix.find('!'); // Dans IRC, le '!' sépare le nick du reste (user@host).
-    if (find!= std::string::npos)  // Si on a trouvé un '!', on retourne uniquement la partie avant : le nick.
-        return prefix.substr(0, find);   // Aucun '!' trouvé : le préfixe est soit déjà un simple nick, soit un nom de serveur.
-    return prefix;
+	if (prefix.empty())
+		return ("");
+	size_t find = prefix.find('!');    // Dans IRC, le '!' separe le nick du reste (user@host).
+	if (find != std::string::npos)     // Si on a trouvé un '!' on retourne uniquement la partie avant : le nick.
+		return (prefix.substr(0, find)); // Aucun '!' trouvé : le prefixe est soit deja  un simple nick, soit un nom de serveur.
+	return (prefix);
 }
 
-bool	Server::PrefixUser(const Message &msg, std::string &User,
-		std::string &channel, std::string &key)
+bool Server::PrefixUser(const Message &msg, std::string &User,
+	std::string &channel, std::string &key)
 {
 	User.clear();
 	channel.clear();
 	key.clear();
 	if (msg.prefix.empty())
 		return (false);
-		
 	User = userPrefix(msg.prefix);
-
 	if (!Server::parseJoin(msg, channel, key))
 		return (false);
 	return (true);
@@ -240,7 +231,8 @@ bool Server::parseJoin(const Message &msg, std::string &channel,
 	const std::string &p0 = msg.params[0]; // nom du channel
 	if (msg.params.empty())
 		return (false);
-	if (p0.empty() || p0[0] != '#') // nom du channel doit commencer par # donc petite verif
+	if (p0.empty() || p0[0] != '#')
+		// nom du channel doit commencer par # donc petite verif
 		return (false);
 	channel = p0;
 	if (msg.params.size() >= 2) // si il y a un deuxieme paramettre c'est le mdp
@@ -261,10 +253,8 @@ void Server::handleJOIN(Client *client, const Message &msg)
 		sendError(client->getFd(), "461", "JOIN", "Not enough parameters");
 		return ;
 	}
-	
 	// chercher si le channel existe ici
-
-	if (PrefixUser(msg,user,channel, key))
+	if (PrefixUser(msg, user, channel, key))
 	{
 		std::cout << "[PARSE] JOIN with user\n";
 		std::cout << " user = " << user << "\n";
@@ -278,5 +268,38 @@ void Server::handleJOIN(Client *client, const Message &msg)
 		std::cout << "  channel = " << channel << "\n";
 		std::cout << "  key     = " << (key.empty() ? "(no key)" : key) << "\n";
 		return ;
+	}
+}
+
+/*=============================================*/
+
+void Server::handleMODE(Client *client, const Message &msg)
+{
+	(void)client;
+	int i = 0;
+	const std::string &target = msg.params[0];  // #channel
+    const std::string &modes  = msg.params[1];  // +it, -o, +k, etc.
+
+	//Ajouter une verif si le channel existe
+
+	if (msg.params.size() < 2) 
+	{
+        sendError(client->getFd(), "461", "MODE", "Not enough parameters");
+        return;
+    }
+	
+
+	std::cout << "target = " << target << "\n";
+    std::cout << "modes  = " << modes  << "\n";
+	
+	if (msg.params[0][0] == '+')
+	{
+		std::cout << " C'est un +" << std::endl;
+		//
+	}
+	else if (msg.params[0][0] == '-') 
+	{
+		std::cout << " C'est un -" << std::endl;
+		//
 	}
 }
