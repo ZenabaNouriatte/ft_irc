@@ -29,6 +29,7 @@
 #include <sys/socket.h> // socket, bind, listen, accept
 #include <unistd.h>
 #include <vector>
+#include <cstring>
 
 #define RESET "\033[0m"
 #define BOLD "\033[1m"
@@ -103,6 +104,7 @@ class Server
 	  std::string &channel, std::string &key);
     std::string userPrefix(const std::string& prefix);
     Channel* findChannel(const std::string& name);
+    Client* findClient(const std::string& nickname);
     std::vector<std::string> splitComma(const std::string &input);
     void handleSingleJoin(Client *client, const std::string &channelName, const std::string &key);
     bool ValidChannelName(const std::string &name);
