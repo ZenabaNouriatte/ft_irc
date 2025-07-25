@@ -52,7 +52,7 @@ class Server
     std::vector<pollfd>     _poll_fds;
     std::string             _server_name;
     std::map<int, Client*>  _clients;
-    std::vector<Channel>    _channels;
+    std::vector<Channel*>    _channels;
 
     public :
 
@@ -95,6 +95,10 @@ class Server
     void handleNICK (Client* client, const Message& msg);
     void handleUSER (Client* client, const Message& msg);
     void handlePRIVMSG(Client* client, const Message& msg);
+    bool MsgToChannel(Client* sender, const std::string& channelName, const std::string& message);
+    bool PvMsgToUser(Client* sender, const std::string& target, const std::string& message);
+
+
     void handlePING (Client* client, const Message& msg);
     void handleMODE (Client* client, const Message& msg);
     void handleJOIN (Client* client, const Message& msg);

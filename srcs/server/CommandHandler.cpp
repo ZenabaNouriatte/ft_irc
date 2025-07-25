@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   CommandHandler.cpp                                 :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: smolines <smolines@student.42.fr>          +#+  +:+       +#+        */
+/*   By: zmogne <zmogne@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/21 14:30:34 by cschmid           #+#    #+#             */
-/*   Updated: 2025/07/25 16:09:30 by smolines         ###   ########.fr       */
+/*   Updated: 2025/07/25 19:49:17 by zmogne           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -183,6 +183,7 @@ void Server::welcomeClient(Client* client)
 
 }
 
+
 void Server::handlePRIVMSG(Client* client, const Message& msg)
 {
     if (!client->isRegistered())
@@ -204,12 +205,48 @@ void Server::handlePRIVMSG(Client* client, const Message& msg)
         return;
     }
 	std::cout << "[PRIVMSG] " << client->getNickname() << " -> " << msg.params[0] << ": " << msg.trailing << std::endl;
-	// si le param 0 est le nom d'un client 
-			//envoyer au client
-	// si le param 0 est une channel : envoyer au channel
-		// TODO: envoye msg au bon client ou canal
+	if (PvMsgToUser(client, target, messageText))
+        return;
+
+    // Try sending to channel if it starts with #
+    if (target[0] == '#' && MsgToChannel(client, target, messageText))
+    {
+		return;
+	}
+	sendError(client->getFd(), "401", target, "No such nick/channel");
+
 }
 
+bool Server::PvMsgToUser(Client* sender, const std::string& target, const std::string& message)
+{
+    for (std::map<int, Client*>::iterator it = _clients.begin(); it != _clients.end(); ++it)
+    {
+        Client* dest = it->second;
+        if (dest->getNickname() == target)
+        {
+            std::string prefix = ":" + sender->getPrefix(); // pas de prefix dans client
+            std::string irc_line = prefix + " PRIVMSG " + target + " :" + message + "\r\n";
+            dest->send_msg(irc_line);
+            return true;
+        }
+    }
+    return false;
+}
+bool Server::MsgToChannel(Client* sender, const std::string& channelName, const std::string& message)
+{
+    Channel* channel = findChannel(channelName);
+    if (!channel)
+    {
+        sendError(sender->getFd(), "403", channelName, "No such channel");
+        return false;
+    }
+
+    std::string irc_line = ":" + sender->getPrefix() + " PRIVMSG " + channelName + " :" + message + "\r\n";
+
+    channel->ChannelSend(irc_line, sender);
+
+    return true;
+}
 
 
 void Server::handlePING(Client* client, const Message& msg)
@@ -421,8 +458,8 @@ Channel* Server::findChannel(const std::string& name)
 {
 	for (size_t i = 0; i < _channels.size(); ++i)
 	{
-		if (_channels[i].getName() == name)
-			return &_channels[i];
+		if (_channels[i]->getName() == name)
+			return _channels[i];
 	}
 	return NULL;
 }

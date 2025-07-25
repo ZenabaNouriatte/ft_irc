@@ -10,6 +10,8 @@
 #include <poll.h>
 #include <map>
 #include <Channel.hpp>
+#include <sstream>
+
 
 # define RESET "\033[0m"
 # define BOLD "\033[1m"
@@ -51,6 +53,7 @@ class Client
         void setHasUser(bool value);
         void setRegistered(bool value);
         void setPass(const std::string &pass);
+        std::string getPrefix() const;
 
         bool hasPass() const;
         bool hasNick() const;
