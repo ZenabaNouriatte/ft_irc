@@ -84,6 +84,7 @@ class Server
     void handlePASS (Client* client, const Message& msg);
     void handleNICK (Client* client, const Message& msg);
     void handleUSER (Client* client, const Message& msg);
+    void handlePRIVMSG(Client* client, const Message& msg);
     void handlePING (Client* client, const Message& msg);
     void handleMODE (Client* client, const Message& msg);
     void handleJOIN (Client* client, const Message& msg);

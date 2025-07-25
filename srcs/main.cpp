@@ -3,16 +3,14 @@
 /*                                                        :::      ::::::::   */
 /*   main.cpp                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: cschmid <cschmid@student.42.fr>            +#+  +:+       +#+        */
+/*   By: zmogne <zmogne@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/21 14:31:03 by cschmid           #+#    #+#             */
-/*   Updated: 2025/07/21 14:31:05 by cschmid          ###   ########.fr       */
+/*   Updated: 2025/07/25 10:12:42 by zmogne           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../includes/Server.hpp"
-// #include "../includes/Client.hpp"
-// #include "../includes/Channel.hpp"
 
 int main(int argc, char **argv) 
 {

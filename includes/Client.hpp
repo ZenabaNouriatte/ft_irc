@@ -8,6 +8,8 @@
 #include <algorithm>
 #include <string>
 #include <poll.h>
+#include <map>
+#include <Channel.hpp>
 
 # define RESET "\033[0m"
 # define BOLD "\033[1m"

@@ -6,7 +6,7 @@
 /*   By: zmogne <zmogne@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/21 14:30:34 by cschmid           #+#    #+#             */
-/*   Updated: 2025/07/24 21:21:14 by zmogne           ###   ########.fr       */
+/*   Updated: 2025/07/25 15:13:37 by zmogne           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,13 +17,18 @@ void Server::handleCommand(Client* client, const Message& msg)
 {
     if (msg.command == "PASS" || msg.command == "NICK" || msg.command == "USER" )
         handleRegistred(client, msg);
-    else if (msg.command == "PING" || msg.command== "MODE" || msg.command== "JOIN" )
+    else if (msg.command == "PING" || msg.command== "PRIVMSG" ||
+			 msg.command== "MODE" || msg.command== "JOIN")
         handleServerCommand(client, msg);
+
+	// handle channel 
+		
     else if (!client->isRegistered())
         sendError(client->getFd(), "451", "*", "You have not registered");
     else
         sendError(client->getFd(), "421", msg.command, "Unknown command");
 }
+
 
 void Server::handleRegistred(Client* client, const Message& msg)
 {
@@ -39,6 +44,8 @@ void Server::handleRegistred(Client* client, const Message& msg)
 
  void Server::handleServerCommand (Client* client, const Message& msg)
  {
+	if (msg.command == "PRIVMSG")
+		handlePRIVMSG(client, msg);
     if (msg.command == "PING")
         handlePING(client, msg);
     else if (msg.command == "MODE")
@@ -174,6 +181,33 @@ void Server::welcomeClient(Client* client)
 
 }
 
+void Server::handlePRIVMSG(Client* client, const Message& msg)
+{
+    if (!client->isRegistered())
+    {
+        sendError(client->getFd(), "451", "*", "You have not registered");
+        return;
+    }
+
+    if (msg.params.empty())
+    {
+        sendError(client->getFd(), "461", "PRIVMSG", "Not enough parameters");
+        return;
+    }
+	std::string target = msg.params[0];
+    std::string messageText = msg.trailing;
+    if (messageText.empty())
+    {
+        sendError(client->getFd(), "412", "PRIVMSG", "No text to send");
+        return;
+    }
+	std::cout << "[PRIVMSG] " << client->getNickname() << " -> " << msg.params[0] << ": " << msg.trailing << std::endl;
+	// si le param 0 est le nom d'un client 
+			//envoyer au client
+	// si le param 0 est une channel : envoyer au channel
+		// TODO: envoye msg au bon client ou canal
+}
+
 
 
 void Server::handlePING(Client* client, const Message& msg)
@@ -194,6 +228,8 @@ void Server::handlePING(Client* client, const Message& msg)
 
 void Server::handleMODE (Client* client, const Message& msg)
 {
+	//ici juste repondre au mode +i 
+	// if channel existe , parsing de mode + appel fonction Sandrine
     (void)client;
     (void)msg;
 }
@@ -256,7 +292,8 @@ void Server::handleJOIN(Client *client, const Message &msg)
 	}
     if (msg.params[0] == "0")
 	{
-        // a faire
+        // a faire , quitter tous les channels ou le client est enregistre
+		//si client 
 		std::cout << "[JOIN] User " << client->getNickname() << " leaving all channels\n";
 		return;
 	}

@@ -6,7 +6,7 @@
 /*   By: zmogne <zmogne@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/21 14:30:42 by cschmid           #+#    #+#             */
-/*   Updated: 2025/07/24 15:55:58 by zmogne           ###   ########.fr       */
+/*   Updated: 2025/07/25 14:44:07 by zmogne           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -33,7 +33,7 @@ void Message::msgParsing(std::string msg)
                 }
         }
 
-        size_t space = msg.find(' ', i);
+        size_t space = msg.find(' ', i); // extraction commande
         if (space != std::string::npos)
         {
                 command = msg.substr(i, space - i);
@@ -44,11 +44,11 @@ void Message::msgParsing(std::string msg)
                 command = msg.substr(i);
                 return ;
         }
-        while (i <msg.size())
+        while (i <msg.size()) // extraction param et trailing
         {
                 if (msg[i] == ':')
                 {
-                        params.push_back(msg.substr( i + 1));
+                        trailing = msg.substr( i + 1);
                         break;
                 }
 
