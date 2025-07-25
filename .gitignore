@@ -4,9 +4,11 @@ a.out
 .gitignore
 .json
 *.d
+*.log
 
 **/a.out
 **/*.o
 **/ircserv
 **/.json
 **/*.d
+**/*.log

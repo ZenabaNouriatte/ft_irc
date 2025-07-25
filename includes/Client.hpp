@@ -65,6 +65,6 @@ class Client
         bool hasPartialData() const;
         void clearBuffer();
 
-
-
+		bool operator==(const Client& other) const;
+		
 };

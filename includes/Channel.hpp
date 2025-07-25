@@ -28,6 +28,7 @@ class Channel
 		~Channel();
 
 
+	
 
 	//getters
 
@@ -54,6 +55,39 @@ class Channel
 	void setHasLimit(bool limit);
 	void setKey(bool key);
 
-    void addUser(const Client &user);
 
+	// fonctions
+
+	void addUser(const Client &user);
+	void addOperator(const Client &user);
+	void removeUser(int fd);
+	int isChannelEmpty() const; // renvoie le nombre d'utilisateurs du channel
+	void removeOperator(const Client &user);
+	void userToOperator (const Client &user);
+	void operatorToUser (const Client &user);
+	bool addOperator(const std::string& password);
+	bool isValidChannelPW(const std::string& password);
+
+	bool verifClientisOperator (const Client & client);
+	bool verifClientisUser (const Client & client);
+	bool verifClientisInChannel (const Client & client);
+
+	// modes
+
+	void changeModeI(Client & client, std::string arg);
+	void changeModeT(Client client, std::string arg);
+	void changeModeK(Client client, std::string arg, std::string key);
+	void changeModeO(Client client, std::string arg, Client cible) ;
+	void changeModeL(Client client, std::string arg, int limit);
+
+	void changeTopic(Client client, std::string topic);
 };
+
+
+
+//dans le client :
+
+// map (channel, droit)
+// gere les droits du client dans chaque Channel
+// droit : operateur ou utilisateur
+

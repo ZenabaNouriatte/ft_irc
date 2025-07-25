@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Client.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: zmogne <zmogne@student.42.fr>              +#+  +:+       +#+        */
+/*   By: smolines <smolines@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/21 14:30:25 by cschmid           #+#    #+#             */
-/*   Updated: 2025/07/25 14:53:59 by zmogne           ###   ########.fr       */
+/*   Updated: 2025/07/25 16:09:01 by smolines         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -148,3 +148,9 @@ void Client::clearBuffer()
 {
     _buffer.clear();
 }
+
+bool Client::operator==(const Client& other) const {
+			return this->getFd() == other.getFd(); 
+		}
+
+

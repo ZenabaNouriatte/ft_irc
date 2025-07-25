@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Server.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: zmogne <zmogne@student.42.fr>              +#+  +:+       +#+        */
+/*   By: smolines <smolines@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/21 14:30:56 by cschmid           #+#    #+#             */
-/*   Updated: 2025/07/25 11:56:46 by zmogne           ###   ########.fr       */
+/*   Updated: 2025/07/25 16:10:15 by smolines         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -323,3 +323,12 @@ std::vector<std::string> Server::splitCommand(const std::string& command)
     }
     return tokens;
 }
+
+	// void Server::suppressChannel(const Channel & channel)  
+	// {
+	// 	if (channel.isChannelEmpty() == 0)
+	// {
+	// 	// supprimer le channel du vecteur channel du serveur
+	// }
+	// }
+	

@@ -1,4 +1,16 @@
 #pragma once
+#include <iostream>
+#include <cstdlib> 
+#include <sys/socket.h> // socket, bind, listen, accept
+#include <netinet/in.h> // sockaddr_in, htons, INADDR_ANY
+#include <unistd.h>
+#include <vector>
+#include <algorithm>
+#include <string.h>
+#include <poll.h>
+#include <map>
+#include <fcntl.h>
+#include "Channel.hpp"
 #include "Client.hpp"
 #include "Message.hpp"
 #include <algorithm>
@@ -109,5 +121,8 @@ class Server
     
     /*===== Global Signal Flag =====*/
     static int signal;
+
+
+	void suppressChannel(const Channel & channel);
 };
 
