@@ -8,6 +8,8 @@
 #include <algorithm>
 #include <string>
 #include <poll.h>
+#include <map>
+#include <Channel.hpp>
 
 # define RESET "\033[0m"
 # define BOLD "\033[1m"
@@ -57,6 +59,12 @@ class Client
         const std::string &getPass() const;
         const std::string &getNick() const;
         const std::string &getUser() const;
+
+        std::vector<std::string> extractCompleteCommands();
+        std::string extractIncompleteCommand();
+        bool hasPartialData() const;
+        void clearBuffer();
+
 
 
 };
