@@ -6,7 +6,7 @@
 /*   By: zmogne <zmogne@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/21 14:30:34 by cschmid           #+#    #+#             */
-/*   Updated: 2025/07/25 15:13:37 by zmogne           ###   ########.fr       */
+/*   Updated: 2025/07/25 15:29:42 by zmogne           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -297,6 +297,12 @@ void Server::handleJOIN(Client *client, const Message &msg)
 		std::cout << "[JOIN] User " << client->getNickname() << " leaving all channels\n";
 		return;
 	}
+	
+	if (!msg.prefix.empty() && PrefixUser(msg, user, channel, key))
+	{
+		handleSingleJoin(client, channel, key);
+		return;
+	}
     std::vector<std::string> channels = splitComma(msg.params[0]);
 	std::vector<std::string> keys;
     if (msg.params.size() > 1)
@@ -307,10 +313,12 @@ void Server::handleJOIN(Client *client, const Message &msg)
 		std::string chan = channels[i];
 		std::string key = (i < keys.size()) ? keys[i] : "";
 
-		if (!ValidChannelName(chan))
+		std::string tmpChannel, tmpKey;
+		Message msg_chan("JOIN " + chan + " :" + key);
+		if (!parseJoin(msg_chan,tmpChannel, tmpKey)) 
 		{
 			sendError(client->getFd(), "403", chan, "No such channel");
-			continue;
+			return;
 		}
 		handleSingleJoin(client, chan, key); // logique unique join
 	}
@@ -385,18 +393,4 @@ Channel* Server::findChannel(const std::string& name)
 	}
 	return NULL;
 }
-bool Server::ValidChannelName(const std::string &name)
-{
-	if (name.empty() || name[0] != '#')
-		return false;
-	if (name.length() > 50)
-		return false;
 
-	for (size_t i = 1; i < name.length(); ++i)
-	{
-		char c = name[i];
-		if (c == ' ' || c == ',' || c == 7 || c == '\n' || c == '\r')
-			return false;
-	}
-	return true;
-}
