@@ -15,3 +15,13 @@ std::string& Client::getBuffer()
 {
     return _buffer;
 }
+
+bool Client::operator==(const Client& other) const {
+			return this->getFd() == other.getFd(); 
+		}
+
+
+int Client::getFd(void) const
+{
+    return (_fd);
+}

@@ -24,4 +24,7 @@ class Client
 
 		int getFd(void) const;
 		int getNick(void) const;
+
+		bool operator==(const Client& other) const;
+		
 };

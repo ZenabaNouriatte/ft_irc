@@ -32,12 +32,7 @@ Channel::~Channel()
 	return;
 }
 
-//////////// OPERATORS //////////////
 
-// bool Channel::operator==(const Client& other) const {
-// 			return this->getFd() == other.getFd(); 
-// 			// ou compare getNick() si plus pertinent
-// 		}
 
 ////// ACCESSSORS //////
 
@@ -163,25 +158,36 @@ Channel::~Channel()
 	}
 
 	bool Channel::verifClientisInChannel (const Client & client) {
-		if (std::find(_operators.begin(), _operators.end(), client.getNick()) != _operators.end() 
-			&& std::find(_users.begin(), _users.end(), client.getNick()) != _users.end())
+		if (std::find(_operators.begin(), _operators.end(), client.getFd()) != _operators.end() 
+			&& std::find(_users.begin(), _users.end(), client.getFd()) != _users.end())
 				return true;
 		return false;
 	}
 
+	// bool Channel::verifClientisOperator (const Client & client) {
+	// 	if (std::find(_operators.begin(), _operators.end(), client.getFd()) != _operators.end()) 
+	// 		return true;
+	// 	return false;
+	// }
+
 	bool Channel::verifClientisOperator (const Client & client) {
-		if (std::find(_operators.begin(), _operators.end(), client.getNick()) != _operators.end()) 
+		if (std::find(_users.begin(), _users.end(), client) != _users.end()) 
 			return true;
 		return false;
 	}
 
-	bool Channel::verifClientisUser (const Client & client) {
-		if (std::find(_users.begin(), _users.end(), client.getNick()) != _users.end()) 
-			return true;
-		return false;
+	// bool Channel::verifClientisUser (const Client & client) {
+	// 	if (std::find(_users.begin(), _users.end(), client.getFD()) != _users.end()) 
+	// 		return true;
+	// 	return false;
+	// }
+
+	bool Channel::verifClientisUser(const Client& client) {
+		return std::find(_users.begin(), _users.end(), client) != _users.end();
 	}
 
-	bool isValidChannelPW(const std::string& password) {
+
+	bool Channel::isValidChannelPW(const std::string& password) {
     	if (password.empty() || password.size() > 23)
     	    return false;
 		for (size_t i = 0; i < password.size(); ++i) 

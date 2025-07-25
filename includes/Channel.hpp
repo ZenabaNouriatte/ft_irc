@@ -26,7 +26,7 @@ class Channel
 		Channel(std::string name, std::string topicName);
 		~Channel();
 
-
+	
 
 	//getters
 
