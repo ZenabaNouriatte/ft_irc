@@ -82,6 +82,10 @@ class Channel
 	void changeModeO(Client* client, const std::string& arg, Client* target);
 	void changeModeL(Client* client, const std::string& arg, int limit);
 	void changeTopic(Client* client, const std::string& topic);
+
+	void printUsers() const;
+	void printClientVectors() const;
+	int getClientCount() const;
 };
 
 //Modification de Client en Client* : coherence avec le reste du projet 

@@ -101,7 +101,6 @@ Channel::~Channel()
 		return (_users.size() + _operators.size()); 
 	}
 
-
 	void Channel::addUser(Client* user) {
 		// rajouter ici condition du not de passe : if (_key == true)		
 
@@ -135,60 +134,57 @@ Channel::~Channel()
 	void Channel::removeUser(int fd) {
     	for (std::vector<Client*>::iterator it = _users.begin(); it != _users.end(); ++it) 
 		{
-    	    if (it->getFd() == fd) 
+    	    if ((*it)->getFd() == fd) 
     	        _users.erase(it);
+				break;
 		}
 	    return;
 	}
 
 	void Channel::removeOperator(Client *user){
-		std::vector<Client>::iterator it = std::find(_operators.begin(), _operators.end(), user);
+		std::vector<Client*>::iterator it = std::find(_operators.begin(), _operators.end(), user);
 		if (it != _operators.end())
     		_operators.erase(it);
 	}
 
 	void Channel::userToOperator (Client *user) {
 		_operators.push_back(user);
-		std::vector<Client>::iterator it = std::find(_users.begin(), _users.end(), user);
+		std::vector<Client*>::iterator it = std::find(_users.begin(), _users.end(), user);
 		if (it != _users.end())
-    		_users.erase(it);
+			_users.erase(it);
 	}
 
 	void Channel::operatorToUser (Client *user) {
 		_users.push_back(user);
-		std::vector<Client>::iterator it = std::find(_operators.begin(), _operators.end(), user);
+		std::vector<Client*>::iterator it = std::find(_operators.begin(), _operators.end(), user);
 		if (it != _operators.end())
     		_operators.erase(it);
 	}
 
 	bool Channel::verifClientisInChannel (Client *client) {
-		if (std::find(_operators.begin(), _operators.end(), client.getFd()) != _operators.end() 
-			&& std::find(_users.begin(), _users.end(), client.getFd()) != _users.end())
+		if (std::find(_operators.begin(), _operators.end(), client) != _operators.end() 
+			&& std::find(_users.begin(), _users.end(), client) != _users.end())
 				return true;
 		return false;
 	}
 
-	// bool Channel::verifClientisOperator (const Client & client) {
-	// 	if (std::find(_operators.begin(), _operators.end(), client.getFd()) != _operators.end()) 
-	// 		return true;
-	// 	return false;
-	// }
 
-	bool Channel::verifClientisOperator (Client *client) {
-		if (std::find(_users.begin(), _users.end(), client) != _users.end()) 
+bool Channel::verifClientisUser(Client* client) {
+	for (size_t i = 0; i < _users.size(); ++i) {
+		if (_users[i]->getFd() == client->getFd())
 			return true;
-		return false;
 	}
+	return false;
+}
 
-	// bool Channel::verifClientisUser (const Client & client) {
-	// 	if (std::find(_users.begin(), _users.end(), client.getFD()) != _users.end()) 
-	// 		return true;
-	// 	return false;
-	// }
-
-	bool Channel::verifClientisUser(Client *client) {
-		return std::find(_users.begin(), _users.end(), client) != _users.end();
+bool Channel::verifClientisOperator(Client* client) {
+	for (size_t i = 0; i < _operators.size(); ++i) {
+		if (_operators[i]->getFd() == client->getFd())
+			return true;
 	}
+	return false;
+}
+
 
 
 	bool Channel::isValidChannelPW(const std::string& password) {
@@ -202,15 +198,6 @@ Channel::~Channel()
     	}
 		return true;
 	}
-
-void Channel::ChannelSend(const std::string& message, Client* sender)
-{
-    for (std::vector<Client*>::iterator it = _users.begin(); it != _users.end(); ++it)
-    {
-        if (*it != sender)
-            (*it)->send_msg(message);
-    }
-}
 
 
 // MODE #channel i
@@ -356,3 +343,43 @@ void Channel::changeModeL(Client *client, const std::string &arg, int limit)
 			std::cout << "DEBUT ChangeModeL : client not an operator" << std::endl;
 }
 
+void Channel::printUsers() const {
+    for (std::vector<Client*>::const_iterator it = _users.begin(); it != _users.end(); ++it)
+        std::cout << "       - " << *it << "\n";
+    for (std::vector<Client*>::const_iterator it = _operators.begin(); it != _operators.end(); ++it)
+        std::cout << "       - (op) " << *it << "\n";
+}
+
+
+//---- DEBUG ZENABA 
+void Channel::ChannelSend(const std::string& message, Client* sender)
+{
+    for (std::vector<Client*>::iterator it = _users.begin(); it != _users.end(); ++it)
+    {
+        if (*it != sender)
+            (*it)->send_msg(message);
+    }
+}
+
+void Channel::printClientVectors() const {
+	std::cout << "  [_users] Clients:\n";
+	for (std::vector<Client*>::const_iterator it = _users.begin(); it != _users.end(); ++it)
+		std::cout << "    - ptr: " << *it << " (" << (*it)->getNickname() << ")\n";
+
+	std::cout << "  [_operators] Clients:\n";
+	for (std::vector<Client*>::const_iterator it = _operators.begin(); it != _operators.end(); ++it)
+		std::cout << "    - ptr: " << *it << " (" << (*it)->getNickname() << ")\n";
+}
+
+	
+int Channel::getClientCount() const {
+	std::set<Client*> uniqueClients;
+
+	// Ajouter tous les utilisateurs
+	uniqueClients.insert(_users.begin(), _users.end());
+
+	// Ajouter tous les opérateurs (si déjà présents, pas ajoutés deux fois)
+	uniqueClients.insert(_operators.begin(), _operators.end());
+
+	return uniqueClients.size();
+}

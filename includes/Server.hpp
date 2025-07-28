@@ -110,6 +110,7 @@ class Server
     std::vector<std::string> splitComma(const std::string &input);
     void handleSingleJoin(Client *client, const std::string &channelName, const std::string &key);
     bool ValidChannelName(const std::string &name);
+    void leaveAllChannels(Client *client);
 
     /*===== Server Console Input =====*/
     void handleConsoleInput();                              // Read from stdin
