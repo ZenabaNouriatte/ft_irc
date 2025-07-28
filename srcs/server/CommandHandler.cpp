@@ -6,7 +6,7 @@
 /*   By: smolines <smolines@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/21 14:30:34 by cschmid           #+#    #+#             */
-/*   Updated: 2025/07/25 16:09:30 by smolines         ###   ########.fr       */
+/*   Updated: 2025/07/28 10:29:04 by smolines         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -405,7 +405,7 @@ void Server::handleSingleJoin(Client *client, const std::string &channelName, co
 	// }
 
 	// Ajouter le client au channel
-	chan->addUser(*client);
+	chan->addUser(client);
 
 	// ajouter reponse facon IRC a faire demain
 
@@ -413,6 +413,7 @@ void Server::handleSingleJoin(Client *client, const std::string &channelName, co
 			  << " joined channel " << channelName
 			  << (key.empty() ? " (no key)" : " with key") << ".\n";
     std::cout << GREEN << BOLD << "Client successfully added to channel" << RESET << std::endl;
+
 
 }
 

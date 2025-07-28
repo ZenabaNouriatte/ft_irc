@@ -17,8 +17,8 @@ class Channel
 		size_t _limit; // nb max d'utilisateurs sur le channel
 		bool _hasLimit; // defini si une limite max d'user existe
 		bool _key; // defini si un password existe
-		std::vector<Client> _users; // liste des users du channel : peut etre repere par nickname ou par fd
-		std::vector<Client> _operators; // liste des operators : permet de changer ou ajouter operator
+		std::vector<Client*> _users; // liste des users du channel : peut etre repere par nickname ou par fd
+		std::vector<Client*> _operators; // liste des operators : permet de changer ou ajouter operator
 	
 
 	public :
@@ -41,8 +41,8 @@ class Channel
 	int getLimit();
 	bool getHasLimit();
 	bool getKey();
-	std::vector<Client> getUsers();
-	std::vector<Client> getOperators();
+	std::vector<Client*> getUsers();
+	std::vector<Client*> getOperators();
 
 	//setters
 	void setName(std::string name);
@@ -58,29 +58,29 @@ class Channel
 
 	// fonctions
 
-	void addUser(const Client &user);
-	void addOperator(const Client &user);
+	void addUser(Client* user);
+	void addOperator(Client* user);
 	void removeUser(int fd);
 	int isChannelEmpty() const; // renvoie le nombre d'utilisateurs du channel
-	void removeOperator(const Client &user);
-	void userToOperator (const Client &user);
-	void operatorToUser (const Client &user);
+	void removeOperator(Client* user);
+	void userToOperator (Client* user);
+	void operatorToUser (Client* user);
 	bool addOperator(const std::string& password);
 	bool isValidChannelPW(const std::string& password);
 
-	bool verifClientisOperator (const Client & client);
-	bool verifClientisUser (const Client & client);
-	bool verifClientisInChannel (const Client & client);
+	bool verifClientisOperator (Client* client);
+	bool verifClientisUser (Client* client);
+	bool verifClientisInChannel (Client* client);
 
 	// modes
 
-	void changeModeI(Client & client, std::string arg);
-	void changeModeT(Client client, std::string arg);
-	void changeModeK(Client client, std::string arg, std::string key);
-	void changeModeO(Client client, std::string arg, Client cible) ;
-	void changeModeL(Client client, std::string arg, int limit);
+	void changeModeI(Client* client, std::string arg);
+	void changeModeT(Client* client, std::string arg);
+	void changeModeK(Client* client, std::string arg, std::string key);
+	void changeModeO(Client* client, std::string arg, Client* cible) ;
+	void changeModeL(Client* client, std::string arg, int limit);
 
-	void changeTopic(Client client, std::string topic);
+	void changeTopic(Client* client, std::string topic);
 };
 
 

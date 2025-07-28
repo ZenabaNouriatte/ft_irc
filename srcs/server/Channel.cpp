@@ -47,8 +47,8 @@ Channel::~Channel()
 	int Channel::getLimit() { return this->_limit; }
 	bool Channel::getHasLimit() { return this->_hasLimit; }
 	bool Channel::getKey() { return this->_key; }
-	std::vector<Client> Channel::getUsers()  { return this->_users; }
-	std::vector<Client> Channel::getOperators() { return this->_operators; }
+	std::vector<Client*> Channel::getUsers()  { return this->_users; }
+	std::vector<Client*> Channel::getOperators() { return this->_operators; }
 
 	//setters
 	void Channel::setName(std::string name){
@@ -102,7 +102,7 @@ Channel::~Channel()
 	}
 
 
-	void Channel::addUser(const Client &user) {
+	void Channel::addUser(Client* user) {
 		// rajouter ici condition du not de passe : if (_key == true)		
 
 		if (_operators.empty())
@@ -123,7 +123,7 @@ Channel::~Channel()
 		return;
 	}
 
-	void Channel::addOperator(const Client &client)   
+	void Channel::addOperator(Client* client)   
 	// a la creation : operator = user numero 1. Si user#1 quitte : definir un nouvel operator // ajouter un op
 	{
 		if (verifClientisOperator (client) == true )
@@ -133,48 +133,49 @@ Channel::~Channel()
 	}
 
 	void Channel::removeUser(int fd) {
-    	for (std::vector<Client>::iterator it = _users.begin(); it != _users.end(); ++it) 
+    	for (std::vector<Client*>::iterator it = _users.begin(); it != _users.end(); ++it) 
 		{
-    	    if (it->getFd() == fd) 
+    	    if ((*it)->getFd() == fd) 
     	        _users.erase(it);
+				break;
 		}
 	    return;
 	}
 
-	void Channel::removeOperator(const Client &user){
-		std::vector<Client>::iterator it = std::find(_operators.begin(), _operators.end(), user);
+	void Channel::removeOperator(Client* user){
+		std::vector<Client*>::iterator it = std::find(_operators.begin(), _operators.end(), user);
 		if (it != _operators.end())
     		_operators.erase(it);
 	}
 
-	void Channel::userToOperator (const Client &user) {
+	void Channel::userToOperator (Client *user) {
 		_operators.push_back(user);
-		std::vector<Client>::iterator it = std::find(_users.begin(), _users.end(), user);
+		std::vector<Client*>::iterator it = std::find(_users.begin(), _users.end(), user);
 		if (it != _users.end())
     		_users.erase(it);
 	}
 
-	void Channel::operatorToUser (const Client &user) {
+	void Channel::operatorToUser (Client* user) {
 		_users.push_back(user);
-		std::vector<Client>::iterator it = std::find(_operators.begin(), _operators.end(), user);
+		std::vector<Client*>::iterator it = std::find(_operators.begin(), _operators.end(), user);
 		if (it != _operators.end())
     		_operators.erase(it);
 	}
 
-	bool Channel::verifClientisInChannel (const Client & client) {
-		if (std::find(_operators.begin(), _operators.end(), client.getFd()) != _operators.end() 
-			&& std::find(_users.begin(), _users.end(), client.getFd()) != _users.end())
+	bool Channel::verifClientisInChannel (Client* client) {
+		if (std::find(_operators.begin(), _operators.end(), client) != _operators.end() 
+			&& std::find(_users.begin(), _users.end(), client) != _users.end())
 				return true;
 		return false;
 	}
 
-	// bool Channel::verifClientisOperator (const Client & client) {
+	// bool Channel::verifClientisOperator (Client* user) {
 	// 	if (std::find(_operators.begin(), _operators.end(), client.getFd()) != _operators.end()) 
 	// 		return true;
 	// 	return false;
 	// }
 
-	bool Channel::verifClientisOperator (const Client & client) {
+	bool Channel::verifClientisOperator (Client* client) {
 		if (std::find(_users.begin(), _users.end(), client) != _users.end()) 
 			return true;
 		return false;
@@ -186,7 +187,7 @@ Channel::~Channel()
 	// 	return false;
 	// }
 
-	bool Channel::verifClientisUser(const Client& client) {
+	bool Channel::verifClientisUser(Client* client) {
 		return std::find(_users.begin(), _users.end(), client) != _users.end();
 	}
 
@@ -207,7 +208,7 @@ Channel::~Channel()
 // i = on invitation only
 // +i : seuls ls invites accedent
 //-i : tout le monde accede
-	void Channel::changeModeI(Client & client, std::string arg) {
+	void Channel::changeModeI(Client* client, std::string arg) {
 		if (verifClientisOperator (client) == true )
 		{
 			if (arg == "-i" && _inviteOnly == true)
@@ -228,7 +229,7 @@ Channel::~Channel()
 			// message pas de droit pour changer le mode
 		}
 
-	void Channel::changeModeT(Client client, std::string arg) {
+	void Channel::changeModeT(Client* client, std::string arg) {
 		if (verifClientisOperator (client) == true )
 		{
 			if (arg == "+t") 
@@ -240,7 +241,7 @@ Channel::~Channel()
 		}
 	}
 
-	void Channel::changeTopic(Client client, std::string topic) {
+	void Channel::changeTopic(Client* client, std::string topic) {
 		if (_topicRestriction == true && verifClientisOperator(client) == false)
 		{
 			std::cout << "DEBUG changeTopic : refus de changement" << std::endl;
@@ -255,7 +256,7 @@ Channel::~Channel()
 		}
 	}
 
-	void Channel::changeModeK(Client client, std::string arg, std::string key) 
+	void Channel::changeModeK(Client* client, std::string arg, std::string key) 
 	{
 			if (verifClientisOperator (client) == true )
 			{
@@ -288,7 +289,7 @@ Channel::~Channel()
 				//erreur client not operator
 	}
 
-void Channel::changeModeO(Client client, std::string arg, Client cible) 
+void Channel::changeModeO(Client* client, std::string arg, Client* cible) 
 {
 	if (verifClientisOperator(client) == true )
 	{
@@ -323,7 +324,7 @@ void Channel::changeModeO(Client client, std::string arg, Client cible)
 }
 
 
-void Channel::changeModeL(Client client, std::string arg, int limit) 
+void Channel::changeModeL(Client* client, std::string arg, int limit) 
 {
 	if (verifClientisOperator(client) == true )
 	{
