@@ -124,6 +124,14 @@ class Server
     /*===== Global Signal Flag =====*/
     static int signal;
 
+    /*===== MODE =====*/
+
+    void handleModeAction(Client *client, Channel *chan, const Message &msg, char c, char sign);
+    void handleModeI(Client *client, Channel *chan, char sign);
+    void handleModeT(Client *client, Channel *chan, char sign);
+    void handleModeK(Client *client, Channel *chan, const Message &msg, char sign);
+    void handleModeO(Client *client, Channel *chan, const Message &msg, char sign);
+    void handleModeL(Client *client, Channel *chan, const Message &msg, char sign);
 
 	void suppressChannel(const Channel & channel);
 };
