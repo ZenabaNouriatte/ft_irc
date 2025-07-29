@@ -75,12 +75,13 @@ class Channel
 	// modes
 
 	void changeModeI(Client & client, std::string arg);
-	void changeModeT(Client client, std::string arg);
+	void changeModeT(Client &client, std::string arg);
 	void changeModeK(Client client, std::string arg, std::string key);
 	void changeModeO(Client client, std::string arg, Client cible) ;
 	void changeModeL(Client client, std::string arg, int limit);
 
 	void changeTopic(Client client, std::string topic);
+	Client* findClientByNick(const std::string &nick);
 };
 
 

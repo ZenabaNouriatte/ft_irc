@@ -228,10 +228,10 @@ Channel::~Channel()
 			// message pas de droit pour changer le mode
 		}
 
-	void Channel::changeModeT(Client client, std::string arg) {
+	void Channel::changeModeT(Client &client, std::string arg) {
 		if (verifClientisOperator (client) == true )
 		{
-			if (arg == "+t") 
+			if (arg == "+t")
 				this->_topicRestriction = true;
 				//message
 			if (arg == "-t")

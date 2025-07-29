@@ -6,7 +6,7 @@
 /*   By: cschmid <cschmid@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/21 14:30:34 by cschmid           #+#    #+#             */
-/*   Updated: 2025/07/25 19:17:08 by cschmid          ###   ########.fr       */
+/*   Updated: 2025/07/29 13:20:29 by cschmid          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -224,11 +224,13 @@ void Server::handlePING(Client *client, const Message &msg)
 
 std::string Server::userPrefix(const std::string &prefix)
 {
+	size_t	find;
+
 	if (prefix.empty())
 		return ("");
-	size_t find = prefix.find('!');
-		// Dans IRC,le '!' sépare le nick du reste (user@host).
-	if (find != std::string::npos) 
+	find = prefix.find('!');
+	// Dans IRC,le '!' sépare le nick du reste (user@host).
+	if (find != std::string::npos)
 		// Si on a trouvé un '!',on retourne uniquement la partie avant : le nick.
 		return (prefix.substr(0, find));
 	// Aucun '!' trouvé : le préfixe est soit déjà un simple nick soit un nom de serveur.
@@ -372,74 +374,140 @@ Channel *Server::findChannel(const std::string &name)
 	return (NULL);
 }
 
-Client* Server::findClient(const std::string& nickname)
+Client *Server::findClient(const std::string &nickname)
 {
-    for (std::map<int, Client*>::iterator it = _clients.begin(); it != _clients.end(); ++it)
+	for (std::map<int,
+		Client *>::iterator it = _clients.begin(); it != _clients.end(); ++it)
 	{
-        Client* client = it->second; // valeur dans la map
-        if (client && client->getNickname() == nickname)
-            return client;
-    }
-    return NULL;
+		Client *client = it->second; // valeur dans la map
+		if (client && client->getNickname() == nickname)
+			return (client);
+	}
+	return (NULL);
 }
-
 
 /*======================================================*/
 
+Client *Channel::findClientByNick(const std::string &nick)
+{
+	for (std::vector<Client>::iterator it = _users.begin(); it != _users.end(); ++it)
+	{
+		if (it->getNick() == nick)
+			return (&(*it)); // renvoie l'adresse de l'objet dans le vector
+	}
+	for (std::vector<Client>::iterator it = _operators.begin(); it != _operators.end(); ++it)
+	{
+		if (it->getNick() == nick)
+			return (&(*it));
+	}
+	return (NULL);
+}
+
 void Server::handleMODE(Client *client, const Message &msg)
 {
-	(void)client;
 	Channel	*chan;
-	// int i = 0;
-	const std::string &channel = msg.params[0]; // #channel
-	const std::string &modes = msg.params[1];  // +it, -o, +k, etc.
-	const std::string &key = msg.params[2]; // mdp ???
-	const std::string &target = msg.params[3]; // target ????
-	int &limit = msg.params[4]; // limit ????
+	char	sign;
+	char	c;
+	Client	*targetClient;
+	int		limit;
 
-	//en realiter ey,target, limit sont en 3e arg,faut faire une nouvelle fonction
-	//pour pouvoir classer en key,target ou limit
-
-	// Ajouter une verif si le channel existe
+	std::string channelName = msg.params[0];
+	std::string modes = msg.params[1];
+	/*----------------------- Param de base -------------------------*/
 	if (msg.params.size() < 2)
 	{
 		sendError(client->getFd(), "461", "MODE", "Not enough parameters");
 		return ;
 	}
-	chan = findChannel(channel);
-	if(!chan)
+	chan = findChannel(channelName);
+	if (!chan)
 	{
-		sendError(client->getFd(), "461", "MODE", "Channel existe pas ");
+		sendError(client->getFd(), "461", "MODE", "Channel n'existe pas");
 		return ;
 	}
-
-	std::cout << "channel = " << channel << "\n";
-	std::cout << "modes  = " << modes << "\n";
+	/*----------------------- Debug -------------------------*/
+	std::cout << "[DEBUG] : Channel = " << channelName << std::endl;
+	std::cout << "[DEBUG] : modes = " << modes << std::endl;
+	/*----------------------- tri -------------------------*/
+	// sign = '+';
 	for (size_t i = 0; i < modes.size(); ++i)
 	{
-    	char c = modes[i];
-   		switch (c)
+		c = modes[i];
+		if (c == '+' || c == '-')
 		{
-       		case 'i':
-				std::cout << "C'est un i" << std::endl;
-				chan->changeModeI(*client, modes);
-				break ;
-        	case 't':
-				std::cout << "C'est un t" << std::endl;
-				chan->changeModeT(*client, modes);
-				break ;
-        	case 'k':
+			sign = c;
+			continue ;
+		}
+		switch (c)
+		{
+		case 'i':
+		{
+			std::cout << "C'est un i" << std::endl;
+			// chan->changeModeI(*client, std::string(1, sign) + "i");
+			break ;
+		}
+		case 't':
+		{
+			std::cout << "C'est un t" << std::endl;
+			// chan->changeModeT(*client, std::string(1, sign) + "t");
+			break ;
+		}
+		case 'k':
+		{
+			if (msg.params.size() > 2)
+			{
+				std::string key = msg.params[2];
 				std::cout << "C'est un k" << std::endl;
-				chan->changeModeK(*client, modes, key);
-				break ;
-        	case 'o':
+				std::cout << "[DEBUG] : Key = " << key << std::endl;
+				// chan->changeModeK(*client, std::string(1, sign) + "k", key);
+			}
+			else
+				std::cout << "Pas de mot de passe fourni pour +k" << std::endl;
+			break ;
+		}
+		case 'o':
+		{
+			if (msg.params.size() > 2)
+			{
+				std::string targetNick = msg.params[2];
+				targetClient = chan->findClientByNick(targetNick);
+				if (!targetClient)
+				{
+					sendError(client->getFd(), "401", targetNick,
+						"No such nick");
+					break ;
+				}
+				std::cout << "[DEBUG] : target = " << targetNick << std::endl;
 				std::cout << "C'est un o" << std::endl;
-				chan->changeModeK(*client, modes, target);
-				break ;
-        	case 'l':
-				std::cout << "C'est un l" << std::endl;
-				chan->changeModeL(*client, modes, limit);
-				break ;
-    	}
+				// chan->changeModeO(*client, std::string(1, sign) + "o",*targetClient);
+			}
+			else
+				std::cout << "Pas de cible fournie pour +o" << std::endl;
+			break ;
+		}
+		case 'l':
+		{
+			if (sign == '+')
+			{
+				if (msg.params.size() > 2)
+				{
+					std::cout << "C'est un +l" << std::endl;
+					limit = atoi(msg.params[2].c_str());
+					// chan->changeModeL(*client, "+l", limit);
+				}
+				else
+					std::cout << "Pas de limite fournie pour +l" << std::endl;
+			}
+			else
+			{
+				std::cout << "C'est un -l" << std::endl;
+				//chan->changeModeL(*client, "-l", 0);
+			}
+			break ;
+		}
+		default:
+			std::cout << "Mode inconnu : " << c << std::endl;
+			break ;
+		}
 	}
 }
