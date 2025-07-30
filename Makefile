@@ -3,10 +3,10 @@
 #                                                         :::      ::::::::    #
 #    Makefile                                           :+:      :+:    :+:    #
 #                                                     +:+ +:+         +:+      #
-#    By: smolines <smolines@student.42.fr>          +#+  +:+       +#+         #
+#    By: cschmid <cschmid@student.42.fr>            +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2025/07/04 16:33:23 by zmogne            #+#    #+#              #
-#    Updated: 2025/07/25 16:13:22 by smolines         ###   ########.fr        #
+#    Updated: 2025/07/30 12:19:35 by cschmid          ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -25,6 +25,7 @@ SRC_FILES    := main.cpp \
                 server/Message.cpp \
                 server/Client.cpp \
 				server/CommandHandler.cpp \
+				server/HandleMode.cpp \
 				server/Channel.cpp \
 				
 
