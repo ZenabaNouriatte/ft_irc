@@ -6,11 +6,9 @@
 /*   By: zmogne <zmogne@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/21 14:30:34 by cschmid           #+#    #+#             */
-/*   Updated: 2025/07/28 22:28:31 by zmogne           ###   ########.fr       */
+/*   Updated: 2025/07/30 17:25:47 by zmogne           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
-
-#include "Server.hpp"
 
 #include "Server.hpp"
 
@@ -60,9 +58,12 @@ void Server::handleRegistred(Client* client, const Message& msg)
 
 void Server::sendError(int fd, const std::string& code, const std::string& target, const std::string& message)
 {
-    std::string full = ":" + _server_name + " " + code + " " + target + " :" + message + "\n";
-    send(fd, full.c_str(), full.size(), 0);
+    std::string full = ":" + _server_name + " " + code + " " + target + " :" + message + "\r\n";
+    ssize_t sent = send(fd, full.c_str(), full.size(), 0);
+    if (sent == -1)
+        std::cerr << "Fail to send Error to Client [" << fd << "]\n";
 }
+
 
 void Server::handlePASS(Client* client, const Message& msg)
 {
@@ -208,9 +209,10 @@ void Server::handlePRIVMSG(Client* client, const Message& msg)
 	if (PvMsgToUser(client, target, messageText))
         return;
 
-    // Try sending to channel if it starts with #
+    
     if (target[0] == '#' && MsgToChannel(client, target, messageText))
     {
+        // Try sending to channel if it starts with #
 		return;
 	}
 	sendError(client->getFd(), "401", target, "No such nick/channel");
@@ -351,6 +353,12 @@ bool Server::parseJoin(const Message &msg, std::string &channel,
 		key = msg.params[1];
 	return (true);
 }
+std::string toLower(const std::string &str) {
+    std::string lower;
+    for (size_t i = 0; i < str.size(); ++i)
+        lower += std::tolower(str[i]);
+    return lower;
+}
 
 void Server::handleJOIN(Client *client, const Message &msg)
 {
@@ -360,27 +368,20 @@ void Server::handleJOIN(Client *client, const Message &msg)
 		sendError(client->getFd(), "461", "JOIN", "Not enough parameters");
 		return ;
 	}
+    if (!client->isRegistered())
+	{
+		sendError(client->getFd(), "451", client->getNickname(), "You have not registered");
+        return;
+    }
+    if (!msg.prefix.empty() && toLower(msg.prefix) != toLower(client->getNickname()))    
+    {
+        sendError(client->getFd(), "451", client->getNickname(), "prefix different from user nickname");
+        return;
+    }
+
     if (msg.params[0] == "0" || msg.params[0] == "#0")
 	{
         leaveAllChannels(client);
-		
-		return;
-	}
-    if (!client->isRegistered())
-	{
-		sendError(client->getFd(), "451", "*", "You have not registered");
-		return ;
-	}
-	if (!msg.prefix.empty() && PrefixUser(msg, user, channel, key))
-	{
-                
-        if (channel == "0" || channel == "#0")
-        {
-            std::cout << "[JOIN] User " << client->getNickname() << " leaving all channels 2\n";
-            return;
-        }
-        if (msg.params[0] != "0" || msg.params[0] != "#0")
-		    handleSingleJoin(client, channel, key);
 		return;
 	}
     std::vector<std::string> channels = splitComma(msg.params[0]);
@@ -392,11 +393,6 @@ void Server::handleJOIN(Client *client, const Message &msg)
 	{
 		std::string chan = channels[i];
 		std::string key = (i < keys.size()) ? keys[i] : "";
-        if (chan == "0" || chan == "#0")
-		{
-			std::cout << "[JOIN] Skipping fake channel: " << chan << "\n";
-			continue;
-		}
 		std::string tmpChannel, tmpKey;
 		Message msg_chan("JOIN " + chan + " :" + key);
 		if (!parseJoin(msg_chan,tmpChannel, tmpKey)) 
@@ -404,14 +400,26 @@ void Server::handleJOIN(Client *client, const Message &msg)
 			sendError(client->getFd(), "403", chan, "No such channel");
 			continue;
 		}
-        if (tmpChannel == "0")
+        if (ClientChannelCount(client) >= 10)
         {
-            std::cout << "[JOIN] User " << client->getNickname() << " leaving all channels 3\n";
-            continue;
+			std::cout << "Client ["<< client->getFd() <<"] has 10 CHannels\n";
+            sendError(client->getFd(), "405", channel, "You have joined too many channels");
+            return;
         }
-        if (msg.params[0] != "0" || msg.params[0] != "#0")
-		    handleSingleJoin(client, chan, key); // logique unique join
+		handleSingleJoin(client, chan, key); // logique unique join
 	}
+}
+
+int Server::ClientChannelCount(Client* client) const 
+{
+    int count = 0;
+    for (std::vector<Channel*>::const_iterator it = _channels.begin(); it != _channels.end(); ++it)
+    {
+        Channel* chan = *it;
+        if (chan->verifClientisUser(client) || chan->verifClientisOperator(client))
+            count++;
+    }
+    return count;
 }
 
 
@@ -504,7 +512,7 @@ void Server::leaveAllChannels(Client *client)
         std::cout << "[DEBUG] Clients in channel before delete:\n";
         chan->printClientVectors();
         std::cout << "[DEBUG] Get Client Count Result = " << result << std::endl;
-        // Supprimer le channel s'il est vide
+        // Supprimer le channel si vide
         if (result == 0)
         {
             std::cout << "[DEBUG]  -> channel " << chan->getName() << " is now empty. Deleting it.\n";

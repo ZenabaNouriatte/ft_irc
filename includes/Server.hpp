@@ -111,6 +111,7 @@ class Server
     void handleSingleJoin(Client *client, const std::string &channelName, const std::string &key);
     bool ValidChannelName(const std::string &name);
     void leaveAllChannels(Client *client);
+    int ClientChannelCount(Client* client) const;
 
     /*===== Server Console Input =====*/
     void handleConsoleInput();                              // Read from stdin

@@ -17,4 +17,6 @@ class Message
 
         Message(std::string raw_msg); // constructeur
         void msgParsing(std::string raw_msg);
+        void debugPrint() const;
+
 };

@@ -372,14 +372,13 @@ void Channel::printClientVectors() const {
 }
 
 	
-int Channel::getClientCount() const {
-	std::set<Client*> uniqueClients;
+int Channel::getClientCount() const 
+{
+	std::set<Client*> uniqueClients; // stl set pas de doublon
 
-	// Ajouter tous les utilisateurs
+	// Ajouter tous les user
 	uniqueClients.insert(_users.begin(), _users.end());
-
-	// Ajouter tous les opérateurs (si déjà présents, pas ajoutés deux fois)
+	// Ajouter operator (pour poas ajouter deux fois)
 	uniqueClients.insert(_operators.begin(), _operators.end());
-
 	return uniqueClients.size();
 }

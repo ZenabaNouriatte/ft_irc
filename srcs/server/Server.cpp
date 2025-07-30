@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Server.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: smolines <smolines@student.42.fr>          +#+  +:+       +#+        */
+/*   By: zmogne <zmogne@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/21 14:30:56 by cschmid           #+#    #+#             */
-/*   Updated: 2025/07/25 16:10:15 by smolines         ###   ########.fr       */
+/*   Updated: 2025/07/30 16:42:28 by zmogne           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -166,7 +166,7 @@ void Server::acceptNewClient()
     int client_fd = accept(_server_fd, (sockaddr*)&client_addr, &addr_len); // on rempli la structure client_adrr avec les information trouve via accept
     if (client_fd == -1)
         return handleError("Fail accept");
-    std::cout << GREEN << BOLD << "Client [" << client_fd << "]" << " connected " << RESET << std::endl;
+    std::cout << GREEN << BOLD << "Client [" << client_fd << "]" << " connected, wainting for register" << RESET << std::endl;
     
     // Mettre le socket client en mode non bloquant
     fcntl(client_fd, F_SETFL, O_NONBLOCK);
