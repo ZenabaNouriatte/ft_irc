@@ -49,7 +49,7 @@ Channel::~Channel()
 	bool Channel::getKey() { return this->_key; }
 	std::vector<Client*> Channel::getUsers()  { return this->_users; }
 	std::vector<Client*> Channel::getOperators() { return this->_operators; }
-
+	
 	//setters
 	void Channel::setName(std::string name){
 		this->_name = name;
@@ -102,42 +102,70 @@ Channel::~Channel()
 	}
 
 
-	void Channel::addUser(Client* user) {
-		// rajouter ici condition du not de passe : if (_key == true)		
+	void Channel::addUser(Client* user, std::string key) {
 
-		if (_operators.empty())
+		// si l'utilisateur est deja dans le channel (user ou chanop) :
+		if (verifClientisInChannel (user) == true) 
+		{
+			sendError2(client->getFd(), "443", client->getNick(), this->_name, "is already on channel");
+			std::cout << "DEBUG ADDUSER user already in the channel" << std::endl;
+		}
+		// si l'utilisateur est deja connecte a 10 channel /
+		//sendError(client->getFd(), "405", "channel name", "You have joined too many channels");
+		else if (_inviteOnly == true && verifClientisInvited(user) == false)
+		{
+			std::cout << "DEBUG ADDUSER channel on invite mode only" << std::endl;
+			sendError(client->getFd(), "473", this->_name, "Cannot join channel (+i)");
+		}
+		else if (_hasLimit == true && (_users.size() + _operators.size()) < _limit) 
+		{
+			std::cout << "DEBUG ADDUSER Too much users in this channel" << std::endl;
+			sendError(client->getFd(), "471", this->_name, "Cannot join channel (+l)");
+		}	
+		else if (this->_key && this->_password != key)
+		{	
+			sendError(client->getFd(), "475", this->_name, "Cannot join channel (+k)");
+			std::cout << "DEBUG ADDUSER bad password" << std::endl;
+		}
+		else if (_operators.empty())
 			_operators.push_back(user);
-			//message
-
-		else if (_hasLimit == true && (_users.size() + _operators.size()) < _limit) {
-			std::cout << "Too much users in this channel" << std::endl;
-			//// refuser acces ////
-			///message///
-			}	
-		// if (_inviteOnly == true)
-		// 	// utilisateur sur invitation
-	
-		// else
-		// 	_users.push_back(user);
-		// 	//message
+			//envoi des messages lies a la creation du channel ???
+			//message: :<nick>!<user>@<host> JOIN :#channel
+			//:<serveur> MODE #channel +o <nick>
+			// :<serveur> 324 <nick> #channel +o
+			// :<serveur> 353 <nick> = #channel :<nick>
+			// :<serveur> 366 <nick> #channel :End of NAMES list
+			// :<serveur> 331 <nick> #channel42 :No topic is set
+		else 
+			_users.push_back(user);
+			//message: :<nick>!<user>@<host> JOIN :#channel
+			// message : liste des modes du channel
+			//message : liste des clients du channel
+			//message : topic du channel
 		return;
 	}
 
+	// A REVOIR : ca doit etre faux
 	void Channel::addOperator(Client* client)   
 	// a la creation : operator = user numero 1. Si user#1 quitte : definir un nouvel operator // ajouter un op
 	{
-		if (verifClientisOperator (client) == true )
-				userToOperator(client);
-		else
+		if (verifClientisUser(client) == true)
+			userToOperator(client);
+		else if (verifClientisOperator(client) == true)
+			{
+			std::cout << "DEBUG addOperator : client already an operator" << std::endl;
+			//message ??
+			}
+		else                                                                  
 			_operators.push_back(client);
-	}
+		}
 
 	void Channel::removeUser(int fd) {
     	for (std::vector<Client*>::iterator it = _users.begin(); it != _users.end(); ++it) 
 		{
     	    if ((*it)->getFd() == fd) 
     	        _users.erase(it);
-				break;
+			break;
 		}
 	    return;
 	}
@@ -146,6 +174,7 @@ Channel::~Channel()
 		std::vector<Client*>::iterator it = std::find(_operators.begin(), _operators.end(), user);
 		if (it != _operators.end())
     		_operators.erase(it);
+		break;
 	}
 
 	void Channel::userToOperator (Client *user) {
@@ -153,6 +182,7 @@ Channel::~Channel()
 		std::vector<Client*>::iterator it = std::find(_users.begin(), _users.end(), user);
 		if (it != _users.end())
     		_users.erase(it);
+		break;
 	}
 
 	void Channel::operatorToUser (Client* user) {
@@ -160,6 +190,7 @@ Channel::~Channel()
 		std::vector<Client*>::iterator it = std::find(_operators.begin(), _operators.end(), user);
 		if (it != _operators.end())
     		_operators.erase(it);
+		break;
 	}
 
 	bool Channel::verifClientisInChannel (Client* client) {
@@ -191,6 +222,9 @@ Channel::~Channel()
 		return std::find(_users.begin(), _users.end(), client) != _users.end();
 	}
 
+	bool Channel::verifClientisInvited(Client* client) {
+		return std::find(_isInvited.begin(), _isInvited.end(), client) != _isInvited.end();
+	}
 
 	bool Channel::isValidChannelPW(const std::string& password) {
     	if (password.empty() || password.size() > 23)
@@ -211,33 +245,42 @@ Channel::~Channel()
 	void Channel::changeModeI(Client* client, std::string arg) {
 		if (verifClientisOperator (client) == true )
 		{
-			if (arg == "-i" && _inviteOnly == true)
+			if (arg == "-i")
+			{
 				this->_inviteOnly = false;	
-				// message confirmation
-				// reponse a envoyer : <server> MODE #chan -i
-
-			else if (arg == "+i" && _inviteOnly == false)
+				// reponse :<Nick>!user@host MODE #channel -i
+				// message :serveur 324 <nick> #channel -i
+			}
+			else if (arg == "+i")
+			{
 				this->_inviteOnly = true;	
-				//message confirmation
-			else
-				std::cout << "DEBUG modeChangeI : mode demande est deja en cours" << std::endl;
-				// le mode demande est deja en cours
+				// reponse :<Nick>!user@host MODE #channel +i
+				// message :serveur 324 <nick> #channel +i
+			}
 		}
 		else
-			std::cout << "DEBUG modeChangeI : pas de droit pour changer le mode" << std::endl;
-			//error
-			// message pas de droit pour changer le mode
+		{
+			std::cout << "DEBUT ChangeModeI : client not an operator" << std::endl;
+			sendError(client->getFd(), "482", this->_name, "You're not channel operator");
+		}
+
 		}
 
 	void Channel::changeModeT(Client* client, std::string arg) {
 		if (verifClientisOperator (client) == true )
 		{
 			if (arg == "+t") 
+			{
 				this->_topicRestriction = true;
-				//message
+				//message: :<nick>!user@host MODE #channel +t
+				// message :serveur 324 <nick> #channel +t
+			}
 			if (arg == "-t")
+			{
 				this->_topicRestriction = false;
-				//message
+				//message: :<nick>!user@host MODE #channel -t
+				// message :serveur 324 <nick> #channel -t
+			}
 		}
 	}
 
@@ -245,14 +288,14 @@ Channel::~Channel()
 		if (_topicRestriction == true && verifClientisOperator(client) == false)
 		{
 			std::cout << "DEBUG changeTopic : refus de changement" << std::endl;
-			// refus de changement
-			// message
+			sendError(client->getFd(), "482", this->_name, "You're not channel operator");
 		}
 		else
 		{
 			this->_topicName = topic;
 			this->_topic = true;
-			//message
+			//message: :<nick>!user@host MODE #channel +t
+			// message :serveur 324 <nick> #channel -t
 		}
 	}
 
@@ -263,63 +306,98 @@ Channel::~Channel()
 				if (arg == "+k")
 				{
 					if (this->_key == true)
-						this->_password = key;
-						// 467 <nick> #canal :Channel key already set
+						{
+						sendError(client->getFd(), "467", this->_name, "Channel key already set");
+						std::cout << "DEBUG ChangeModeK : channel a deja un password" << std::endl;
+						}
 					else if (this->_key == false && isValidChannelPW(key) == true)
+					{
 						this->_password = key;
+						this->_key = true;
+						//message: :<nick>!user@host MODE #channel +k
+						// :serveur 324 <nick> #channel +k motdepasse
+					}
 					else
-						std::cout << "DEBUT ChangeModeK : ERR_BADCHANNELKEY" << std::endl;
-						//message mauvais mot de passe : ERR_BADCHANNELKEY
+						{
+						std::cout << "DEBUG ChangeModeK : bad channel key - password non valid" << std::endl;
+						sendError(client->getFd(), "475", this->_name, "Cannot join channel (+k)");
+						}
 				}
 				if (arg == "-k")
 				{	
-					if (this->_key == true && this->_password == key)
-							this->_key = false;
-						//message desactivation key
+					if (this->_key == true && this->_password == key)\
+					{
+						this->_key = false;
+						//message: :<nick>!user@host MODE #channel -k
+						//:serveur 324 <nick> #channel -k
+					}
 					else if (this->_key == false)	
-						std::cout << "DEBUT ChangeModeK : mode key non actif" << std::endl;
-						//message mode key non active
+					{
+						std::cout << "DEBUG ChangeModeK : channel est deja en mode -k : message confirmation" << std::endl;
+						//message: :<nick>!user@host MODE #channel -k
+						//:serveur 324 <nick> #channel -k
+					}
 					else 
-						std::cout << "DEBUT ChangeModeK : ERR_BADCHANNELKEY" << std::endl;
-						//message mauvais mot de passe : ERR_BADCHANNELKEY
+					{
+						std::cout << "DEBUG ChangeModeK : mauvais password de channel : mot de passe ignore et mode -k active" << std::endl;
+						// attention infos contradictoires trouvees sur le sujet
+						//sendError(client->getFd(), "475", this->_name, "Cannot join channel (+k)");
+						//message: :<nick>!user@host MODE #channel -k
+						//:serveur 324 <nick> #channel -k
+					}
 				}
 			}
 			else
-			std::cout << "DEBUT ChangeModeK : client not an operator" << std::endl;
-				//erreur client not operator
+			{
+				std::cout << "DEBUT ChangeModeK : client not an operator" << std::endl;
+				sendError(client->getFd(), "482", this->_name, "You're not channel operator");
+			}
 	}
 
 void Channel::changeModeO(Client* client, std::string arg, Client* cible) 
 {
 	if (verifClientisOperator(client) == true )
 	{
-		if (verifClientisInChannel(client) == false)
-			// message client not in channel
-			std::cout << "DEBUT ChangeModeO : Client not in channel" << std::endl;
+		if (verifClientisInChannel(cible) == false)
+		{
+			std::cout << "DEBUT ChangeModeO : Cible not in channel" << std::endl;
+			sendError2(client->getFd(), "441", cible.getNick(), this->_name, "They aren't on that channel");
+		}
  		else		
 		{
 			if (arg == "+o" && verifClientisUser(cible) == true)
-				std::cout << "DEBUT ChangeModeO : " << std::endl;
-				// remove cible from users
-				// add cible to operator
+			{
+				std::cout << "DEBUG ChangeModeO : cible passe de user a operator" << std::endl;
+				userToOperator (cible);
+				// message: :<nick>!<user>@<host> MODE #canal +o cible
+				//:serveur 324 <nick> #canal +o cible
+			}
 			else if (arg == "+o" && verifClientisUser(cible) == false)
-				std::cout << "DEBUT ChangeModeO : cible already operator" << std::endl;
-				// message cible already operator
-
+			{
+				std::cout << "DEBUT ChangeModeO : cible already operator : envoi message confirmation" << std::endl;
+				// message: :<nick>!<user>@<host> MODE #canal +o cible
+				//:serveur 324 <nick> #canal +o cible
+			}
 			else if (arg == "-o" && verifClientisOperator(cible) == true)
-					std::cout << "DEBUT ChangeModeO : " << std::endl;
-			// remove cible from operator
-			// add cible to user
-
+			{
+				std::cout << "DEBUG ChangeModeO : cible passe de operator a user" << std::endl;
+				operatorToUser(cible);
+				// message: :<nick>!<user>@<host> MODE #canal -o cible
+				//:serveur 324 <nick> #canal -o cible
+			}
 			else
-				std::cout << "DEBUT ChangeModeO : cible not an operator" << std::endl;
-				// message cible not an operator
-			
+			{
+				std::cout << "DEBUT ChangeModeO : cible not an operator : envoi message confirmation" << std::endl;
+				// message: :<nick>!<user>@<host> MODE #canal +o cible
+				//:serveur 324 <nick> #canal +o cible
+			}
 		}
 	}
 	else
-		//erreur client not operator
+	{
 		std::cout << "DEBUT ChangeModeO : client not an operator" << std::endl;
+		sendError(client->getFd(), "482", this->_name, "You're not channel operator");
+	}
 
 }
 
@@ -332,18 +410,91 @@ void Channel::changeModeL(Client* client, std::string arg, int limit)
 		{
 			_hasLimit = true;
 			_limit = limit;
+			// message confirmation : :<nick>!<user>@<host> MODE #canal +l 10
+			// :serveur 324 <nick> #canal +l 10
 		}
 		else if (arg == "+l" && _hasLimit == true)
-			std::cout << "DEBUT ChangeModeL : limit already set" << std::endl;
-			//message error limit already set
+		{
+		_limit = limit;
+			std::cout << "DEBUT ChangeModeL : limite modifiee" << std::endl;
+			// message confirmation : :<nick>!<user>@<host> MODE #canal +l 10
+			//:serveur 324 <nick> #canal +l 10
+		}
 		else if (arg == "-l" && _hasLimit == true)
+		{
 			_hasLimit = false;
+			//message confirmation : :<nick>!<user>@<host> MODE #canal -l
+			//:serveur 324 <nick> #canal -l 
+		}
 		else 
-			std::cout << "DEBUT ChangeModeL : no limit is set" << std::endl;
-			//message error no limit is set
+		{
+			std::cout << "DEBUT ChangeModeL : no limit is set - commande ignoree" << std::endl;
+			//commande ignoree - aucun message\
+		}
 	}
-		else 
-			//erreur client not operator
-			std::cout << "DEBUT ChangeModeL : client not an operator" << std::endl;
+	else 
+	{
+		std::cout << "DEBUT ChangeModeL : client not an operator" << std::endl;
+		sendError(client->getFd(), "482", this->_name, "You're not channel operator");
+	}
 }
 
+
+
+// client : celui qui envoie la commande
+// cible : nickname utilise dans la commande
+void Channel::commandKick(Client* client, Client* cible, std::string comment)
+{
+	if (verifClientisOperator(client) == true )
+	{
+		if (verifClientisInChannel(cible) == true)
+			removeUser(cible);
+			// message confirmation : :<nick>!user@host KICK #channel cible :<comment>
+		else
+			{
+			std::cout << "DEBUG commKick : cible not in channel" << std::endl;
+			sendError2(client->getFd(), "441", cible.getNick(), this->_name, "They aren't on that channel");
+
+			}
+	}
+	else
+		{
+			sendError(client->getFd(), "482", this->_name, "You're not channel operator");
+			std::cout << "DEBUG commKick : client not an operator" << std::endl;
+		}
+}
+
+void Channel::commandInvite(Client* client, Client* cible)
+{
+	if (verifClientisOperator(client) == true )
+	{
+			// si cible is in Channel
+			// 	err ???
+			// si cible not in Channel	
+			// 	cible dans vector Invite
+			// 	message
+	}
+	else
+		{
+			sendError(client->getFd(), "482", this->_name, "You're not channel operator");
+			std::cout << "DEBUG commInvite : client not an operator" << std::endl;
+		}
+}
+
+void Channel::commandTopic(Client* client, std::string topic)
+{
+	if (verifClientisOperator(client) == true )
+	{
+			// if topic est vide :
+			// 	afficher le topic
+			// si topic renseigne :
+			//	si mode topic on ???
+				// 	changer le topic	
+			
+	}
+	else
+		{
+			sendError(client->getFd(), "482", this->_name, "You're not channel operator");
+			std::cout << "DEBUG commInvite : client not an operator" << std::endl;
+		}
+}

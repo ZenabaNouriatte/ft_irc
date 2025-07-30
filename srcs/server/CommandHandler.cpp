@@ -6,7 +6,7 @@
 /*   By: smolines <smolines@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/21 14:30:34 by cschmid           #+#    #+#             */
-/*   Updated: 2025/07/28 10:29:04 by smolines         ###   ########.fr       */
+/*   Updated: 2025/07/30 16:23:24 by smolines         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -61,6 +61,12 @@ void Server::handleRegistred(Client* client, const Message& msg)
 void Server::sendError(int fd, const std::string& code, const std::string& target, const std::string& message)
 {
     std::string full = ":" + _server_name + " " + code + " " + target + " :" + message + "\n";
+    send(fd, full.c_str(), full.size(), 0);
+}
+
+void Server::sendError2(int fd, const std::string& code, const std::string& target, const std::string& targetBis, const std::string& message)
+{
+    std::string full = ":" + _server_name + " " + code + " " + target + " " + targetBis +" :" + message + "\n";
     send(fd, full.c_str(), full.size(), 0);
 }
 
@@ -405,7 +411,7 @@ void Server::handleSingleJoin(Client *client, const std::string &channelName, co
 	// }
 
 	// Ajouter le client au channel
-	chan->addUser(client);
+	chan->addUser(client, key);
 
 	// ajouter reponse facon IRC a faire demain
 

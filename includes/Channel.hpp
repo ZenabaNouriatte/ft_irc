@@ -19,15 +19,13 @@ class Channel
 		bool _key; // defini si un password existe
 		std::vector<Client*> _users; // liste des users du channel : peut etre repere par nickname ou par fd
 		std::vector<Client*> _operators; // liste des operators : permet de changer ou ajouter operator
-	
+		std::vector<Client*> _isInvited; // liste des operators : permet de changer ou ajouter operator
 
 	public :
 		Channel();
 		Channel(std::string name);
 		Channel(std::string name, std::string topicName);
 		~Channel();
-
-
 	
 
 	//getters
@@ -58,7 +56,7 @@ class Channel
 
 	// fonctions
 
-	void addUser(Client* user);
+	void addUser(Client* user, std::string key);
 	void addOperator(Client* user);
 	void removeUser(int fd);
 	int isChannelEmpty() const; // renvoie le nombre d'utilisateurs du channel
@@ -71,7 +69,8 @@ class Channel
 	bool verifClientisOperator (Client* client);
 	bool verifClientisUser (Client* client);
 	bool verifClientisInChannel (Client* client);
-
+	bool verifClientisInvited(Client* client);
+	
 	// modes
 
 	void changeModeI(Client* client, std::string arg);
@@ -81,6 +80,13 @@ class Channel
 	void changeModeL(Client* client, std::string arg, int limit);
 
 	void changeTopic(Client* client, std::string topic);
+
+	//commandes op
+
+	void commandTopic(Client* client, std::string topic);
+	void commandInvite(Client* client, Client* cible);
+	void commandKick(Client* client, Client* cible, std::string comment);
+
 };
 
 
