@@ -163,17 +163,18 @@ Channel::~Channel()
 		return false;
 	}
 
-	bool Channel::verifClientisOperator (Client* client) {
+	bool Channel::verifClientisOperator (Client* client) 
+	{
 		if (std::find(_users.begin(), _users.end(), client) != _users.end()) 
 			return true;
-	}
 	return false;
+}
 
 
 	bool Channel::verifClientisUser(Client* client) {
 		return std::find(_users.begin(), _users.end(), client) != _users.end();
-	}
 	return false;
+	}
 
 
 
