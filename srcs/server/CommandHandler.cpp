@@ -6,7 +6,7 @@
 /*   By: cschmid <cschmid@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/21 14:30:34 by cschmid           #+#    #+#             */
-/*   Updated: 2025/07/30 12:18:09 by cschmid          ###   ########.fr       */
+/*   Updated: 2025/07/31 10:07:14 by cschmid          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -57,6 +57,8 @@ void Server::sendError(int fd, const std::string &code,
 	send(fd, full.c_str(), full.size(), 0);
 }
 
+
+
 void Server::completeRegistration(Client *client)
 {
 	client->setRegistered(true);
@@ -69,7 +71,7 @@ void Server::handleCommand(Client *client, const Message &msg)
 	if (msg.command == "PASS" || msg.command == "NICK" || msg.command == "USER")
 		handleRegistred(client, msg);
 	else if (msg.command == "PING" || msg.command == "PRIVMSG"
-		|| msg.command == "MODE" || msg.command == "JOIN")
+		|| msg.command == "MODE" || msg.command == "JOIN" || msg.command == "KICK")
 		handleServerCommand(client, msg);
 	// handle channel
 	else if (!client->isRegistered())
@@ -100,6 +102,12 @@ void Server::handleServerCommand(Client *client, const Message &msg)
 		handleMODE(client, msg);
 	else if (msg.command == "JOIN")
 		handleJOIN(client, msg);
+	else if (msg.command == "KICK")
+		handleKICK(client, msg);
+	else if (msg.command == "INVIT")
+		handleINVIT(client, msg);
+	else if (msg.command == "TOPIC")
+		handleTOPIC(client, msg);
 	else
 		return ;
 }

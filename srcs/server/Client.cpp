@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Client.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: smolines <smolines@student.42.fr>          +#+  +:+       +#+        */
+/*   By: cschmid <cschmid@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/21 14:30:25 by cschmid           #+#    #+#             */
-/*   Updated: 2025/07/25 16:09:01 by smolines         ###   ########.fr       */
+/*   Updated: 2025/07/31 09:17:11 by cschmid          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -71,6 +71,10 @@ void Client::setRegistered(bool value){
 
 std::string Client::getNickname() const {
     return _nickname;
+}
+
+std::string Client::getUsername() const {
+    return _username;
 }
 
 std::string& Client::getBuffer() 

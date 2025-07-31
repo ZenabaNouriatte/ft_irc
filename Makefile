@@ -6,7 +6,7 @@
 #    By: cschmid <cschmid@student.42.fr>            +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2025/07/04 16:33:23 by zmogne            #+#    #+#              #
-#    Updated: 2025/07/30 12:19:35 by cschmid          ###   ########.fr        #
+#    Updated: 2025/07/31 10:00:52 by cschmid          ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -25,7 +25,10 @@ SRC_FILES    := main.cpp \
                 server/Message.cpp \
                 server/Client.cpp \
 				server/CommandHandler.cpp \
-				server/HandleMode.cpp \
+				server/HandleCommand/HandleInvit.cpp \
+				server/HandleCommand/HandleKick.cpp \
+				server/HandleCommand/HandleMode.cpp \
+				server/HandleCommand/HandleTopic.cpp \
 				server/Channel.cpp \
 				
 

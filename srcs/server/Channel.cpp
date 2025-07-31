@@ -345,4 +345,3 @@ void Channel::changeModeL(Client client, std::string arg, int limit)
 			//erreur client not operator
 			std::cout << "DEBUT ChangeModeL : client not an operator" << std::endl;
 }
-

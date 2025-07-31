@@ -82,13 +82,14 @@ class Channel
 
 	void changeTopic(Client client, std::string topic);
 	Client* findClientByNick(const std::string &nick);
+
+	void commandTopic(Client* client, std::string topic);
+	void commandInvite(Client* client, Client* cible);
+	void commandKick(Client* client, Client* cible, std::string comment);
+	
 };
 
-
-
 //dans le client :
-
 // map (channel, droit)
 // gere les droits du client dans chaque Channel
 // droit : operateur ou utilisateur
-

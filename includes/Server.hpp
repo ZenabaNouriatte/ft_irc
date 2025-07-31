@@ -126,5 +126,12 @@ class Server
 		char c, char sign, size_t &paramIndex);
 	void handleModeNoParam(Client *client, Channel *chan, char c, char sign);
 
+	/*===== Kick =====*/
+
+	void handleKICK(Client *client, const Message &msg);
+	void handleINVIT(Client *client, const Message &msg);
+	void handleTOPIC(Client *client, const Message &msg);
+
+
 	void suppressChannel(const Channel &channel);
 };
