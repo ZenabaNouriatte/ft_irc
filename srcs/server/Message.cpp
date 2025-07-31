@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Message.cpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: zmogne <zmogne@student.42.fr>              +#+  +:+       +#+        */
+/*   By: cschmid <cschmid@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/21 14:30:42 by cschmid           #+#    #+#             */
-/*   Updated: 2025/07/30 15:14:06 by zmogne           ###   ########.fr       */
+/*   Updated: 2025/07/31 14:23:37 by cschmid          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -67,6 +67,9 @@ void Message::msgParsing(std::string msg)
                         ++i;
         }
 }
+
+
+/*============= DEBUG ================*/
 
 void Message::debugPrint() const {
 	std::cout << "┌──────────── Parsed Message ────────────" << std::endl;

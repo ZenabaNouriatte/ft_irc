@@ -6,7 +6,7 @@
 #    By: cschmid <cschmid@student.42.fr>            +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2025/07/04 16:33:23 by zmogne            #+#    #+#              #
-#    Updated: 2025/07/31 10:00:52 by cschmid          ###   ########.fr        #
+#    Updated: 2025/07/31 14:23:12 by cschmid          ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -21,17 +21,21 @@ OBJ_DIR   := obj
 
 HEADER_NAMES := Channel.hpp Client.hpp CommandHanler.hpp Message.hpp Server.hpp
 SRC_FILES    := main.cpp \
-                server/Server.cpp \
-                server/Message.cpp \
-                server/Client.cpp \
-				server/CommandHandler.cpp \
+				server/Channel/Channel.cpp \
+				server/Channel/Mode.cpp \
+				server/Channel/otherCommand.cpp \
+				server/Channel/utils.cpp \
+				server/HandleCommand/HandleCommand.cpp \
 				server/HandleCommand/HandleInvit.cpp \
+				server/HandleCommand/HandleJoin.cpp \
 				server/HandleCommand/HandleKick.cpp \
 				server/HandleCommand/HandleMode.cpp \
 				server/HandleCommand/HandleTopic.cpp \
-				server/HandleCommand/HandleJoin.cpp \
-				server/Channel.cpp \
-				
+				server/HandleCommand/Registration.cpp \
+				server/HandleCommand/utils.cpp \
+				server/Client.cpp \
+				server/Message.cpp \
+				server/Server.cpp \
 
 SRC := $(addprefix $(SRC_DIR)/, $(SRC_FILES))
 HEADER_FILES := $(addprefix includes/, $(HEADER_NAMES))
