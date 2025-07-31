@@ -3,7 +3,9 @@
 #include <string.h>
 #include <vector>
 #include "Client.hpp"
+#include "Server.hpp"
 
+class Server;
 class Client;
 class Channel
 {
@@ -43,6 +45,7 @@ class Channel
 	std::vector<Client*> getOperators();
 
 	//setters
+
 	void setName(std::string name);
 	void setTopicName(std::string topic);
 	void setPassWord(std::string psswd);
@@ -56,16 +59,17 @@ class Channel
 
 	// fonctions
 
-	void addUser(Client* user, std::string key);
+	void addUser(Server* server, Client* user, std::string key);
 	void addOperator(Client* user);
+	void addInvited(Client* client);
 	void removeUser(int fd);
-	int isChannelEmpty() const; // renvoie le nombre d'utilisateurs du channel
+	void removeInvited(Client* user);
 	void removeOperator(Client* user);
 	void userToOperator (Client* user);
 	void operatorToUser (Client* user);
-	bool addOperator(const std::string& password);
-	bool isValidChannelPW(const std::string& password);
 
+	int isChannelEmpty() const; // renvoie le nombre d'utilisateurs du channel
+	bool isValidChannelPW(const std::string& password);
 	bool verifClientisOperator (Client* client);
 	bool verifClientisUser (Client* client);
 	bool verifClientisInChannel (Client* client);
@@ -73,19 +77,18 @@ class Channel
 	
 	// modes
 
-	void changeModeI(Client* client, std::string arg);
-	void changeModeT(Client* client, std::string arg);
-	void changeModeK(Client* client, std::string arg, std::string key);
-	void changeModeO(Client* client, std::string arg, Client* cible) ;
-	void changeModeL(Client* client, std::string arg, int limit);
-
-	void changeTopic(Client* client, std::string topic);
+	void changeModeI(Server* server, Client* client, std::string arg);
+	void changeModeT(Server* server, Client* client, std::string arg);
+	void changeModeK(Server* server, Client* client, std::string arg, std::string key);
+	void changeModeO(Server* server, Client* client, std::string arg, Client* cible) ;
+	void changeModeL(Server* server, Client* client, std::string arg, int limit);
+	void changeTopic(Server* server, Client* client, std::string topic);
 
 	//commandes op
 
-	void commandTopic(Client* client, std::string topic);
-	void commandInvite(Client* client, Client* cible);
-	void commandKick(Client* client, Client* cible, std::string comment);
+	void commandTopic(Server* server, Client* client, std::string topic);
+	void commandInvite(Server* server, Client* client, Client* cible);
+	void commandKick(Server* server, Client* client, Client* cible, std::string comment);
 
 };
 

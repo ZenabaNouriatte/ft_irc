@@ -16,7 +16,6 @@
 #include <algorithm>
 #include <csignal>
 #include <cstdlib>
-#include "Channel.hpp"
 #include <errno.h>
 #include <fcntl.h>
 #include <iostream>
@@ -41,6 +40,7 @@
 #define BUFFER_SIZE 1024
 
 class	Client;
+class	Channel;
 
 class Server
 {

@@ -99,14 +99,20 @@ Channel::~Channel()
 		return (_users.size() + _operators.size()); 
 	}
 
+	// A REVOIR : ca doit etre faux
 	void Channel::addOperator(Client* client)   
 	// a la creation : operator = user numero 1. Si user#1 quitte : definir un nouvel operator // ajouter un op
 	{
 		if (verifClientisUser(client) == true)
 			userToOperator(client);
-		else if (verifClientisOperator(client) == false)
+		else if (verifClientisOperator(client) == true)
+			{
+			std::cout << "DEBUG addOperator : client already an operator" << std::endl;
+			//message ??
+			}
+		else                                                                  
 			_operators.push_back(client);
-	}
+		}
 
 
 	void Channel::addInvited(Client* client)   
@@ -195,7 +201,7 @@ Channel::~Channel()
 		// si l'utilisateur est deja dans le channel (user ou chanop) :
 		if (verifClientisInChannel (user) == true) 
 		{
-			sendError2(user->getFd(), "443", user->getNick(), this->_name, "is already on channel");
+			server.sendError2(user->getFd(), "443", user->getNick(), this->_name, "is already on channel");
 			std::cout << "DEBUG ADDUSER user already in the channel" << std::endl;
 		}
 		// si l'utilisateur est deja connecte a 10 channel /
@@ -203,16 +209,16 @@ Channel::~Channel()
 		else if (_inviteOnly == true && verifClientisInvited(user) == false)
 		{
 			std::cout << "DEBUG ADDUSER channel on invite mode only" << std::endl;
-			server.sendError(user->getFd(), "473", this->_name, "Cannot join channel (+i)");
+			server.server.sendError(user->getFd(), "473", this->_name, "Cannot join channel (+i)");
 		}
 		else if (_hasLimit == true && (_users.size() + _operators.size()) < _limit) 
 		{
 			std::cout << "DEBUG ADDUSER Too much users in this channel" << std::endl;
-			server.sendError(user->getFd(), "471", this->_name, "Cannot join channel (+l)");
+			server.server.sendError(user->getFd(), "471", this->_name, "Cannot join channel (+l)");
 		}	
 		else if (this->_key && this->_password != key)
 		{	
-			server.sendError(user->getFd(), "475", this->_name, "Cannot join channel (+k)");
+			server.server.sendError(user->getFd(), "475", this->_name, "Cannot join channel (+k)");
 			std::cout << "DEBUG ADDUSER bad password" << std::endl;
 		}
 		else if (_operators.empty())
@@ -257,7 +263,7 @@ Channel::~Channel()
 		else
 		{
 			std::cout << "DEBUT ChangeModeI : client not an operator" << std::endl;
-			server.sendError(client->getFd(), "482", this->_name, "You're not channel operator");
+			server.server.sendError(client->getFd(), "482", this->_name, "You're not channel operator");
 		}
 
 		}
@@ -284,7 +290,7 @@ Channel::~Channel()
 		if (_topicRestriction == true && verifClientisOperator(client) == false)
 		{
 			std::cout << "DEBUG changeTopic : refus de changement" << std::endl;
-			server.sendError(client->getFd(), "482", this->_name, "You're not channel operator");
+			server.server.sendError(client->getFd(), "482", this->_name, "You're not channel operator");
 		}
 		else
 		{
@@ -303,7 +309,7 @@ Channel::~Channel()
 				{
 					if (this->_key == true)
 						{
-						server.sendError(client->getFd(), "467", this->_name, "Channel key already set");
+						server.server.sendError(client->getFd(), "467", this->_name, "Channel key already set");
 						std::cout << "DEBUG ChangeModeK : channel a deja un password" << std::endl;
 						}
 					else if (this->_key == false && isValidChannelPW(key) == true)
@@ -316,7 +322,7 @@ Channel::~Channel()
 					else
 						{
 						std::cout << "DEBUG ChangeModeK : bad channel key - password non valid" << std::endl;
-						server.sendError(client->getFd(), "475", this->_name, "Cannot join channel (+k)");
+						server.server.sendError(client->getFd(), "475", this->_name, "Cannot join channel (+k)");
 						}
 				}
 				if (arg == "-k")
@@ -337,7 +343,7 @@ Channel::~Channel()
 					{
 						std::cout << "DEBUG ChangeModeK : mauvais password de channel : mot de passe ignore et mode -k active" << std::endl;
 						// attention infos contradictoires trouvees sur le sujet
-						//server.sendError(client->getFd(), "475", this->_name, "Cannot join channel (+k)");
+						//server.server.sendError(client->getFd(), "475", this->_name, "Cannot join channel (+k)");
 						//message: :<nick>!user@host MODE #channel -k
 						//:serveur 324 <nick> #channel -k
 					}
@@ -346,7 +352,7 @@ Channel::~Channel()
 			else
 			{
 				std::cout << "DEBUT ChangeModeK : client not an operator" << std::endl;
-				server.sendError(client->getFd(), "482", this->_name, "You're not channel operator");
+				server.server.sendError(client->getFd(), "482", this->_name, "You're not channel operator");
 			}
 	}
 
@@ -357,7 +363,7 @@ void Channel::changeModeO(Server* server, Client* client, std::string arg, Clien
 		if (verifClientisInChannel(cible) == false)
 		{
 			std::cout << "DEBUT ChangeModeO : Cible not in channel" << std::endl;
-			server.sendError2(client->getFd(), "441", cible->getNick(), this->_name, "They aren't on that channel");
+			server.server.sendError2(client->getFd(), "441", cible->getNick(), this->_name, "They aren't on that channel");
 		}
  		else		
 		{
@@ -392,7 +398,7 @@ void Channel::changeModeO(Server* server, Client* client, std::string arg, Clien
 	else
 	{
 		std::cout << "DEBUT ChangeModeO : client not an operator" << std::endl;
-		server.sendError(client->getFd(), "482", this->_name, "You're not channel operator");
+		server.server.sendError(client->getFd(), "482", this->_name, "You're not channel operator");
 	}
 
 }
@@ -431,7 +437,7 @@ void Channel::changeModeL(Server* server, Client* client, std::string arg, int l
 	else 
 	{
 		std::cout << "DEBUT ChangeModeL : client not an operator" << std::endl;
-		server.sendError(client->getFd(), "482", this->_name, "You're not channel operator");
+		server.server.sendError(client->getFd(), "482", this->_name, "You're not channel operator");
 	}
 }
 
@@ -450,24 +456,22 @@ void Channel::commandKick(Server* server, Client* client, Client* cible, std::st
 			if (comment != "")
 			{
 				std::cout << "DEBUG commKick : message confirmation sans comment" << std::endl;	
-				// message envoye a tous y compris client et cible
 				// message confirmation : :<nick>!user@host KICK #channel cible 
 			}
 			else
 				std::cout << "DEBUG commKick : message confirmation avec comment" << std::endl;	
-				// message envoye a tous y compris client et cible
 				// message confirmation : :<nick>!user@host KICK #channel cible :<comment>
 		}
 		else
 			{
 			std::cout << "DEBUG commKick : cible not in channel" << std::endl;
-			server.sendError2(client->getFd(), "441", cible->getNick(), this->_name, "They aren't on that channel");
+			server.server.sendError2(client->getFd(), "441", cible->getNick(), this->_name, "They aren't on that channel");
 
 			}
 	}
 	else
 		{
-			server.sendError(client->getFd(), "482", this->_name, "You're not channel operator");
+			server.server.sendError(client->getFd(), "482", this->_name, "You're not channel operator");
 			std::cout << "DEBUG commKick : client not an operator" << std::endl;
 		}
 }
@@ -478,10 +482,7 @@ void Channel::commandInvite(Server* server, Client* client, Client* cible)
 	if (verifClientisOperator(client) == true )
 	{
 		if (verifClientisInChannel(cible) == true)
-		{
-			server.sendError2(client->getFd(), "443", cible->getNick(), "is already on channel");
-			std::cout << "DEBUG commInvite : deja dans channel" << std::endl;
-		}
+			server.server.sendError2(client->getFd(), "443", cible->getNick(), "is already on channel");
 		else 
 		{
 			addInvited(cible);	
@@ -491,42 +492,29 @@ void Channel::commandInvite(Server* server, Client* client, Client* cible)
 	}
 	else
 		{
-			server.sendError(client->getFd(), "482", this->_name, "You're not channel operator");
+			server.server.sendError(client->getFd(), "482", this->_name, "You're not channel operator");
 			std::cout << "DEBUG commInvite : client not an operator" << std::endl;
 		}
 }
 
-void Channel::commandTopic(Server* server, Client* client, std::string topic)
-{
-			// if topic est vide : afficher le topic
-			if (topic == "")
-			{
-				// message recu par tous les utilisateurs du canal y compris le demandeur :
-				//:<nick client>!user@host TOPIC <#channel> :<topic>
-				// pas de message specifique envoye uniquement au demandeur
-				std::cout << "DEBUG commtPOPIC : message topic actuel" << std::endl;
-			}
-			else	if (_topicRestriction == true)
-			{
-			 	if (verifClientisOperator(client) == true)
-				{
-					_topicName = topic;
-					// message recu par tous les utilisateurs du canal y compris le demandeur :
-					//:<nick client>!user@host TOPIC <#channel> :<topic>
-					// pas de message specifique envoye uniquement au demandeur
-					std::cout << "DEBUG commtPOPIC : message nouveau topic" << std::endl;
-				}
-				else 
-				{
-					server.sendError(client->getFd(), "482", this->_name, "You're not channel operator");
-					std::cout << "DEBUG commtPOPIC : client not an operator" << std::endl;
-				}
-			}
-			else
-			{
-				_topicName = topic;
-				// message recu par tous les utilisateurs du canal y compris le demandeur :
-				//:<nick client>!user@host TOPIC <#channel> :<topic>
-				// pas de message specifique envoye uniquement au demandeur
-			}
-		}
+// void Channel::commandTopic(Client* client, std::string topic)
+// {
+// 	if (verifClientisOperator(client) == true )
+// 	{
+// 			// if topic est vide :
+// 			// 	afficher le topic
+// 			// si topic renseigne :
+// 			//	si mode topic on ???
+// 			// 	changer le topic	
+
+// 			// message recu par tous les utilisateurs du canal y compris le demandeur :
+// 			//:<nick client>!user@host TOPIC <#channel> :<topic>
+// 			// pas de message specifique envoye uniquement au demandeur
+// 	}
+
+// 	else
+// 		{
+// 			server.server.sendError(client->getFd(), "482", this->_name, "You're not channel operator");
+// 			std::cout << "DEBUG commInvite : client not an operator" << std::endl;
+// 		}
+// }
