@@ -6,7 +6,7 @@
 /*   By: zmogne <zmogne@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/21 14:30:34 by cschmid           #+#    #+#             */
-/*   Updated: 2025/07/30 17:25:47 by zmogne           ###   ########.fr       */
+/*   Updated: 2025/07/31 11:35:08 by smolines         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -64,6 +64,11 @@ void Server::sendError(int fd, const std::string& code, const std::string& targe
         std::cerr << "Fail to send Error to Client [" << fd << "]\n";
 }
 
+void Server::sendError2(int fd, const std::string& code, const std::string& target, const std::string& targetBis, const std::string& message)
+{
+    std::string full = ":" + _server_name + " " + code + " " + target + " " + targetBis +" :" + message + "\n";
+    send(fd, full.c_str(), full.size(), 0);
+}
 
 void Server::handlePASS(Client* client, const Message& msg)
 {
@@ -469,7 +474,7 @@ void Server::handleSingleJoin(Client *client, const std::string &channelName, co
         return;
     }
 	// Ajouter le client au channel
-	chan->addUser(client);
+	chan->addUser(this, client, key);
 
 	// ajouter reponse facon IRC a faire demain
 

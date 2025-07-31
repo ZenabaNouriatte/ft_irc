@@ -16,7 +16,6 @@
 #include <algorithm>
 #include <csignal>
 #include <cstdlib>
-#include "Channel.hpp"
 #include <errno.h>
 #include <fcntl.h>
 #include <iostream>
@@ -41,6 +40,7 @@
 #define BUFFER_SIZE 1024
 
 class	Client;
+class	Channel;
 
 class Server
 {
@@ -123,7 +123,9 @@ class Server
     /*===== Utilities =====*/
     void sendError(int fd, const std::string& code,
         const std::string& target, const std::string& message);             // IRC error sender
-    std::vector<std::string> splitCommand(const std::string& command);      // Split input string into tokens
+	void sendError2(int fd, const std::string& code, 
+		const std::string& target, const std::string& targetBis, const std::string& message);
+	std::vector<std::string> splitCommand(const std::string& command);      // Split input string into tokens
     
     /*===== Global Signal Flag =====*/
     static int signal;

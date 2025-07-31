@@ -4,7 +4,9 @@
 #include <vector>
 #include "Client.hpp"
 #include <set>
+#include "Server.hpp"
 
+class Server;
 class Client;
 class Channel
 {
@@ -20,15 +22,13 @@ class Channel
 		bool _key; // defini si un password existe
 		std::vector<Client*> _users; // liste des users du channel : peut etre repere par nickname ou par fd
 		std::vector<Client*> _operators; // liste des operators : permet de changer ou ajouter operator
-	
+		std::vector<Client*> _isInvited; // liste des operators : permet de changer ou ajouter operator
 
 	public :
 		Channel();
 		Channel(std::string name);
 		Channel(std::string name, std::string topicName);
 		~Channel();
-
-
 	
 
 	//getters
@@ -46,6 +46,7 @@ class Channel
 	std::vector<Client*> getOperators();
 
 	//setters
+
 	void setName(std::string name);
 	void setTopicName(std::string topic);
 	void setPassWord(std::string psswd);
@@ -59,33 +60,44 @@ class Channel
 
 	// fonctions
 
-	void addUser(Client* user);
-	void addOperator(Client* client);
+	void addUser(Server* server, Client* user, std::string key);
+	void addOperator(Client* user);
+	void addInvited(Client* client);
 	void removeUser(int fd);
-	int isChannelEmpty() const; // renvoie le nombre d'utilisateurs du channel
+	void removeInvited(Client* user);
 	void removeOperator(Client* user);
-	void userToOperator(Client* user);
-	void operatorToUser(Client* user);
-	bool addOperator(const std::string& password);
+	void userToOperator (Client* user);
+	void operatorToUser (Client* user);
+
+	int isChannelEmpty() const; // renvoie le nombre d'utilisateurs du channel
 	bool isValidChannelPW(const std::string& password);
-	void ChannelSend(const std::string& message, Client* sender);
+	bool verifClientisOperator (Client* client);
+	bool verifClientisUser (Client* client);
+	bool verifClientisInChannel (Client* client);
+	bool verifClientisInvited(Client* client);
 
-	bool verifClientisOperator(Client* client);
-	bool verifClientisUser(Client* client);
-	bool verifClientisInChannel(Client* client);
-
+	
 	// modes
 
-	void changeModeI(Client* client, const std::string& arg);
-	void changeModeT(Client* client, const std::string& arg);
-	void changeModeK(Client* client, const std::string& arg, const std::string& key);
-	void changeModeO(Client* client, const std::string& arg, Client* target);
-	void changeModeL(Client* client, const std::string& arg, int limit);
-	void changeTopic(Client* client, const std::string& topic);
+	void changeModeI(Server* server, Client* client, std::string arg);
+	void changeModeT(Server* server, Client* client, std::string arg);
+	void changeModeK(Server* server, Client* client, std::string arg, std::string key);
+	void changeModeO(Server* server, Client* client, std::string arg, Client* cible) ;
+	void changeModeL(Server* server, Client* client, std::string arg, int limit);
+	void changeTopic(Server* server, Client* client, std::string topic);
 
+	//commandes op
+
+	void commandTopic(Server* server, Client* client, std::string topic);
+	void commandInvite(Server* server, Client* client, Client* cible);
+	void commandKick(Server* server, Client* client, Client* cible, std::string comment);
+
+	// ajout Zenaba debug
+	void ChannelSend(const std::string& message, Client* sender);
 	void printUsers() const;
 	void printClientVectors() const;
 	int getClientCount() const;
+
 };
 
 //Modification de Client en Client* : coherence avec le reste du projet 
