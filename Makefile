@@ -29,6 +29,7 @@ SRC_FILES    := main.cpp \
 				server/HandleCommand/HandleKick.cpp \
 				server/HandleCommand/HandleMode.cpp \
 				server/HandleCommand/HandleTopic.cpp \
+				server/HandleCommand/HandleJoin.cpp \
 				server/Channel.cpp \
 				
 
