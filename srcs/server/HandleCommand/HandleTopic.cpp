@@ -30,7 +30,7 @@ void Server::handleTOPIC(Client *client, const Message &msg)
         return;
     }
 
-    if (!chan->verifClientisInChannel(*client))
+    if (!chan->verifClientisInChannel(client))
     {
         sendError(client->getFd(), "442", channelName, "You're not on that channel");
         return;

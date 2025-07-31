@@ -3,14 +3,13 @@
 /*                                                        :::      ::::::::   */
 /*   CommandHandler.cpp                                 :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: cschmid <cschmid@student.42.fr>            +#+  +:+       +#+        */
+/*   By: zmogne <zmogne@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/21 14:30:34 by cschmid           #+#    #+#             */
-/*   Updated: 2025/07/31 10:07:14 by cschmid          ###   ########.fr       */
+/*   Updated: 2025/07/31 11:35:08 by smolines         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "Channel.hpp"
 #include "Server.hpp"
 
 /*========== METHODES ==========*/
@@ -57,7 +56,11 @@ void Server::sendError(int fd, const std::string &code,
 	send(fd, full.c_str(), full.size(), 0);
 }
 
-
+void Server::sendError2(int fd, const std::string& code, const std::string& target, const std::string& targetBis, const std::string& message)
+{
+    std::string full = ":" + _server_name + " " + code + " " + target + " " + targetBis +" :" + message + "\n";
+    send(fd, full.c_str(), full.size(), 0);
+}
 
 void Server::completeRegistration(Client *client)
 {
@@ -191,30 +194,70 @@ void Server::handleUSER(Client *client, const Message &msg)
 
 /*======================================================*/
 
-void Server::handlePRIVMSG(Client *client, const Message &msg)
+void Server::handlePRIVMSG(Client* client, const Message& msg)
 {
-	if (!client->isRegistered())
-	{
-		sendError(client->getFd(), "451", "*", "You have not registered");
-		return ;
-	}
-	if (msg.params.empty())
-	{
-		sendError(client->getFd(), "461", "PRIVMSG", "Not enough parameters");
-		return ;
-	}
+    if (!client->isRegistered())
+    {
+        sendError(client->getFd(), "451", "*", "You have not registered");
+        return;
+    }
+
+    if (msg.params.empty())
+    {
+        sendError(client->getFd(), "461", "PRIVMSG", "Not enough parameters");
+        return;
+    }
 	std::string target = msg.params[0];
-	std::string messageText = msg.trailing;
-	if (messageText.empty())
-	{
-		sendError(client->getFd(), "412", "PRIVMSG", "No text to send");
-		return ;
+    std::string messageText = msg.trailing;
+    if (messageText.empty())
+    {
+        sendError(client->getFd(), "412", "PRIVMSG", "No text to send");
+        return;
+    }
+	std::cout << "[PRIVMSG] " << client->getNickname() << " -> " << msg.params[0] << ": " << msg.trailing << std::endl;
+	if (PvMsgToUser(client, target, messageText))
+        return;
+
+    
+    if (target[0] == '#' && MsgToChannel(client, target, messageText))
+    {
+        // Try sending to channel if it starts with #
+		return;
 	}
-	std::cout << "[PRIVMSG] " << client->getNickname() << "	-> " << msg.params[0] << ": " << msg.trailing << std::endl;
-	// si le param 0 est le nom d'un client
-	// envoyer au client
-	// si le param 0 est une channel : envoyer au channel
-	// TODO: envoye msg au bon client ou canal
+	sendError(client->getFd(), "401", target, "No such nick/channel");
+
+}
+
+bool Server::PvMsgToUser(Client* sender, const std::string& target, const std::string& message)
+{
+    for (std::map<int, Client*>::iterator it = _clients.begin(); it != _clients.end(); ++it)
+    {
+        Client* dest = it->second;
+        if (dest->getNickname() == target)
+        {
+            std::string prefix = ":" + sender->getPrefix(); // pas de prefix dans client
+            std::string irc_line = prefix + " PRIVMSG " + target + " :" + message + "\r\n";
+            dest->send_msg(irc_line);
+            return true;
+        }
+    }
+    return false;
+}
+
+bool Server::MsgToChannel(Client* sender, const std::string& channelName, const std::string& message)
+{
+    Channel* channel = findChannel(channelName);
+    if (!channel)
+    {
+        sendError(sender->getFd(), "403", channelName, "No such channel");
+        return false;
+    }
+
+    std::string irc_line = ":" + sender->getPrefix() + " PRIVMSG " + channelName + " :" + message + "\r\n";
+
+    channel->ChannelSend(irc_line, sender);
+
+    return true;
 }
 
 void Server::handlePING(Client *client, const Message &msg)
@@ -230,35 +273,6 @@ void Server::handlePING(Client *client, const Message &msg)
 	client->send_msg(_server_name + " :PONG sent by the server");
 }
 
-std::string Server::userPrefix(const std::string &prefix)
-{
-	size_t	find;
-
-	if (prefix.empty())
-		return ("");
-	find = prefix.find('!');
-	// Dans IRC,le '!' sépare le nick du reste (user@host).
-	if (find != std::string::npos)
-		// Si on a trouvé un '!',on retourne uniquement la partie avant : le nick.
-		return (prefix.substr(0, find));
-	// Aucun '!' trouvé : le préfixe est soit déjà un simple nick soit un nom de serveur.
-	return (prefix);
-}
-
-bool Server::PrefixUser(const Message &msg, std::string &User,
-	std::string &channel, std::string &key)
-{
-	User.clear();
-	channel.clear();
-	key.clear();
-	if (msg.prefix.empty())
-		return (false);
-	User = userPrefix(msg.prefix);
-	if (!Server::parseJoin(msg, channel, key))
-		return (false);
-	return (true);
-}
-
 bool Server::parseJoin(const Message &msg, std::string &channel,
 	std::string &key)
 {
@@ -267,119 +281,200 @@ bool Server::parseJoin(const Message &msg, std::string &channel,
 	const std::string &p0 = msg.params[0]; // nom du channel
 	if (msg.params.empty())
 		return (false);
-	if (p0.empty() || p0[0] != '#')
-		// nom du channel doit commencer par # donc petite verif
+    if (p0 == "0"|| p0 == "#0")
+    {
+        channel = "0";
+        return true;
+    }
+	if (p0.empty() || p0[0] != '#') // nom du channel doit commencer par # donc petite verif
 		return (false);
 	channel = p0;
 	if (msg.params.size() >= 2) // si il y a un deuxieme paramettre c'est le mdp
 		key = msg.params[1];
 	return (true);
 }
+std::string toLower(const std::string &str) {
+    std::string lower;
+    for (size_t i = 0; i < str.size(); ++i)
+        lower += std::tolower(str[i]);
+    return lower;
+}
 
 void Server::handleJOIN(Client *client, const Message &msg)
 {
 	std::string channel, key, user;
-	if (!client->isRegistered())
-	{
-		sendError(client->getFd(), "451", "*", "You have not registered");
-		return ;
-	}
 	if (msg.params.empty())
 	{
 		sendError(client->getFd(), "461", "JOIN", "Not enough parameters");
 		return ;
 	}
-	if (msg.params[0] == "0")
+    if (!client->isRegistered())
 	{
-		// a faire , quitter tous les channels ou le client est enregistre
-		// si client
-		std::cout << "[JOIN] User " << client->getNickname() << " leaving all channels\n";
-		return ;
-	}
-	if (!msg.prefix.empty() && PrefixUser(msg, user, channel, key))
+		sendError(client->getFd(), "451", client->getNickname(), "You have not registered");
+        return;
+    }
+    if (!msg.prefix.empty() && toLower(msg.prefix) != toLower(client->getNickname()))    
+    {
+        sendError(client->getFd(), "451", client->getNickname(), "prefix different from user nickname");
+        return;
+    }
+
+    if (msg.params[0] == "0" || msg.params[0] == "#0")
 	{
-		handleSingleJoin(client, channel, key);
-		return ;
+        leaveAllChannels(client);
+		return;
 	}
-	std::vector<std::string> channels = splitComma(msg.params[0]);
+    std::vector<std::string> channels = splitComma(msg.params[0]);
 	std::vector<std::string> keys;
-	if (msg.params.size() > 1)
+    if (msg.params.size() > 1)
 		keys = splitComma(msg.params[1]);
+
 	for (size_t i = 0; i < channels.size(); ++i)
 	{
 		std::string chan = channels[i];
 		std::string key = (i < keys.size()) ? keys[i] : "";
 		std::string tmpChannel, tmpKey;
 		Message msg_chan("JOIN " + chan + " :" + key);
-		if (!parseJoin(msg_chan, tmpChannel, tmpKey))
+		if (!parseJoin(msg_chan,tmpChannel, tmpKey)) 
 		{
 			sendError(client->getFd(), "403", chan, "No such channel");
-			return ;
+			continue;
 		}
+        if (ClientChannelCount(client) >= 10)
+        {
+			std::cout << "Client ["<< client->getFd() <<"] has 10 CHannels\n";
+            sendError(client->getFd(), "405", channel, "You have joined too many channels");
+            return;
+        }
 		handleSingleJoin(client, chan, key); // logique unique join
 	}
 }
+
+int Server::ClientChannelCount(Client* client) const 
+{
+    int count = 0;
+    for (std::vector<Channel*>::const_iterator it = _channels.begin(); it != _channels.end(); ++it)
+    {
+        Channel* chan = *it;
+        if (chan->verifClientisUser(client) || chan->verifClientisOperator(client))
+            count++;
+    }
+    return count;
+}
+
 
 std::vector<std::string> Server::splitComma(const std::string &input)
 {
 	std::vector<std::string> result;
 	std::stringstream ss(input);
 	std::string item;
+
 	while (std::getline(ss, item, ','))
 		result.push_back(item);
-	return (result);
+	return result;
 }
 
-void Server::handleSingleJoin(Client *client, const std::string &channelName,
-	const std::string &key)
+void Server::handleSingleJoin(Client *client, const std::string &channelName, const std::string &key)
 {
-	Channel	*chan;
-
-	std::cout << "[JOIN] Handle JOIN request\n";
-	std::cout << "  user    = " << client->getNickname() << "\n";
-	std::cout << "  channel = " << channelName << "\n";
-	std::cout << "  key     = " << (key.empty() ? "(no key)" : key) << "\n";
+    std::cout << "[DEBUG][JOIN] Handle JOIN request\n";
+	std::cout << "[DEBUG]  user    = " << client->getNickname() << "\n";
+	std::cout << "[DEBUG]  channel = " << channelName << "\n";
+	std::cout << "[DEBUG]  key     = " << (key.empty() ? "(no key)" : key) << "\n";
 	// Vérifie que le nom est valide
 	if (channelName.empty() || channelName[0] != '#')
 	{
 		sendError(client->getFd(), "403", channelName, "No such channel");
-		return ;
+		return;
 	}
+
 	// Cherche le channel
-	chan = findChannel(channelName);
-	// S'il n'existe pas, on le crée
+	Channel* chan = findChannel(channelName);
+
+	// Si existe pas, crer
 	if (!chan)
 	{
 		std::cout << "[JOIN] Channel '" << channelName << "' does not exist. Creating it.\n";
-		Channel newChannel(channelName);
+		Channel* newChannel = new Channel(channelName);
 		_channels.push_back(newChannel);
-		chan = &_channels.back();
+		chan = newChannel;
 	}
 	else
 	{
 		std::cout << "[JOIN] Channel '" << channelName << "' already exists.\n";
 	}
-	// Vérifie si le client est déjà dans le channel
-	// if (chan->hasUser(*client))
-	// {
-	// 	std::cout << "[JOIN] Client already in channel '" << channelName << "'. Skipping.\n";
-	// 	return ;
-	// }
+	// Si client dans le channel
+	if (chan->verifClientisUser(client))
+    {
+        std::cout << "[JOIN] Client already in channel '" << channelName << "'. Skipping.\n";
+        return;
+    }
 	// Ajouter le client au channel
-	chan->addUser(*client);
+	chan->addUser(this, client, key);
+
 	// ajouter reponse facon IRC a faire demain
-	std::cout << "[JOIN] Client " << client->getNickname() << " joined channel " << channelName << (key.empty() ? " (no key)" : " with key") << ".\n";
-	std::cout << GREEN << BOLD << "Client successfully added to channel" << RESET << std::endl;
+
+	std::cout << "[DEBUG][JOIN] Client " << client->getNickname()
+			  << "[DEBUG] joined channel " << channelName
+			  << (key.empty() ? "[DEBUG] (no key)" : "[DEBUG] with key") << ".\n";
+    std::cout << GREEN << BOLD << "Client successfully added to channel" << RESET << std::endl;
+
+    std::cout << "[DEBUG] Clients in channel after join:\n";
+    chan->printClientVectors();
+
 }
 
-Channel *Server::findChannel(const std::string &name)
+void Server::leaveAllChannels(Client *client) 
+{
+    std::cout << BOLD << "Client [" << client->getFd() << "] leaving all channels\n";
+    for (std::vector<Channel*>::iterator it = _channels.begin(); it != _channels.end(); )
+    {
+        Channel* chan = *it;
+
+        std::cout << "[DEBUG]  -> Checking if client is in channel: " << chan->getName() << "\n";
+        std::cout << "[DEBUG]     client ptr = " << client << "\n";
+
+        std::cout << "[DEBUG]    users in channel:\n";
+        chan->printUsers();
+
+        if (chan->verifClientisUser(client) || chan->verifClientisOperator(client))
+        {
+            std::cout << "[DEBUG]  -> client is present in channel!\n";
+            chan->removeUser(client->getFd());
+            chan->removeOperator(client);
+
+            std::string partMsg = ":" + client->getPrefix() + " PART " + chan->getName() + " :Leaving all channels\r\n";
+            chan->ChannelSend(partMsg, client);
+
+            std::cout << "[DEBUG]  -> left channel " << chan->getName() << "\n";
+        }
+        int result = chan->getClientCount();  // ou isChannelEmpty()
+
+        std::cout << "[DEBUG] Clients in channel before delete:\n";
+        chan->printClientVectors();
+        std::cout << "[DEBUG] Get Client Count Result = " << result << std::endl;
+        // Supprimer le channel si vide
+        if (result == 0)
+        {
+            std::cout << "[DEBUG]  -> channel " << chan->getName() << " is now empty. Deleting it.\n";
+            delete chan;
+            it = _channels.erase(it); // erase retourne l'itérateur suivant
+        }
+        else
+        {
+            ++it;
+        }
+    }
+}
+
+
+Channel* Server::findChannel(const std::string& name)
 {
 	for (size_t i = 0; i < _channels.size(); ++i)
 	{
-		if (_channels[i].getName() == name)
-			return (&_channels[i]);
+		if (_channels[i]->getName() == name)
+			return _channels[i];
 	}
-	return (NULL);
+	return NULL;
 }
 
 Client *Server::findClient(const std::string &nickname)
@@ -393,4 +488,3 @@ Client *Server::findClient(const std::string &nickname)
 	}
 	return (NULL);
 }
-

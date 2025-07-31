@@ -6,7 +6,7 @@
 /*   By: zmogne <zmogne@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/21 14:30:42 by cschmid           #+#    #+#             */
-/*   Updated: 2025/07/25 14:44:07 by zmogne           ###   ########.fr       */
+/*   Updated: 2025/07/30 15:14:06 by zmogne           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,6 +16,7 @@
 Message::Message(std::string raw_msg): raw(raw_msg)
 {
         msgParsing(raw);
+        debugPrint();
 }
 
 void Message::msgParsing(std::string msg)
@@ -31,6 +32,8 @@ void Message::msgParsing(std::string msg)
                         prefix = msg.substr(1, space - 1);
                         i = space + 1;
                 }
+                else
+                        return;
         }
 
         size_t space = msg.find(' ', i); // extraction commande
@@ -60,5 +63,22 @@ void Message::msgParsing(std::string msg)
                 }
                 params.push_back(msg.substr(i, next_space - i));
                 i = next_space + 1;
+                while (i < msg.size() && msg[i] == ' ')
+                        ++i;
         }
+}
+
+void Message::debugPrint() const {
+	std::cout << "┌──────────── Parsed Message ────────────" << std::endl;
+	if (!prefix.empty())
+		std::cout << "│ Prefix   : " << prefix << std::endl;
+	std::cout << "│ Command  : " << command << std::endl;
+	std::cout << "│ Params   : ";
+	if (params.empty()) std::cout << "(none)";
+	else for (size_t i = 0; i < params.size(); ++i)
+		std::cout << "[" << i << "] = '" << params[i] << "'  ";
+	std::cout << std::endl;
+	if (!trailing.empty())
+		std::cout << "│ Trailing : " << trailing << std::endl;
+	std::cout << "└────────────────────────────────────────" << std::endl;
 }

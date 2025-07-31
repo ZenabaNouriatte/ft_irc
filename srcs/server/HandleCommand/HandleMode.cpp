@@ -13,21 +13,21 @@
 #include "Channel.hpp"
 #include "Server.hpp"
 
-Client *Channel::findClientByNick(const std::string &nick)
+Client* Channel::findClientByNick(const std::string &nick)
 {
-	for (std::vector<Client>::iterator it = _users.begin(); it != _users.end(); ++it)
+	for (std::vector<Client*>::iterator it = _users.begin(); it != _users.end(); ++it)
 	{
-		// char sign = current[0];
-		if (it->getNick() == nick)
-			return (&(*it)); // renvoie l'adresse de l'objet dans le vector
+		if ((*it)->getNick() == nick)
+			return (*it);
 	}
-	for (std::vector<Client>::iterator it = _operators.begin(); it != _operators.end(); ++it)
+	for (std::vector<Client*>::iterator it = _operators.begin(); it != _operators.end(); ++it)
 	{
-		if (it->getNick() == nick)
-			return (&(*it));
+		if ((*it)->getNick() == nick)
+			return (*it);
 	}
 	return (NULL);
 }
+
 
 void Server::handleMODE(Client *client, const Message &msg)
 {

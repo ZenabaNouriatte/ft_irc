@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Client.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: cschmid <cschmid@student.42.fr>            +#+  +:+       +#+        */
+/*   By: zmogne <zmogne@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/21 14:30:25 by cschmid           #+#    #+#             */
-/*   Updated: 2025/07/31 09:17:11 by cschmid          ###   ########.fr       */
+/*   Updated: 2025/07/25 19:53:16 by zmogne           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -86,6 +86,17 @@ int Client::getFd(void) const
 {
 	return (_fd);
 }
+
+std::string Client::getPrefix() const 
+{
+    if (_nickname.empty() || _username.empty()) {
+        std::ostringstream oss;
+        oss << "user" << _fd << "@localhost";
+        return oss.str();
+    }
+    return _nickname + "!" + _username + "@localhost";
+}
+
 
 /*========== METHODES ==========*/
 bool Client::isRegistered() const 
