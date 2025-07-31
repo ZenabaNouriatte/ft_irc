@@ -100,17 +100,11 @@ class Channel
 	int getClientCount() const;
 
 	// ajout Chloe
-	void changeTopic(Client client, std::string topic);
 	Client* findClientByNick(const std::string &nick);
+
 
 };
 
 //Modification de Client en Client* : coherence avec le reste du projet 
 //Ne pas creer une copie mais utiliser l'objet client
 //Utiliser des const quqnd on ne modifie pas la string
-
-
-//dans le client :
-// map (channel, droit)
-// gere les droits du client dans chaque Channel
-// droit : operateur ou utilisateur

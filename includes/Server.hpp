@@ -141,4 +141,7 @@ class Server
 
 
 	void suppressChannel(const Channel & channel);
+
+	void Server::commandPart(Client* client, Channel* channel, std::string comment);
+	void Server::verifIfCloseChannel(Channel* channel);
 };
