@@ -63,6 +63,7 @@ class Client
         const std::string &getPass() const;
         const std::string &getNick() const;
         const std::string &getUser() const;
+        const std::string &getRealname() const;
 
         std::vector<std::string> extractCompleteCommands();
         std::string extractIncompleteCommand();

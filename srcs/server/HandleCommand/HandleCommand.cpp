@@ -1,16 +1,18 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   CommandHandler.cpp                                 :+:      :+:    :+:   */
+/*   HandleCommand.cpp                                  :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: cschmid <cschmid@student.42.fr>            +#+  +:+       +#+        */
+/*   By: zmogne <zmogne@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/21 14:30:34 by cschmid           #+#    #+#             */
-/*   Updated: 2025/07/31 14:02:59 by cschmid          ###   ########.fr       */
+/*   Updated: 2025/08/03 19:50:47 by zmogne           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "Server.hpp"
+#include "Channel.hpp"
+#include "Utils.hpp"
 
 
 void Server::handleCommand(Client *client, const Message &msg)
@@ -18,7 +20,7 @@ void Server::handleCommand(Client *client, const Message &msg)
 	if (msg.command == "PASS" || msg.command == "NICK" || msg.command == "USER")
 		handleRegistred(client, msg);
 	else if (msg.command == "PING" || msg.command == "PRIVMSG"
-		|| msg.command == "MODE" || msg.command == "JOIN" || msg.command == "KICK")
+		|| msg.command == "MODE" || msg.command == "JOIN" || msg.command == "KICK" || msg.command == "WHOIS")
 		handleServerCommand(client, msg);
 	// handle channel
 	else if (!client->isRegistered())
@@ -55,10 +57,11 @@ void Server::handleServerCommand(Client *client, const Message &msg)
 		handleINVIT(client, msg);
 	else if (msg.command == "TOPIC")
 		handleTOPIC(client, msg);
+	else if (msg.command == "WHOIS")
+        handleWHOIS(client, msg);
 	else
 		return ;
 }
-
 
 /*======================== COMMAND ============================*/
 
@@ -184,4 +187,45 @@ void Server::handlePING(Client *client, const Message &msg)
 	std::string response = ":" + _server_name + " PONG :" + token;
 	client->send_msg(response);
 	client->send_msg(_server_name + " :PONG sent by the server");
+}
+
+
+
+Client* Server::findByNick(const std::string& nickname)
+{
+    for (std::map<int, Client*>::iterator it = _clients.begin(); it != _clients.end(); ++it)
+    {
+        if (toLower(it->second->getNick()) == toLower(nickname))
+            return it->second;
+    }
+    return NULL;
+}
+
+void Server::handleWHOIS(Client* client, const Message &msg)
+{
+    std::cout << "DANS WHO IS\n";
+
+    if (msg.params.empty())
+    {
+        client->send_msg(":" + _server_name + " 431 " + client->getNick() + " :No nickname given");
+        return;
+    }
+
+    std::string target = msg.params[0];
+    Client* targetClient = findByNick(target);
+
+    if (!targetClient)
+    {
+        client->send_msg(":" + _server_name + " 401 " + client->getNick() + " " + target + " :No such nick");
+        return;
+    }
+
+    // WHOIS user line (code 311)
+    client->send_msg(":" + _server_name + " 311 " + client->getNick() + " " +
+                    targetClient->getNick() + " ~user localhost * :" + targetClient->getRealname());
+
+    // WHOIS end line (code 318)
+    client->send_msg(":" + _server_name + " 318 " + client->getNick() + " " +
+                    targetClient->getNick() + " :End of WHOIS list");
+
 }

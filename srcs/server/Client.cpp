@@ -6,7 +6,7 @@
 /*   By: zmogne <zmogne@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/21 14:30:25 by cschmid           #+#    #+#             */
-/*   Updated: 2025/07/25 19:53:16 by zmogne           ###   ########.fr       */
+/*   Updated: 2025/08/03 18:02:05 by zmogne           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -31,6 +31,7 @@ bool Client::hasUser() const { return _has_user; }
 const std::string &Client::getPass() const { return _pass;}
 const std::string &Client::getNick() const { return _nickname;}
 const std::string &Client::getUser() const { return _username;}
+const std::string &Client::getRealname() const { return _realname;}
 
 
 /*========== SETTER ==========*/

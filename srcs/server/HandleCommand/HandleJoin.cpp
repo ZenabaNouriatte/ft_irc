@@ -82,7 +82,8 @@ bool Server::parseJoin(const Message &msg, std::string &channel,
 		key = msg.params[1];
 	return (true);
 }
-std::string toLower(const std::string &str) {
+std::string toLower(const std::string &str) 
+{
     std::string lower;
     for (size_t i = 0; i < str.size(); ++i)
         lower += std::tolower(str[i]);
