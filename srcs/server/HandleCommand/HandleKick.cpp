@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   HandleKick.cpp                                     :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: cschmid <cschmid@student.42.fr>            +#+  +:+       +#+        */
+/*   By: zmogne <zmogne@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/31 09:05:39 by cschmid           #+#    #+#             */
-/*   Updated: 2025/07/31 09:50:43 by cschmid          ###   ########.fr       */
+/*   Updated: 2025/08/04 13:02:02 by zmogne           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -45,5 +45,5 @@ void Server::handleKICK(Client *client, const Message &msg)
     }
     std::cout << "[DEBUG] Target = " << targetNick << std::endl;
     std::cout << "[DEBUG] reason = " << reason << std::endl;
-    //chan->commandKick(client, target, reason);
+    chan->commandKick(this,client, target, reason);
 }

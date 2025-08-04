@@ -6,7 +6,7 @@
 /*   By: zmogne <zmogne@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/21 14:30:56 by cschmid           #+#    #+#             */
-/*   Updated: 2025/07/30 16:42:28 by zmogne           ###   ########.fr       */
+/*   Updated: 2025/08/04 15:11:58 by zmogne           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,6 +30,10 @@ Server::~Server()
     std::cout << RED << "Server exit" << RESET << std::endl;
 }
 
+const std::string &Server::getServerName() const 
+{
+    return _server_name;
+}
 
 /*==========================================
                   METHODES        

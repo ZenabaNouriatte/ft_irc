@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   HandleMode.cpp                                     :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: cschmid <cschmid@student.42.fr>            +#+  +:+       +#+        */
+/*   By: zmogne <zmogne@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/30 12:17:37 by cschmid           #+#    #+#             */
-/*   Updated: 2025/07/31 09:07:09 by cschmid          ###   ########.fr       */
+/*   Updated: 2025/08/04 12:51:57 by zmogne           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -103,19 +103,21 @@ void Server::handleModeWithParam(Client *client, Channel *chan,
 		if (!target)
 			sendError(client->getFd(), "401", param, "No such nick");
 		else
+		{
 			std::cout << "C'est un o avec " << param << std::endl;
-		// chan->changeModeO(*client, std::string(1, sign) + "o", *target);
+			chan->changeModeO(this,client, std::string(1, sign) + "o", target);
+		}
 	}
 	else if (c == 'k')
 	{
 		std::cout << "C'est un k avec " << param << std::endl;
-		// chan->changeModeK(*client, std::string(1, sign) + "k", param);
+		chan->changeModeK(this,client, std::string(1, sign) + "k", param);
 	}
 	else if (c == 'l')
 	{
 		limit = atoi(param.c_str());
 		std::cout << "C'est un l avec " << limit << std::endl;
-		// chan->changeModeL(*client, std::string(1, sign) + "l", limit);
+		chan->changeModeL(this, client, std::string(1, sign) + "l", limit);
 	}
 	paramIndex++;
 }
@@ -128,12 +130,12 @@ void Server::handleModeNoParam(Client *client, Channel *chan, char c, char sign)
 	if (c == 'i')
 	{
 		std::cout << "C'est un i" << std::endl;
-		// chan->changeModeI(*client, std::string(1, sign) + "i");
+		chan->changeModeI(this,client, std::string(1, sign) + "i");
 	}
 	else if (c == 't')
 	{
 		std::cout << "C'est un t" << std::endl;
-		// chan->changeModeT(*client, std::string(1, sign) + "t");
+		chan->changeModeT(this,client, std::string(1, sign) + "t");
 	}
 	else
 	{

@@ -6,7 +6,7 @@
 /*   By: zmogne <zmogne@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/31 14:07:32 by cschmid           #+#    #+#             */
-/*   Updated: 2025/08/04 10:34:40 by zmogne           ###   ########.fr       */
+/*   Updated: 2025/08/04 13:18:23 by zmogne           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -48,7 +48,7 @@ void Channel::removeUser(int fd)
 bool Channel::verifClientisInChannel(Client *client)
 {
 	if (std::find(_operators.begin(), _operators.end(),
-			client) != _operators.end() && std::find(_users.begin(),
+			client) != _operators.end() || std::find(_users.begin(),
 			_users.end(), client) != _users.end())
 		return (true);
 	return (false);

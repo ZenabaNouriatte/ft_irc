@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   otherCommand.cpp                                   :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: cschmid <cschmid@student.42.fr>            +#+  +:+       +#+        */
+/*   By: zmogne <zmogne@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/31 14:14:57 by cschmid           #+#    #+#             */
-/*   Updated: 2025/07/31 14:17:50 by cschmid          ###   ########.fr       */
+/*   Updated: 2025/08/04 15:17:29 by zmogne           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -31,41 +31,89 @@ void Channel::changeTopic(Server *server, Client *client, std::string topic)
 	}
 }
 
+// void Channel::commandTopic(Server *server, Client *client, std::string topic)
+// {
+// 	std::cout << "DEBUG Dans fonction COMMANDTOPIC" << std::endl;
+	
+// 	// if topic est vide : afficher le topic
+// 	if (_topicName.empty())
+// 	{
+// 		// message recu par tous les utilisateurs du canal y compris le demandeur :
+// 		//:<nick client>!user@host TOPIC <#channel> :<topic>
+// 		// pas de message specifique envoye uniquement au demandeur
+// 		std::cout << "DEBUG Aucun topic defini" << std::endl;
+// 	}
+// 	else if (!topic.empty() && _topicRestriction == true)
+// 	{
+// 		std::cout << "DEBUG  Topic restriction" << std::endl;
+// 		if (verifClientisOperator(client) == true)
+// 		{
+// 			_topicName = topic;
+// 			// message recu par tous les utilisateurs du canal y compris le demandeur :
+// 			//:<nick client>!user@host TOPIC <#channel> :<topic>
+// 			// pas de message specifique envoye uniquement au demandeur
+// 			std::cout << "DEBUG commtPOPIC : message nouveau topic" << std::endl;
+// 		}
+// 		else
+// 		{
+// 			server->sendError(client->getFd(), "482", this->_name,
+// 				"You're not channel operator");
+// 			std::cout << "DEBUG commtPOPIC : client not an operator" << std::endl;
+// 		}
+// 	}
+// 	else
+// 	{
+// 		std::cout << "DEBUG  Pas de Topic restriction et pas vide" << std::endl;
+// 		_topicName = topic;
+// 		// message recu par tous les utilisateurs du canal y compris le demandeur :
+// 		//:<nick client>!user@host TOPIC <#channel> :<topic>
+// 		// pas de message specifique envoye uniquement au demandeur
+// 	}
+// }
+
 void Channel::commandTopic(Server *server, Client *client, std::string topic)
 {
-	// if topic est vide : afficher le topic
-	if (topic == "")
+	std::cout << "[DEBUG][TOPIC] Entrée dans commandTopic()\n";
+
+	if (topic.empty())
 	{
-		// message recu par tous les utilisateurs du canal y compris le demandeur :
-		//:<nick client>!user@host TOPIC <#channel> :<topic>
-		// pas de message specifique envoye uniquement au demandeur
-		std::cout << "DEBUG commtPOPIC : message topic actuel" << std::endl;
-	}
-	else if (_topicRestriction == true)
-	{
-		if (verifClientisOperator(client) == true)
+		std::cout << "[DEBUG][TOPIC] Aucun nouveau topic fourni → affichage du topic actuel\n";
+		if (_topicName.empty())
 		{
-			_topicName = topic;
-			// message recu par tous les utilisateurs du canal y compris le demandeur :
-			//:<nick client>!user@host TOPIC <#channel> :<topic>
-			// pas de message specifique envoye uniquement au demandeur
-			std::cout << "DEBUG commtPOPIC : message nouveau topic" << std::endl;
+			std::cout << "[DEBUG][TOPIC] Aucun topic défini pour le channel '" << _name << "'\n";
+			std::string msg = ":" + server->getServerName() + " 331 " + client->getNickname() + " " + _name + " :No topic is set\r\n";
+			client->send_msg( msg);
 		}
 		else
 		{
-			server->sendError(client->getFd(), "482", this->_name,
-				"You're not channel operator");
-			std::cout << "DEBUG commtPOPIC : client not an operator" << std::endl;
+			std::cout << "[DEBUG][TOPIC] Topic actuel = '" << _topicName << "'\n";
+			std::string msg = ":" + server->getServerName() + " 332 " + client->getNickname() + " " + _name + " :" + _topicName + "\r\n";
+			client->send_msg(msg);
 		}
+		return;
 	}
-	else
+
+	std::cout << "[DEBUG][TOPIC] Un nouveau topic est fourni : '" << topic << "'\n";
+
+	if (_topicRestriction)
 	{
-		_topicName = topic;
-		// message recu par tous les utilisateurs du canal y compris le demandeur :
-		//:<nick client>!user@host TOPIC <#channel> :<topic>
-		// pas de message specifique envoye uniquement au demandeur
+		std::cout << "[DEBUG][TOPIC] La restriction de topic est activée → vérification opérateur\n";
+		if (!verifClientisOperator(client))
+		{
+			std::cout << "[DEBUG][TOPIC] Client n'est pas opérateur → refus de changer le topic\n";
+			server->sendError(client->getFd(), "482", _name, "You're not channel operator");
+			return;
+		}
+		std::cout << "[DEBUG][TOPIC] Client est opérateur → changement autorisé\n";
 	}
+
+	_topicName = topic;
+
+	std::cout << "[DEBUG][TOPIC] Nouveau topic défini pour le channel '" << _name << "'\n";
+	std::string topicMsg = ":" + client->getPrefix() + " TOPIC " + _name + " :" + topic + "\r\n";
+	ChannelSend(topicMsg, NULL); // Diffusion à tous les membres du channel
 }
+
 
 /*========================== KICK ============================*/
 

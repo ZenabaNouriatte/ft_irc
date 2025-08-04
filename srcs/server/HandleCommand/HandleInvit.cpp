@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   HandleInvit.cpp                                    :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: cschmid <cschmid@student.42.fr>            +#+  +:+       +#+        */
+/*   By: zmogne <zmogne@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/31 09:42:56 by cschmid           #+#    #+#             */
-/*   Updated: 2025/07/31 10:07:20 by cschmid          ###   ########.fr       */
+/*   Updated: 2025/08/04 13:01:43 by zmogne           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -35,5 +35,5 @@ void Server::handleINVIT(Client *client, const Message &msg)
         return;
     }
     std::cout << "[DEBUG] Target = " << targetNick << std::endl;
-   // chan->commandInvite(client, target);
+    chan->commandInvite(this,client, target);
 }
