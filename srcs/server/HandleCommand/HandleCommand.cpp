@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   HandleCommand.cpp                                  :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: zmogne <zmogne@student.42.fr>              +#+  +:+       +#+        */
+/*   By: cschmid <cschmid@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/21 14:30:34 by cschmid           #+#    #+#             */
-/*   Updated: 2025/08/04 13:15:14 by zmogne           ###   ########.fr       */
+/*   Updated: 2025/08/04 16:21:22 by cschmid          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -60,6 +60,8 @@ void Server::handleServerCommand(Client *client, const Message &msg)
 		handleINVIT(client, msg);
 	else if (msg.command == "TOPIC")
 		handleTOPIC(client, msg);
+	else if (msg.command == "PART")
+		handlePART(client, msg);
 	else if (msg.command == "WHOIS")
         handleWHOIS(client, msg);
 	else

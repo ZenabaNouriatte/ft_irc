@@ -87,6 +87,7 @@ class Server
 	void handleKICK(Client *client, const Message &msg);
 	void handleINVIT(Client *client, const Message &msg);
 	void handleTOPIC(Client *client, const Message &msg);
+    void handlePART(Client* client, const Message& msg);
 
 
 
