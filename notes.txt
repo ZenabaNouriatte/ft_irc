@@ -6,6 +6,25 @@ le fichier de log sera sauvegarder sur le home
 
 
 
+
+A FAIRE
+//KICK et PART
+
+si un client quitte le channel
+- si il est operator et que c'est le dernier operator : le 1er client devient operator
+
+
+A TESTER :
+peut-on se KICK soi meme --> NON 
+
+
+
+
+
+
+
+
+
 "irssi"
 "/connect dalnet <port> "  et pas irc.dal.net
 "/rawlog save <nom du fichier> "

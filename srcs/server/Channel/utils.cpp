@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   utils.cpp                                          :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: zmogne <zmogne@student.42.fr>              +#+  +:+       +#+        */
+/*   By: smolines <smolines@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/31 14:07:32 by cschmid           #+#    #+#             */
-/*   Updated: 2025/08/04 13:18:23 by zmogne           ###   ########.fr       */
+/*   Updated: 2025/08/04 18:27:19 by smolines         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,12 +14,30 @@
 
 /*========================== REMOVE ============================*/
 
+void Channel::affectNextOperator()
+{
+	if (_operators.size() == 0)
+	{
+		if (!_users.empty()) {
+ 		   Client* firstUser = _users.front();
+		   userToOperator(firstUser);
+		}
+		else {
+			std::cout << "[DEBUG] Ce channel semble bien vide" << std::endl;
+		}
+	}
+		return;
+}
+
 void Channel::removeOperator(Client *user)
 {
 	std::vector<Client *>::iterator it = std::find(_operators.begin(),
 			_operators.end(), user);
 	if (it != _operators.end())
+	{
 		_operators.erase(it);
+		affectNextOperator();
+	}
 }
 
 void Channel::removeInvited(Client *user)

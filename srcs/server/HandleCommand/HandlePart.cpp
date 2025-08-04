@@ -6,7 +6,7 @@
 /*   By: smolines <smolines@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/30 12:17:37 by cschmid           #+#    #+#             */
-/*   Updated: 2025/08/04 16:35:11 by smolines         ###   ########.fr       */
+/*   Updated: 2025/08/04 16:36:50 by smolines         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -68,5 +68,5 @@ void Server::handlePART(Client* client, const Message& msg)
     std::cout << "PART = " << comment << std::endl;
     std::cout << "Channel = " << channelName << std::endl;
     std::cout << "-------------------------------" << std::endl;
-    commandPart(client, channel, comment);
+    commandPart(client, chan, comment);
 }
