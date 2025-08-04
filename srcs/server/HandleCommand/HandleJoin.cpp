@@ -1,6 +1,7 @@
 #include "Channel.hpp"
 #include "Server.hpp"
 #include "Client.hpp"
+#include "Utils.hpp"
 
 std::vector<std::string> Server::splitComma(const std::string &input)
 {
@@ -39,7 +40,7 @@ void Server::handleSingleJoin(Client *client, const std::string &channelName, co
 	}
 	else
 	{
-		std::cout << "[JOIN] Channel '" << channelName << "' already exists.\n";
+		std::cout << "[JOIN] Channel '" << channelName << "' already exists at ptr [" << chan << "]\n";
 	}
 	// Si client dans le channel
 	if (chan->verifClientisUser(client))
@@ -49,16 +50,12 @@ void Server::handleSingleJoin(Client *client, const std::string &channelName, co
     }
 	// Ajouter le client au channel
 	chan->addUser(this, client, key);
-	std::string joinMsg = ":" + client->getPrefix() + " JOIN :" + channelName + "\r\n";
-	chan->ChannelSend(joinMsg, NULL); // envoyer à tous y compris l'émetteur
-	if (chan->getTopic())
-	{
-		std::string topicMsg = ":" + _server_name + " 332 " + client->getNickname() +
-			" " + channelName + " :" + chan->getTopicName() + "\r\n";
-		client->send_msg(topicMsg);
-	}
-
-	// ajouter reponse facon IRC a faire demain
+	// std::string joinMsg = ":" + client->getPrefix() + " JOIN :" + channelName + "\r\n";
+	// chan->ChannelSend(joinMsg, NULL); // envoyer à tous y compris l'émetteur
+	//fonctions a integrer
+	sendJoinMsg(client, chan);
+	sendTopic(client, chan);
+	sendNameList(client, chan);
 
 	std::cout << "[DEBUG][JOIN] Client " << client->getNickname()
 			  << "[DEBUG] joined channel " << channelName
@@ -90,13 +87,7 @@ bool Server::parseJoin(const Message &msg, std::string &channel,
 		key = msg.params[1];
 	return (true);
 }
-std::string toLower(const std::string &str) 
-{
-    std::string lower;
-    for (size_t i = 0; i < str.size(); ++i)
-        lower += std::tolower(str[i]);
-    return lower;
-}
+
 
 void Server::handleJOIN(Client *client, const Message &msg)
 {
@@ -189,4 +180,93 @@ void Server::leaveAllChannels(Client *client)
             ++it;
         }
     }
+}
+
+
+// void Server::sendNameList(Client* client, Channel* chan)
+// {
+// 	std::string memberList;
+// 	const std::vector<Client*>& users = chan->getUsers(); 
+
+// 	for (size_t i = 0; i < users.size(); ++i)
+// 	{
+// 		if (chan->verifClientisOperator(users[i]))
+// 			memberList += "@";
+// 		memberList += users[i]->getNickname();
+// 		if (i != users.size() - 1)
+// 			memberList += " ";
+// 	}
+
+// 	std::string namesMsg = ":" + _server_name + " 353 " + client->getNickname() +
+// 		" = " + chan->getName() + " :" + memberList + "\r\n";
+// 	client->send_msg(namesMsg);
+
+// 	std::string endNamesMsg = ":" + _server_name + " 366 " + client->getNickname() +
+// 		" " + chan->getName() + " :End of /NAMES list\r\n";
+// 	client->send_msg(endNamesMsg);
+// }
+
+void Server::sendNameList(Client* client, Channel* chan)
+{
+	std::string memberList;
+
+	// 1. Ajouter les opérateurs avec le préfixe '@'
+	const std::vector<Client*>& operators = chan->getOperators();
+	for (size_t i = 0; i < operators.size(); ++i)
+	{
+		memberList += "@" + operators[i]->getNickname();
+		memberList += " ";
+	}
+
+	// 2. Ajouter les utilisateurs (en évitant les doublons)
+	const std::vector<Client*>& users = chan->getUsers();
+	for (size_t i = 0; i < users.size(); ++i)
+	{
+		Client* user = users[i];
+
+		// Si l'utilisateur est déjà dans la liste des opérateurs, on le saute
+		if (std::find(operators.begin(), operators.end(), user) != operators.end())
+			continue;
+
+		memberList += user->getNickname();
+		memberList += " ";
+	}
+
+	// Supprimer l'espace final si besoin
+	if (!memberList.empty() && memberList[memberList.size() - 1] == ' ')
+		memberList.erase(memberList.size() - 1);
+
+	// 3. Envoi du message 353 (liste des membres)
+	std::string namesMsg = ":" + _server_name + " 353 " + client->getNickname() +
+		" = " + chan->getName() + " :" + memberList + "\r\n";
+	client->send_msg(namesMsg);
+
+	// 4. Envoi du message 366 (fin de la liste)
+	std::string endNamesMsg = ":" + _server_name + " 366 " + client->getNickname() +
+		" " + chan->getName() + " :End of /NAMES list\r\n";
+	client->send_msg(endNamesMsg);
+}
+
+
+
+void Server::sendTopic(Client* client, Channel* chan)
+{
+	if (!chan->getTopicName().empty())
+	{
+		std::string topicMsg = ":" + _server_name + " 332 " + client->getNickname() +
+			" " + chan->getName() + " :" + chan->getTopicName() + "\r\n";
+		client->send_msg(topicMsg);
+	}
+	else
+	{
+		std::string noTopicMsg = ":" + _server_name + " 331 " + client->getNickname() +
+			" " + chan->getName() + " :No topic is set\r\n";
+		client->send_msg(noTopicMsg);
+	}
+}
+
+void Server::sendJoinMsg(Client* client, Channel* chan)
+{
+	std::string joinMsg = ":" + client->getPrefix() + " JOIN :" + chan->getName() + "\r\n";
+	chan->ChannelSend(joinMsg, NULL); // Diffusion à tous, y compris l'émetteur
 }

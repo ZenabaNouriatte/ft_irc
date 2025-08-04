@@ -126,6 +126,9 @@ class Server
     bool ValidChannelName(const std::string &name);
     void leaveAllChannels(Client *client);
     int ClientChannelCount(Client* client) const;
+    void sendNameList(Client* client, Channel* chan);
+    void sendTopic(Client* client, Channel* chan);
+    void sendJoinMsg(Client* client, Channel* chan);
 
     /*===== Server Console Input =====*/
     void handleConsoleInput();                              // Read from stdin

@@ -6,7 +6,7 @@
 /*   By: zmogne <zmogne@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/31 13:57:45 by cschmid           #+#    #+#             */
-/*   Updated: 2025/08/04 11:22:37 by zmogne           ###   ########.fr       */
+/*   Updated: 2025/08/04 16:41:45 by zmogne           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -113,4 +113,12 @@ bool isValidNickname(const std::string& nick)
             return false;
     }
     return true;
+}
+
+std::string toLower(const std::string &str) 
+{
+    std::string lower;
+    for (size_t i = 0; i < str.size(); ++i)
+        lower += std::tolower(str[i]);
+    return lower;
 }

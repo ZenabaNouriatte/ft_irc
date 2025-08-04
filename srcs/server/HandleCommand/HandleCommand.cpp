@@ -6,7 +6,7 @@
 /*   By: zmogne <zmogne@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/21 14:30:34 by cschmid           #+#    #+#             */
-/*   Updated: 2025/08/04 13:15:14 by zmogne           ###   ########.fr       */
+/*   Updated: 2025/08/04 19:52:13 by zmogne           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -95,12 +95,13 @@ void Server::handlePASS(Client *client, const Message &msg)
 
 void Server::handleNICK(Client *client, const Message &msg)
 {
-	std::string newNick = msg.params[0];
+	
 	if (msg.params.size() < 1)
 	{
 		sendError(client->getFd(), "431", "*", "No nickname given");
 		return ;
 	}
+	std::string newNick = msg.params[0];
 	for (std::map<int,
 		Client *>::iterator it = _clients.begin(); it != _clients.end(); ++it)
 	{
@@ -108,13 +109,21 @@ void Server::handleNICK(Client *client, const Message &msg)
 		{
 			sendError(client->getFd(), "433", "*",
 				"Nickname is already in use");
-			return ;
+			return; // boucle inifinie ici
 		}
+
 	}
 	if (!isValidNickname(newNick))
 	{
 		sendError(client->getFd(), "432", "*", "Error nickname");
 		return ;
+	}
+	if (client->isRegistered())
+	{
+		std::string oldNick = client->getNickname();
+		std::string nickMsg = ":" + oldNick + "!~" + client->getUsername() +
+			"@localhost NICK :" + newNick + "\r\n";
+		sendToAllClients(nickMsg); // ou sendToChannelClients si tu préfères
 	}
 	client->setNickname(newNick);
 	client->setHasNick(true);
@@ -123,6 +132,55 @@ void Server::handleNICK(Client *client, const Message &msg)
 		completeRegistration(client);
 	}
 }
+
+// void Server::handleNICK(Client *client, const Message &msg)
+// {
+//     if (msg.params.size() < 1)
+//     {
+//         sendError(client->getFd(), "431", "*", "No nickname given");
+//         return;
+//     }
+    
+//     std::string newNick = msg.params[0];
+    
+//     // Vérifier la validité du pseudonyme AVANT de vérifier la disponibilité
+//     if (!isValidNickname(newNick))
+//     {
+//         sendError(client->getFd(), "432", "*", "Erroneous nickname");
+//         return;
+//     }
+    
+//     // Vérifier si le pseudonyme est déjà utilisé par un autre client
+//     for (std::map<int, Client *>::iterator it = _clients.begin(); it != _clients.end(); ++it)
+//     {
+//         if (it->second != client && it->second->getNickname() == newNick)
+//         {
+//             // Format correct du message d'erreur 433
+//             sendError(client->getFd(), "433", client->getNickname().empty() ? "*" : client->getNickname(), 
+//                      newNick + " :Nickname is already in use");
+//             return;
+//         }
+//     }
+    
+//     // Si le client est déjà enregistré, notifier le changement de pseudonyme
+//     if (client->isRegistered())
+//     {
+//         std::string oldNick = client->getNickname();
+//         std::string nickMsg = ":" + oldNick + "!~" + client->getUsername() +
+//             "@localhost NICK :" + newNick + "\r\n";
+//         sendToAllClients(nickMsg);
+//     }
+    
+//     // Définir le nouveau pseudonyme
+//     client->setNickname(newNick);
+//     client->setHasNick(true);
+    
+//     // Vérifier si l'enregistrement peut être complété
+//     if (client->hasNick() && client->hasUser() && client->hasPass())
+//     {
+//         completeRegistration(client);
+//     }
+// }
 
 void Server::handleUSER(Client *client, const Message &msg)
 {
