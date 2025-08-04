@@ -6,7 +6,7 @@
 /*   By: zmogne <zmogne@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/31 13:57:45 by cschmid           #+#    #+#             */
-/*   Updated: 2025/08/04 16:41:45 by zmogne           ###   ########.fr       */
+/*   Updated: 2025/08/04 19:55:53 by zmogne           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,6 +19,7 @@ void Server::sendError(int fd, const std::string &code,
 {
 	std::string full = ":" + _server_name + " " + code + " " + target + " :"
 		+ message + "\n";
+    std::cout << " DEBUG Sending error to client " << fd << ": " << full << std::endl;
 	send(fd, full.c_str(), full.size(), 0);
 }
 
@@ -100,7 +101,7 @@ bool Server::PvMsgToUser(Client* sender, const std::string& target, const std::s
 
 bool isValidNickname(const std::string& nick) 
 {
-    if (nick.empty())
+    if (nick.empty() || nick.length() > 15)
         return false;
     if (!std::isalpha(nick[0]))
         return false;
