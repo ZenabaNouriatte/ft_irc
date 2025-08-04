@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Channel.cpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: cschmid <cschmid@student.42.fr>            +#+  +:+       +#+        */
+/*   By: smolines <smolines@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/31 14:04:03 by cschmid           #+#    #+#             */
-/*   Updated: 2025/07/31 14:17:30 by cschmid          ###   ########.fr       */
+/*   Updated: 2025/08/04 12:45:24 by smolines         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,19 +26,19 @@ Channel::Channel(std::string name)
 	return ;
 }
 
-Channel::Channel(std::string name, std::string topicName)
-{
-	this->_topicName = topicName;
-	this->_name = name;
-	this->_inviteOnly = 0;
-	this->_limit = 0;
-	this->_topic = true;
-	this->_topicRestriction = false;
-	this->_hasLimit = false;
-	this->_key = false;
-	std::cout << GREEN << BOLD << "Channel [" << this->_name << "] successfully created" << RESET << std::endl;
-	return ;
-}
+// Channel::Channel(std::string name, std::string topicName)
+// {
+// 	this->_topicName = topicName;
+// 	this->_name = name;
+// 	this->_inviteOnly = 0;
+// 	this->_limit = 0;
+// 	this->_topic = true;
+// 	this->_topicRestriction = false;
+// 	this->_hasLimit = false;
+// 	this->_key = false;
+// 	std::cout << GREEN << BOLD << "Channel [" << this->_name << "] successfully created" << RESET << std::endl;
+// 	return ;
+// }
 
 /*===================== Destructor =====================*/
 

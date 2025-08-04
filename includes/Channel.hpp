@@ -27,7 +27,7 @@ class Channel
 	public :
 		Channel();
 		Channel(std::string name);
-		Channel(std::string name, std::string topicName);
+//		Channel(std::string name, std::string topicName);
 		~Channel();
 	
 

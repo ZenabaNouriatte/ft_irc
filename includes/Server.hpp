@@ -122,6 +122,8 @@ class Server
     bool ValidChannelName(const std::string &name);
     void leaveAllChannels(Client *client);
     int ClientChannelCount(Client* client) const;
+	void verifIfCloseChannel(Channel* channel);
+	void commandPart(Client* client, Channel* channel, std::string comment);
 
     /*===== Server Console Input =====*/
     void handleConsoleInput();                              // Read from stdin
