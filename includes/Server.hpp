@@ -56,6 +56,10 @@ class Server
 	// Print error and close server socket
 	void cleanExit(); // Cleanup sockets and memory
 
+    /*===== GETTERS =====*/
+
+    const std::string &getServerName() const;
+
 	/*===== Server Setup =====*/
 	bool setupServerSocket(); // Create, bind, listen on socket
 	void setupPollFds();      // Add server socket and stdin to poll()
@@ -83,6 +87,7 @@ class Server
 	void handleKICK(Client *client, const Message &msg);
 	void handleINVIT(Client *client, const Message &msg);
 	void handleTOPIC(Client *client, const Message &msg);
+    void handlePART(Client* client, const Message& msg);
 
 
 

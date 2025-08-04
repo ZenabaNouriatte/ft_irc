@@ -49,6 +49,14 @@ void Server::handleSingleJoin(Client *client, const std::string &channelName, co
     }
 	// Ajouter le client au channel
 	chan->addUser(this, client, key);
+	std::string joinMsg = ":" + client->getPrefix() + " JOIN :" + channelName + "\r\n";
+	chan->ChannelSend(joinMsg, NULL); // envoyer à tous y compris l'émetteur
+	if (chan->getTopic())
+	{
+		std::string topicMsg = ":" + _server_name + " 332 " + client->getNickname() +
+			" " + channelName + " :" + chan->getTopicName() + "\r\n";
+		client->send_msg(topicMsg);
+	}
 
 	// ajouter reponse facon IRC a faire demain
 

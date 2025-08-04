@@ -1,0 +1,2238 @@
+#pragma once
+#include <string>
+#include <string.h>
+#include <vector>
+#include "Client.hpp"
+#include <set>
+#include "Server.hpp"
+
+class Server;
+class Client;
+class Channel
+{
+	private :
+		std::string _name;
+		std::string _topicName; // theme du channel
+		std::string _password;
+		bool _inviteOnly; // channel sur invitation uniquement : 0 = non, 1 = oui
+		bool _topicRestriction; // false = tous les users peuvent changer le topic / true ; que chanop
+		bool _topic; // defini si un topic existe ou non
+		size_t _limit; // nb max d'utilisateurs sur le channel
+		bool _hasLimit; // defini si une limite max d'user existe
+		bool _key; // defini si un password existe
+		std::vector<Client*> _users; // liste des users du channel : peut etre repere par nickname ou par fd
+		std::vector<Client*> _operators; // liste des operators : permet de changer ou ajouter operator
+		std::vector<Client*> _isInvited; // liste des operators : permet de changer ou ajouter operator
+
+	public :
+		Channel();
+		Channel(std::string name);
+		Channel(std::string name, std::string topicName);
+		~Channel();
+	
+
+	//getters
+
+	std::string getName();
+	std::string getTopicName();
+	std::string getPassWord();
+	bool getTopicRestriction();
+	bool getInviteOnly();
+	bool getTopic();
+	int getLimit();
+	bool getHasLimit();
+	bool getKey();
+	std::vector<Client*> getUsers();
+	std::vector<Client*> getOperators();
+
+	//setters
+
+	void setName(std::string name);
+	void setTopicName(std::string topic);
+	void setPassWord(std::string psswd);
+	void setTopicRestriction(bool rectriction);
+	void setInviteOnly(bool invite);
+	void setTopic(bool topic);
+	void setLimit(int nb);
+	void setHasLimit(bool limit);
+	void setKey(bool key);
+
+
+	// fonctions
+
+	void addUser(Server* server, Client* user, std::string key);
+	void addOperator(Client* user);
+	void addInvited(Client* client);
+	void removeUser(int fd);
+	void removeInvited(Client* user);
+	void removeOperator(Client* user);
+	void userToOperator (Client* user);
+	void operatorToUser (Client* user);
+
+	int isChannelEmpty() const; // renvoie le nombre d'utilisateurs du channel
+	bool isValidChannelPW(const std::string& password);
+	bool verifClientisOperator (Client* client);
+	bool verifClientisUser (Client* client);
+	bool verifClientisInChannel (Client* client);
+	bool verifClientisInvited(Client* client);
+
+	
+	// modes
+
+
+	void changeModeI(Server* server, Client* client, std::string arg);
+	void changeModeT(Server* server, Client* client, std::string arg);
+	void changeModeK(Server* server, Client* client, std::string arg, std::string key);
+	void changeModeO(Server* server, Client* client, std::string arg, Client* cible) ;
+	void changeModeL(Server* server, Client* client, std::string arg, int limit);
+	void changeTopic(Server* server, Client* client, std::string topic);
+
+	//commandes op
+
+	void commandTopic(Server* server, Client* client, std::string topic);
+	void commandInvite(Server* server, Client* client, Client* cible);
+	void commandKick(Server* server, Client* client, Client* cible, std::string comment);
+
+	// ajout Zenaba debug
+	void ChannelSend(const std::string& message, Client* sender);
+	void printUsers() const;
+	void printClientVectors() const;
+	int getClientCount() const;
+
+	// ajout Chloe
+	void changeTopic(Client client, std::string topic);
+	Client* findClientByNick(const std::string &nick);
+
+};
+#pragma once
+#include <iostream>
+#include <cstdlib> 
+#include <sys/socket.h> // socket, bind, listen, accept
+#include <netinet/in.h> // sockaddr_in, htons, INADDR_ANY
+#include <unistd.h>
+#include <vector>
+#include <algorithm>
+#include <string>
+#include <poll.h>
+#include <map>
+#include <Channel.hpp>
+#include <sstream>
+
+
+# define RESET "\033[0m"
+# define BOLD "\033[1m"
+# define RED "\033[31m"
+# define GREEN "\033[32m"
+# define YELLOW "\033[33m"
+# define BLUE "\033[34m"
+# define CYAN "\033[36m"
+
+class Client 
+{
+    private:
+        int _fd;
+        std::string _nickname;
+        std::string _username;
+        std::string _realname;
+        std::string _pass;
+        bool _has_pass;
+        bool _has_nick;
+        bool _has_user;
+        bool _registred;
+        std::string _buffer; // Pour stocker les messages en attente
+
+    public :
+        Client(int fd);
+        ~Client();
+        bool isRegistered() const ;
+        void appendToBuffer(const std::string& data);
+        std::string& getBuffer();
+
+        int getFd(void) const;
+        void setHasPass(bool value);
+        void send_msg(const std::string& message);
+        void setNickname(const std::string& nick);
+        std::string getNickname() const;
+        std::string getUsername() const;
+        void setHasNick(bool value);
+        void setUsername(const std::string& name);
+        void setRealname(const std::string& name);
+        void setHasUser(bool value);
+        void setRegistered(bool value);
+        void setPass(const std::string &pass);
+        std::string getPrefix() const;
+
+        bool hasPass() const;
+        bool hasNick() const;
+        bool hasUser() const;
+
+        const std::string &getPass() const;
+        const std::string &getNick() const;
+        const std::string &getUser() const;
+        const std::string &getRealname() const;
+
+        std::vector<std::string> extractCompleteCommands();
+        std::string extractIncompleteCommand();
+        bool hasPartialData() const;
+        void clearBuffer();
+
+		bool operator==(const Client& other) const;
+		
+};
+#pragma once
+#include <iostream>
+#include <vector>
+#include <string>
+
+
+
+class Message 
+
+{
+    public:
+        std::string prefix;
+        std::string command;
+        std::string raw;
+        std::vector<std::string> params;
+        std::string trailing;
+
+        Message(std::string raw_msg); // constructeur
+        void msgParsing(std::string raw_msg);
+        void debugPrint() const;
+
+};
+#pragma once
+#include "Channel.hpp"
+#include "Client.hpp"
+#include "Message.hpp"
+#include <algorithm>
+#include <csignal>
+#include <cstdlib>
+#include <cstring>
+#include <errno.h>
+#include <fcntl.h>
+#include <iostream>
+#include <map>
+#include <netinet/in.h> // sockaddr_in, htons, INADDR_ANY
+#include <poll.h>
+#include <sstream>
+#include <string.h>
+#include <string>
+#include <sys/socket.h> // socket, bind, listen, accept
+#include <unistd.h>
+#include <vector>
+
+#define RESET "\033[0m"
+#define BOLD "\033[1m"
+#define RED "\033[31m"
+#define GREEN "\033[32m"
+#define YELLOW "\033[33m"
+#define BLUE "\033[34m"
+#define CYAN "\033[36m"
+
+#define BUFFER_SIZE 1024
+
+class	Client;
+class	Channel;
+
+class Server
+{
+  private:
+
+    int                     _port;
+    std::string             _password;
+    int                     _server_fd;
+    std::vector<pollfd>     _poll_fds;
+    std::string             _server_name;
+    std::map<int, Client*>  _clients;
+    std::vector<Channel*>    _channels;
+
+	public:
+	/*===== Constructors / Destructor =====*/
+	Server(int port, const std::string &password);
+	~Server();
+	/*===== Startup / Signal Handling / Error =====*/
+	void start(); // Main loop
+	static void catchSignal(int);
+	// Handle Ctrl+C or kill signals
+	void handleError(const std::string &message);
+	// Print error and close server socket
+	void cleanExit(); // Cleanup sockets and memory
+
+	/*===== Server Setup =====*/
+	bool setupServerSocket(); // Create, bind, listen on socket
+	void setupPollFds();      // Add server socket and stdin to poll()
+	void printStart();        // Display server start message
+	void handlePollEvents();  // Process events returned by poll()
+
+	/*===== Client Connection Management =====*/
+	void acceptNewClient();
+	// Accept new connection and register client
+	void removeClient(int client_fd); // Remove client (socket, pollfd, memory)
+
+	
+	/*===== MODE =====*/
+
+	//Client findClientByNick(const std::string &nick);
+	bool isValidModeCommand(Client *client, const Message &msg);
+	void parseModeBlock(Client *client, Channel *chan, const Message &msg,
+		const std::string &modes, size_t &paramIndex);
+	void handleModeWithParam(Client *client, Channel *chan, const Message &msg,
+		char c, char sign, size_t &paramIndex);
+	void handleModeNoParam(Client *client, Channel *chan, char c, char sign);
+
+	/*===== Kick =====*/
+
+	void handleKICK(Client *client, const Message &msg);
+	void handleINVIT(Client *client, const Message &msg);
+	void handleTOPIC(Client *client, const Message &msg);
+
+
+
+
+    /*===== Client Communication =====*/
+    void handleClient(int client_fd);                                                           // Read data from client
+    void handleClientRead(Client* client, const std::string& input);                            // Handle full commands
+    void handleClientDisconnection(Client* client, int client_fd, ssize_t received_bytes);      // Manage disconnect or error
+
+    
+    /*===== IRC Command Handling =====*/
+    void handleCommand(Client* client, const Message& msg);
+    void completeRegistration(Client* client);
+    void handleRegistred(Client* client, const Message& msg);
+    void handleServerCommand (Client* client, const Message& msg);
+    
+    void handlePASS (Client* client, const Message& msg);
+    void handleNICK (Client* client, const Message& msg);
+    void handleUSER (Client* client, const Message& msg);
+    void handlePRIVMSG(Client* client, const Message& msg);
+    void handleWHOIS(Client* client, const Message &msg);
+    bool MsgToChannel(Client* sender, const std::string& channelName, const std::string& message);
+    bool PvMsgToUser(Client* sender, const std::string& target, const std::string& message);
+
+
+    void handlePING (Client* client, const Message& msg);
+    void handleMODE (Client* client, const Message& msg);
+    void handleJOIN (Client* client, const Message& msg);
+    bool parseJoin(const Message &msg, std::string &channel, std::string &key);
+	bool PrefixUser(const Message &msg, std::string &User,
+	    std::string &channel, std::string &key);
+    std::string userPrefix(const std::string& prefix);
+    Channel* findChannel(const std::string& name);
+	Client *findClient(const std::string &nickname);
+    std::vector<std::string> splitComma(const std::string &input);
+    void handleSingleJoin(Client *client, const std::string &channelName, const std::string &key);
+    bool ValidChannelName(const std::string &name);
+    void leaveAllChannels(Client *client);
+    int ClientChannelCount(Client* client) const;
+
+    /*===== Server Console Input =====*/
+    void handleConsoleInput();                              // Read from stdin
+    void sendToAllClients(const std::string& text);         // Send message to all clients
+    void welcomeServer();                                   // Print welcome message
+    void welcomeClient(Client* client);                     // Send welcome message to client
+
+
+    /*===== Utilities =====*/
+    void sendError(int fd, const std::string& code,
+        const std::string& target, const std::string& message);             // IRC error sender
+	void sendError2(int fd, const std::string& code, 
+		const std::string& target, const std::string& targetBis, const std::string& message);
+	std::vector<std::string> splitCommand(const std::string& command);      // Split input string into tokens
+    Client* findByNick(const std::string& nickname);
+
+    /*===== Global Signal Flag =====*/
+    static int signal;
+
+
+	void suppressChannel(const Channel & channel);
+};
+// Utils.hpp
+#ifndef UTILS_HPP
+#define UTILS_HPP
+
+#include <string>
+#include <cctype>
+
+std::string toLower(const std::string& str);
+
+#endif
+#include "../includes/Server.hpp"
+
+int main(int argc, char **argv) 
+{
+    if (argc != 3) 
+    {
+        std::cerr << "Usage: ./ircserv <port> <password>\n";
+        return 1;
+    }
+
+    int port = std::atoi(argv[1]);
+    // ?? must be an integer between 6660 and 6669 ??
+    if (port < 1024 || port > 65535) 
+    {
+        std::cerr << "Error: Port number must be between 1024 and 65535." << std::endl;
+        return (1);
+    }
+    std::string password = argv[2];
+    Server server(port, password);
+    signal(SIGINT, Server::catchSignal);
+    server.start();
+    return 0;
+}
+#include "Server.hpp"
+
+int Server::signal = 0;
+
+/*==========================================
+      CONSTRUCTION DESTRUCTION SERVEUR        
+==========================================*/
+
+Server::Server(int port, const std::string& password) : _port(port), _password(password), _server_fd(-1)
+{
+    _server_name = "gossip.irc.localhost";
+    
+}
+
+Server::~Server() 
+{
+    cleanExit();
+    std::cout << RED << "Server exit" << RESET << std::endl;
+}
+
+
+/*==========================================
+                  METHODES        
+==========================================*/
+
+/*========== SIGNAL & EXIT ==========*/
+
+void Server::handleError(const std::string& message) 
+{
+    std::cerr << message << std::endl;
+    if (_server_fd >= 0)
+        close(_server_fd);
+}
+
+void Server::catchSignal(int signum)
+{
+    signal = signum;
+}
+void Server::cleanExit() 
+{
+    for (size_t i = 0; i < _poll_fds.size(); ++i)
+        close(_poll_fds[i].fd);
+
+    for (std::map<int, Client*>::iterator it = _clients.begin(); it != _clients.end(); ++it)
+        delete it->second;
+
+    _poll_fds.clear();
+    _clients.clear();
+}
+
+/*==========CONNEXION SETUP ==========*/
+
+void Server::setupPollFds()
+{
+    pollfd pfd;
+    pfd.fd = _server_fd;
+    pfd.events = POLLIN;
+    _poll_fds.push_back(pfd);
+
+    fcntl(STDIN_FILENO, F_SETFL, O_NONBLOCK);
+
+    pollfd p_stdin;
+    p_stdin.fd = STDIN_FILENO;
+    p_stdin.events = POLLIN;
+    _poll_fds.push_back(p_stdin);
+}
+
+void Server::printStart()
+{
+    std::cout << "\n────────────────────────────────\n";
+    std::cout << BOLD << "Password             : " << _password << std::endl;
+    std::cout << BOLD << "Server ready on port : " << _port << std::endl;
+    std::cout << "────────────────────────────────\n" << std::endl;
+}
+
+bool Server::setupServerSocket()
+{
+    int opt = 1;
+    sockaddr_in addr;
+    socklen_t addr_len = sizeof(addr);
+
+    _server_fd = socket(AF_INET, SOCK_STREAM, 0);
+    if (_server_fd == -1)
+        return handleError("Fail socket"), false;
+    if (setsockopt(_server_fd, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt)) == -1)
+        return handleError("Fail setsockopt"), false;
+    fcntl(_server_fd, F_SETFL, O_NONBLOCK);
+    memset(&addr, 0, sizeof(addr));
+    addr.sin_family = AF_INET;
+    addr.sin_port = htons(_port);
+    addr.sin_addr.s_addr = INADDR_ANY;
+
+    if (bind(_server_fd, (sockaddr*)&addr, addr_len) == -1)
+        return handleError("Fail bind"), false;
+    if (listen(_server_fd, 5) == -1)
+        return handleError("Fail listen"), false;
+    return true;
+}
+
+/*========== MAIN LOOP ==========*/
+
+void Server::start()
+{
+    if (!setupServerSocket())
+        return;
+    setupPollFds();
+    printStart();
+    while (Server::signal == 0)
+    {
+        int poll_count = poll(_poll_fds.data(), _poll_fds.size(), 1000);
+        if (poll_count < 0)
+        {
+            if (errno == EINTR)
+                continue;
+            return handleError("poll failed");
+        }
+        if (Server::signal != 0)
+            break;
+        handlePollEvents();
+    }
+}
+
+void Server::handlePollEvents()
+{
+    for (size_t i = 0; i < _poll_fds.size(); ++i)
+    {
+        int fd = _poll_fds[i].fd;
+
+        if (_poll_fds[i].revents & (POLLHUP | POLLERR))
+        {
+            removeClient(fd);
+            i--; // Ajuster car remove modifie la taille
+        }
+        else if (_poll_fds[i].revents & POLLIN)
+        {
+            if (fd == _server_fd)
+                acceptNewClient();
+            else if (fd == STDIN_FILENO)
+                handleConsoleInput();
+            else
+                handleClient(fd);
+        }
+    }
+}
+
+/*========== NEW CLIENT & EXISTING CLIENT ==========*/
+
+void Server::acceptNewClient()
+{
+    sockaddr_in client_addr; // stock les info client qui se connect
+    memset(&client_addr, 0, sizeof(client_addr));
+    socklen_t addr_len = sizeof(client_addr); //taille
+
+    int client_fd = accept(_server_fd, (sockaddr*)&client_addr, &addr_len); // on rempli la structure client_adrr avec les information trouve via accept
+    if (client_fd == -1)
+        return handleError("Fail accept");
+    std::cout << GREEN << BOLD << "Client [" << client_fd << "]" << " connected, wainting for register" << RESET << std::endl;
+    
+    // Mettre le socket client en mode non bloquant
+    fcntl(client_fd, F_SETFL, O_NONBLOCK);
+
+    //On ajoute une entree pollfd pour ce client dans _poll_fds pour que poll() suveille le socket
+    pollfd pfd;
+    pfd.fd = client_fd;
+    pfd.events = POLLIN;
+    pfd.revents = 0;
+    _poll_fds.push_back(pfd);
+
+    Client *client = new Client(client_fd); // on creer un nouveau client via son fd
+    _clients[client_fd] = client; //stock le client dans le map avec cles = fd
+
+}
+
+void Server::handleClient(int client_fd)
+{
+    /*Verifie que le client existe dans la map */
+    std::map<int, Client*>::iterator it = _clients.find(client_fd);
+    if (it == _clients.end()) 
+    {
+        std::cerr << "[ERROR] Client not found on fd [" << client_fd << "]" << std::endl;
+        return;
+    }
+    // Recuper le pointeur vers l'objet client cible pour utiliser ses attributs
+    Client* client = it->second;
+    
+    char buffer[1024]; // recv attend un tableau de char , 1024 taille suffisament grand pour un msg
+    ssize_t received_bytes = recv(client_fd, buffer, sizeof(buffer) - 1, 0);
+    if (received_bytes > 0)
+    {
+        buffer[received_bytes] = '\0';
+        handleClientRead(client, buffer);
+    }
+    else
+        handleClientDisconnection(client, client_fd, received_bytes);
+}
+
+
+void Server::handleClientRead(Client* client, const std::string& input)
+{
+    client->appendToBuffer(input);
+    std::vector<std::string> commands = client->extractCompleteCommands();
+
+    for (size_t i = 0; i < commands.size(); ++i)
+    {
+        const std::string& raw_message = commands[i];
+        std::cout << BOLD << "Client [" << client->getFd() << "] [RECV] " 
+                  << raw_message << RESET << std::endl;
+
+        Message msg(raw_message);
+        handleCommand(client, msg);
+    }
+}
+
+void Server::handleClientDisconnection(Client* client, int client_fd, ssize_t received_bytes)
+{
+    if (received_bytes == 0)
+    {
+        std::cout << RED << BOLD << "Client " << client_fd << " closed the connection." << RESET << std::endl;
+
+        if (client->hasPartialData()) 
+        {
+            std::string incomplete_cmd = client->extractIncompleteCommand();
+            if (!incomplete_cmd.empty()) 
+            {
+                Message msg(incomplete_cmd);
+                handleCommand(client, msg);
+            }
+        }
+    }
+    else
+        handleError("DEBUG ERROR recv()");
+    removeClient(client_fd);
+}
+
+
+
+void Server::removeClient(int client_fd)
+{
+    // Fermer la socket
+    close(client_fd);
+    //Supprimer le pollfd associe
+    for (std::vector<pollfd>::iterator it = _poll_fds.begin(); it != _poll_fds.end(); ++it)
+    {
+        if (it->fd == client_fd)
+        {
+            _poll_fds.erase(it);
+            break;
+        }
+    }
+    // Supprimer le client de la map + memoire
+    std::map<int, Client*>::iterator it = _clients.find(client_fd);
+    if (it != _clients.end())
+    {
+        delete it->second;
+        _clients.erase(it);
+    }
+}
+
+
+/*========== SERVER CONSOLE ==========*/
+
+void Server::handleConsoleInput()
+{
+    char    buf[BUFFER_SIZE];
+    ssize_t n = read(STDIN_FILENO, buf, sizeof(buf) - 1);
+
+    if (n <= 0)
+        return;
+    buf[n] = '\0';
+    std::string input(buf);
+    while (!input.empty() &&
+           (input[input.size() - 1] == '\n' || input[input.size() - 1] == '\r'))
+    {
+        input.erase(input.size() - 1, 1);
+    }
+    if (!input.empty())
+        sendToAllClients(input);
+}
+// Diffuse un message à TOUS les clients co
+void Server::sendToAllClients(const std::string& text)
+{
+    // Préfixe pour identifier le serveur
+    const std::string prefix = ":gossip.irc.localhost NOTICE * :";
+
+    // préfixe + texte + fin de ligne (\r\n)
+    std::string irc_line = prefix + text + "\r\n";
+
+    // Boucle sur tous les clients actuellement connectés
+    for (std::map<int, Client*>::iterator it = _clients.begin();
+         it != _clients.end(); ++it)
+    {
+        // Envoie le message au client via sa socket
+        it->second->send_msg(irc_line);
+    }
+
+    // Affiche également le message sur la console du serveur (pour logging)
+    std::cout << GREEN << BOLD << "[Serveur] " << irc_line << RESET;
+}
+
+/*========== OTHER ==========*/
+
+std::vector<std::string> Server::splitCommand(const std::string& command) 
+{
+    std::vector<std::string> tokens;
+    std::istringstream iss(command);
+    std::string token;
+
+    while (iss >> token) 
+    {
+        tokens.push_back(token);
+    }
+    return tokens;
+}
+
+	// void Server::suppressChannel(const Channel & channel)  
+	// {
+	// 	if (channel.isChannelEmpty() == 0)
+	// {
+	// 	// supprimer le channel du vecteur channel du serveur
+	// }
+	// }
+	
+#include "Message.hpp"
+
+/*========== METHODES ==========*/
+Message::Message(std::string raw_msg): raw(raw_msg)
+{
+        msgParsing(raw);
+        debugPrint();
+}
+
+void Message::msgParsing(std::string msg)
+{
+        while (!msg.empty() && (msg[msg.length() - 1] == '\r' || msg[msg.length() - 1] == '\n'))
+                msg.erase(msg.length() - 1, 1);
+        size_t i = 0;
+        if (!msg.empty() && msg[0] == ':') // trouver prefix
+        {
+                size_t space = msg.find(' ');
+                if (space != std::string::npos)
+                {
+                        prefix = msg.substr(1, space - 1);
+                        i = space + 1;
+                }
+                else
+                        return;
+        }
+
+        size_t space = msg.find(' ', i); // extraction commande
+        if (space != std::string::npos)
+        {
+                command = msg.substr(i, space - i);
+                i = space + 1;
+        }
+        else
+        {
+                command = msg.substr(i);
+                return ;
+        }
+        while (i <msg.size()) // extraction param et trailing
+        {
+                if (msg[i] == ':')
+                {
+                        trailing = msg.substr( i + 1);
+                        break;
+                }
+
+                size_t next_space = msg.find(' ', i);
+                if ( next_space == std::string::npos)
+                {
+                        params.push_back(msg.substr(i));
+                        break;
+                }
+                params.push_back(msg.substr(i, next_space - i));
+                i = next_space + 1;
+                while (i < msg.size() && msg[i] == ' ')
+                        ++i;
+        }
+}
+
+
+/*============= DEBUG ================*/
+
+void Message::debugPrint() const {
+	std::cout << "┌──────────── Parsed Message ────────────" << std::endl;
+	if (!prefix.empty())
+		std::cout << "│ Prefix   : " << prefix << std::endl;
+	std::cout << "│ Command  : " << command << std::endl;
+	std::cout << "│ Params   : ";
+	if (params.empty()) std::cout << "(none)";
+	else for (size_t i = 0; i < params.size(); ++i)
+		std::cout << "[" << i << "] = '" << params[i] << "'  ";
+	std::cout << std::endl;
+	if (!trailing.empty())
+		std::cout << "│ Trailing : " << trailing << std::endl;
+	std::cout << "└────────────────────────────────────────" << std::endl;
+}
+
+#include "Client.hpp"
+
+/*========== CONSTRUCTEUR ==========*/
+
+Client::Client(int fd) : _fd(fd), _has_pass(false), _has_nick(false), _has_user(false), _registred(false) {}
+
+/*========== DESTRUCTEUR ==========*/
+
+Client::~Client() {
+    close(_fd);
+}
+
+/*========== GETTERS ==========*/
+
+bool Client::hasPass() const { return _has_pass; }
+bool Client::hasNick() const { return _has_nick; }
+bool Client::hasUser() const { return _has_user; }
+
+const std::string &Client::getPass() const { return _pass;}
+const std::string &Client::getNick() const { return _nickname;}
+const std::string &Client::getUser() const { return _username;}
+const std::string &Client::getRealname() const { return _realname;}
+
+
+/*========== SETTER ==========*/
+
+void Client::setHasPass(bool value){
+    _has_pass = value;
+}
+
+void Client::setNickname(const std::string& nick){
+    _nickname = nick; 
+}
+
+void Client::setHasNick(bool value) {
+    _has_nick = value;
+}
+
+void Client::setUsername(const std::string& name){
+    _username = name;
+}
+
+void Client::setRealname(const std::string& name){
+    _realname = name;
+}
+
+void Client::setPass(const std::string& pass){
+    _pass = pass;
+}
+
+void Client::setHasUser(bool value){
+    _has_user = value;
+}
+
+void Client::setRegistered(bool value){
+    _registred = value;
+}
+
+/*========== GETTER ==========*/
+
+std::string Client::getNickname() const {
+    return _nickname;
+}
+
+std::string Client::getUsername() const {
+    return _username;
+}
+
+std::string& Client::getBuffer() 
+{
+    return _buffer;
+}
+
+int Client::getFd(void) const
+{
+	return (_fd);
+}
+
+std::string Client::getPrefix() const 
+{
+    if (_nickname.empty() || _username.empty()) {
+        std::ostringstream oss;
+        oss << "user" << _fd << "@localhost";
+        return oss.str();
+    }
+    return _nickname + "!" + _username + "@localhost";
+}
+
+
+/*========== METHODES ==========*/
+bool Client::isRegistered() const 
+{
+    if (_has_pass && _has_nick && _has_user)
+        return true;
+    else
+        return false;
+}
+
+void Client::appendToBuffer(const std::string& data) 
+{
+    _buffer += data;
+}
+
+void Client::send_msg(const std::string& message)
+{
+    
+    std::string full_message = message + "\r\n";
+
+    ssize_t sent = send(_fd, full_message.c_str(), full_message.size(), 0);
+
+    if (sent == -1)
+    {
+        std::cerr << RED << BOLD << "[ERROR] Error sending msg to client." << _fd << RESET << std::endl;
+    }
+
+}
+
+std::vector<std::string> Client::extractCompleteCommands() 
+{
+    std::vector<std::string> commands;
+    std::string::size_type pos = 0;
+
+    while ((pos = _buffer.find('\n')) != std::string::npos) 
+    {
+        std::string command = _buffer.substr(0, pos);
+        _buffer.erase(0, pos + 1); // supprimer la ligne + '\n'
+
+        if (!command.empty() && command[command.length() - 1] == '\r') 
+            command.erase(command.length() - 1); // enlever le '\r'
+
+        if (!command.empty()) 
+            commands.push_back(command);
+    }
+
+    return commands;
+}
+
+//forcer l'extraction d'une commande incomplete ( Ctrl+D)
+std::string Client::extractIncompleteCommand() 
+{
+    std::string command = _buffer;
+    _buffer.clear();
+    return command;
+}
+
+bool Client::hasPartialData() const 
+{
+    return !_buffer.empty();
+}
+
+void Client::clearBuffer() 
+{
+    _buffer.clear();
+}
+
+bool Client::operator==(const Client& other) const {
+			return this->getFd() == other.getFd(); 
+		}
+
+
+#include "Server.hpp"
+
+/*================== ERROR =======================*/
+
+void Server::sendError(int fd, const std::string &code,
+	const std::string &target, const std::string &message)
+{
+	std::string full = ":" + _server_name + " " + code + " " + target + " :"
+		+ message + "\n";
+	send(fd, full.c_str(), full.size(), 0);
+}
+
+void Server::sendError2(int fd, const std::string& code, const std::string& target, const std::string& targetBis, const std::string& message)
+{
+    std::string full = ":" + _server_name + " " + code + " " + target + " " + targetBis +" :" + message + "\n";
+    send(fd, full.c_str(), full.size(), 0);
+}
+
+/*=================== FIND =======================*/
+
+Channel* Server::findChannel(const std::string& name)
+{
+	for (size_t i = 0; i < _channels.size(); ++i)
+	{
+		if (_channels[i]->getName() == name)
+			return _channels[i];
+	}
+	return NULL;
+}
+
+Client *Server::findClient(const std::string &nickname)
+{
+	for (std::map<int,
+		Client *>::iterator it = _clients.begin(); it != _clients.end(); ++it)
+	{
+		Client *client = it->second; // valeur dans la map
+		if (client && client->getNickname() == nickname)
+			return (client);
+	}
+	return (NULL);
+}
+
+int Server::ClientChannelCount(Client* client) const 
+{
+    int count = 0;
+    for (std::vector<Channel*>::const_iterator it = _channels.begin(); it != _channels.end(); ++it)
+    {
+        Channel* chan = *it;
+        if (chan->verifClientisUser(client) || chan->verifClientisOperator(client))
+            count++;
+    }
+    return count;
+}
+
+/*=================== Message =======================*/
+
+bool Server::MsgToChannel(Client* sender, const std::string& channelName, const std::string& message)
+{
+    Channel* channel = findChannel(channelName);
+    if (!channel)
+    {
+        sendError(sender->getFd(), "403", channelName, "No such channel");
+        return false;
+    }
+
+    std::string irc_line = ":" + sender->getPrefix() + " PRIVMSG " + channelName + " :" + message + "\r\n";
+
+    channel->ChannelSend(irc_line, sender);
+
+    return true;
+}
+
+bool Server::PvMsgToUser(Client* sender, const std::string& target, const std::string& message)
+{
+    for (std::map<int, Client*>::iterator it = _clients.begin(); it != _clients.end(); ++it)
+    {
+        Client* dest = it->second;
+        if (dest->getNickname() == target)
+        {
+            std::string prefix = ":" + sender->getPrefix(); // pas de prefix dans client
+            std::string irc_line = prefix + " PRIVMSG " + target + " :" + message + "\r\n";
+            dest->send_msg(irc_line);
+            return true;
+        }
+    }
+    return false;
+}
+
+#include "Server.hpp"
+
+void Server::welcomeServer()
+{
+	std::cout << "\n██████████████████████████████████████" << std::endl;
+	std::cout << "███                               ████" << std::endl;
+	std::cout << "███  ***  GOSSIP.IRC SERVER  ***  ████" << std::endl;
+	std::cout << "███                               ████" << std::endl;
+	std::cout << "██████████████████████████████████████" << std::endl;
+	std::cout << "\n────────────────────────────\n" << std::endl;
+	std::cout << "         SERVER LOG        :\n" << std::endl;
+}
+
+void Server::welcomeClient(Client *client)
+{
+	std::string nick = client->getNickname();
+	client->send_msg(":" + _server_name + " 001 " + nick +
+						" :\x03"
+						"03"
+						"Welcome to the GOSSIP.IRC Network, " +
+						nick + "\x0F");
+	client->send_msg(":" + _server_name + " 002 " + nick +
+						" :\x03"
+						"03"
+						"Your host is " +
+						_server_name + ", running version 1.0\x0F");
+	client->send_msg(":" + _server_name + " 003 " + nick +
+						" :\x03"
+						"03"
+						"This server was created July 2025\x0F");
+	client->send_msg(":" + _server_name + " 004 " + nick +
+						" :\x03"
+						"03" +
+						_server_name + " 1.0 o o\x0F");
+}
+
+
+void Server::completeRegistration(Client *client)
+{
+	client->setRegistered(true);
+	this->welcomeServer();
+	this->welcomeClient(client);
+}
+
+#include "Channel.hpp"
+#include "Server.hpp"
+
+void Server::handleTOPIC(Client *client, const Message &msg)
+{
+    if (msg.params.empty())
+    {
+        sendError(client->getFd(), "461", "TOPIC", "Not enough parameters");
+        return;
+    }
+
+    std::string channelName = msg.params[0];
+    Channel *chan = findChannel(channelName);
+
+    if (!chan)
+    {
+        sendError(client->getFd(), "403", channelName, "No such channel");
+        return;
+    }
+
+    if (!chan->verifClientisInChannel(client))
+    {
+        sendError(client->getFd(), "442", channelName, "You're not on that channel");
+        return;
+    }
+
+    std::string topic;
+    if (msg.params.size() > 1)
+        topic = msg.params[1];
+    else
+        topic = "";
+
+    std::cout << "[DEBUG] topic = " << topic << std::endl;
+    //   chan->commandTopic(client, topic);
+}
+
+#include "Channel.hpp"
+#include "Server.hpp"
+
+Client* Channel::findClientByNick(const std::string &nick)
+{
+	for (std::vector<Client*>::iterator it = _users.begin(); it != _users.end(); ++it)
+	{
+		if ((*it)->getNick() == nick)
+			return (*it);
+	}
+	for (std::vector<Client*>::iterator it = _operators.begin(); it != _operators.end(); ++it)
+	{
+		if ((*it)->getNick() == nick)
+			return (*it);
+	}
+	return (NULL);
+}
+
+
+void Server::handleMODE(Client *client, const Message &msg)
+{
+	Channel	*chan;
+	size_t	paramIndex;
+
+	if (!isValidModeCommand(client, msg))
+		return ;
+	chan = findChannel(msg.params[0]);
+	paramIndex = 2;
+	for (size_t i = 1; i < msg.params.size(); ++i)
+	{
+		std::string current = msg.params[i];
+		if (!current.empty() && (current[0] == '+' || current[0] == '-'))
+			parseModeBlock(client, chan, msg, current, paramIndex);
+	}
+}
+
+bool Server::isValidModeCommand(Client *client, const Message &msg)
+{
+	Channel	*chan;
+
+	if (msg.params.size() < 2 || msg.params[0][0] != '#')
+	{
+		sendError(client->getFd(), "461", "MODE", "Not enough parameters");
+		return (false);
+	}
+	chan = findChannel(msg.params[0]);
+	if (!chan)
+	{
+		sendError(client->getFd(), "403", "MODE", "No such channel");
+		return (false);
+	}
+	std::cout << "[DEBUG] : Channel = " << msg.params[0] << std::endl;
+	return (true);
+}
+
+void Server::parseModeBlock(Client *client, Channel *chan, const Message &msg,
+	const std::string &modes, size_t &paramIndex)
+{
+	char	sign;
+	char	c;
+
+	std::cout << "[DEBUG] : modes = " << modes << std::endl;
+	sign = modes[0];
+	for (size_t j = 1; j < modes.size(); ++j)
+	{
+		c = modes[j];
+		if (c == 'o' || c == 'k' || c == 'l')
+			handleModeWithParam(client, chan, msg, c, sign, paramIndex);
+		else
+			handleModeNoParam(client, chan, c, sign);
+	}
+}
+
+void Server::handleModeWithParam(Client *client, Channel *chan,
+	const Message &msg, char c, char sign, size_t &paramIndex)
+{
+	Client	*target;
+	int		limit;
+
+	(void)sign;
+	if (paramIndex >= msg.params.size())
+	{
+		std::cout << "Pas assez de paramètres pour le mode " << c << std::endl;
+		return ;
+	}
+	std::string param = msg.params[paramIndex];
+	std::cout << "[DEBUG] : mode = " << c << " param = " << param << std::endl;
+	if (c == 'o')
+	{
+		target = chan->findClientByNick(param);
+		if (!target)
+			sendError(client->getFd(), "401", param, "No such nick");
+		else
+			std::cout << "C'est un o avec " << param << std::endl;
+		// chan->changeModeO(*client, std::string(1, sign) + "o", *target);
+	}
+	else if (c == 'k')
+	{
+		std::cout << "C'est un k avec " << param << std::endl;
+		// chan->changeModeK(*client, std::string(1, sign) + "k", param);
+	}
+	else if (c == 'l')
+	{
+		limit = atoi(param.c_str());
+		std::cout << "C'est un l avec " << limit << std::endl;
+		// chan->changeModeL(*client, std::string(1, sign) + "l", limit);
+	}
+	paramIndex++;
+}
+
+void Server::handleModeNoParam(Client *client, Channel *chan, char c, char sign)
+{
+	(void)sign;
+	(void)chan;
+	(void)client;
+	if (c == 'i')
+	{
+		std::cout << "C'est un i" << std::endl;
+		// chan->changeModeI(*client, std::string(1, sign) + "i");
+	}
+	else if (c == 't')
+	{
+		std::cout << "C'est un t" << std::endl;
+		// chan->changeModeT(*client, std::string(1, sign) + "t");
+	}
+	else
+	{
+		std::cout << "Mode inconnu : " << c << std::endl;
+	}
+}
+
+#include "Channel.hpp"
+#include "Server.hpp"
+
+void Server::handleKICK(Client *client, const Message &msg)
+{
+    if (msg.params.size() < 2)
+    {
+        sendError(client->getFd(), "461", "KICK", "Not enough parameters");
+        return;
+    }
+
+    std::string channelName = msg.params[0];
+    std::string targetNick = msg.params[1];
+
+    std::string reason;
+    if (msg.trailing.empty())
+        reason = "No reason";
+    else
+        reason = msg.trailing;
+
+    Channel *chan = findChannel(channelName);
+    if (!chan)
+    {
+        sendError(client->getFd(), "403", channelName, "No such channel");
+        return;
+    }
+
+    Client *target = chan->findClientByNick(targetNick);
+    if (!target)
+    {
+        sendError(client->getFd(), "441", targetNick, "They aren't on that channel");
+        return;
+    }
+    std::cout << "[DEBUG] Target = " << targetNick << std::endl;
+    std::cout << "[DEBUG] reason = " << reason << std::endl;
+    //chan->commandKick(client, target, reason);
+}
+#include "Channel.hpp"
+#include "Server.hpp"
+#include "Client.hpp"
+
+std::vector<std::string> Server::splitComma(const std::string &input)
+{
+	std::vector<std::string> result;
+	std::stringstream ss(input);
+	std::string item;
+
+	while (std::getline(ss, item, ','))
+		result.push_back(item);
+	return result;
+}
+
+void Server::handleSingleJoin(Client *client, const std::string &channelName, const std::string &key)
+{
+    std::cout << "[DEBUG][JOIN] Handle JOIN request\n";
+	std::cout << "[DEBUG]  user    = " << client->getNickname() << "\n";
+	std::cout << "[DEBUG]  channel = " << channelName << "\n";
+	std::cout << "[DEBUG]  key     = " << (key.empty() ? "(no key)" : key) << "\n";
+	// Vérifie que le nom est valide
+	if (channelName.empty() || channelName[0] != '#')
+	{
+		sendError(client->getFd(), "403", channelName, "No such channel");
+		return;
+	}
+
+	// Cherche le channel
+	Channel* chan = findChannel(channelName);
+
+	// Si existe pas, crer
+	if (!chan)
+	{
+		std::cout << "[JOIN] Channel '" << channelName << "' does not exist. Creating it.\n";
+		Channel* newChannel = new Channel(channelName);
+		_channels.push_back(newChannel);
+		chan = newChannel;
+	}
+	else
+	{
+		std::cout << "[JOIN] Channel '" << channelName << "' already exists.\n";
+	}
+	// Si client dans le channel
+	if (chan->verifClientisUser(client))
+    {
+        std::cout << "[JOIN] Client already in channel '" << channelName << "'. Skipping.\n";
+        return;
+    }
+	// Ajouter le client au channel
+	chan->addUser(this, client, key);
+
+	// ajouter reponse facon IRC a faire demain
+
+	std::cout << "[DEBUG][JOIN] Client " << client->getNickname()
+			  << "[DEBUG] joined channel " << channelName
+			  << (key.empty() ? "[DEBUG] (no key)" : "[DEBUG] with key") << ".\n";
+    std::cout << GREEN << BOLD << "Client successfully added to channel" << RESET << std::endl;
+
+    std::cout << "[DEBUG] Clients in channel after join:\n";
+    chan->printClientVectors();
+
+}
+
+bool Server::parseJoin(const Message &msg, std::string &channel,
+	std::string &key)
+{
+	channel.clear(); // reset
+	key.clear();
+	const std::string &p0 = msg.params[0]; // nom du channel
+	if (msg.params.empty())
+		return (false);
+    if (p0 == "0"|| p0 == "#0")
+    {
+        channel = "0";
+        return true;
+    }
+	if (p0.empty() || p0[0] != '#') // nom du channel doit commencer par # donc petite verif
+		return (false);
+	channel = p0;
+	if (msg.params.size() >= 2) // si il y a un deuxieme paramettre c'est le mdp
+		key = msg.params[1];
+	return (true);
+}
+std::string toLower(const std::string &str) 
+{
+    std::string lower;
+    for (size_t i = 0; i < str.size(); ++i)
+        lower += std::tolower(str[i]);
+    return lower;
+}
+
+void Server::handleJOIN(Client *client, const Message &msg)
+{
+	std::string channel, key, user;
+	if (msg.params.empty())
+	{
+		sendError(client->getFd(), "461", "JOIN", "Not enough parameters");
+		return ;
+	}
+    if (!client->isRegistered())
+	{
+		sendError(client->getFd(), "451", client->getNickname(), "You have not registered");
+        return;
+    }
+    if (!msg.prefix.empty() && toLower(msg.prefix) != toLower(client->getNickname()))    
+    {
+        sendError(client->getFd(), "451", client->getNickname(), "prefix different from user nickname");
+        return;
+    }
+
+    if (msg.params[0] == "0" || msg.params[0] == "#0")
+	{
+        leaveAllChannels(client);
+		return;
+	}
+    std::vector<std::string> channels = splitComma(msg.params[0]);
+	std::vector<std::string> keys;
+    if (msg.params.size() > 1)
+		keys = splitComma(msg.params[1]);
+
+	for (size_t i = 0; i < channels.size(); ++i)
+	{
+		std::string chan = channels[i];
+		std::string key = (i < keys.size()) ? keys[i] : "";
+		std::string tmpChannel, tmpKey;
+		Message msg_chan("JOIN " + chan + " :" + key);
+		if (!parseJoin(msg_chan,tmpChannel, tmpKey)) 
+		{
+			sendError(client->getFd(), "403", chan, "No such channel");
+			continue;
+		}
+        if (ClientChannelCount(client) >= 10)
+        {
+			std::cout << "Client ["<< client->getFd() <<"] has 10 CHannels\n";
+            sendError(client->getFd(), "405", channel, "You have joined too many channels");
+            return;
+        }
+		handleSingleJoin(client, chan, key); // logique unique join
+	}
+}
+
+void Server::leaveAllChannels(Client *client) 
+{
+    std::cout << BOLD << "Client [" << client->getFd() << "] leaving all channels\n";
+    for (std::vector<Channel*>::iterator it = _channels.begin(); it != _channels.end(); )
+    {
+        Channel* chan = *it;
+
+        std::cout << "[DEBUG]  -> Checking if client is in channel: " << chan->getName() << "\n";
+        std::cout << "[DEBUG]     client ptr = " << client << "\n";
+
+        std::cout << "[DEBUG]    users in channel:\n";
+        chan->printUsers();
+
+        if (chan->verifClientisUser(client) || chan->verifClientisOperator(client))
+        {
+            std::cout << "[DEBUG]  -> client is present in channel!\n";
+            chan->removeUser(client->getFd());
+            chan->removeOperator(client);
+
+            std::string partMsg = ":" + client->getPrefix() + " PART " + chan->getName() + " :Leaving all channels\r\n";
+            chan->ChannelSend(partMsg, client);
+
+            std::cout << "[DEBUG]  -> left channel " << chan->getName() << "\n";
+        }
+        int result = chan->getClientCount();  // ou isChannelEmpty()
+
+        std::cout << "[DEBUG] Clients in channel before delete:\n";
+        chan->printClientVectors();
+        std::cout << "[DEBUG] Get Client Count Result = " << result << std::endl;
+        // Supprimer le channel si vide
+        if (result == 0)
+        {
+            std::cout << "[DEBUG]  -> channel " << chan->getName() << " is now empty. Deleting it.\n";
+            delete chan;
+            it = _channels.erase(it); // erase retourne l'itérateur suivant
+        }
+        else
+        {
+            ++it;
+        }
+    }
+}
+
+#include "Channel.hpp"
+#include "Server.hpp"
+
+void Server::handleINVIT(Client *client, const Message &msg)
+{
+    if (msg.params.size() < 2) {
+        sendError(client->getFd(), "461", "INVITE", "Not enough parameters");
+        return;
+    }
+
+    std::string targetNick = msg.params[0];
+    std::string channelName = msg.params[1];
+
+    Channel *chan = findChannel(channelName);
+    if (!chan) {
+        sendError(client->getFd(), "403", channelName, "No such channel");
+        return;
+    }
+
+    Client *target = findClient(targetNick);
+    if (!target) {
+        sendError(client->getFd(), "401", targetNick, "No such nick");
+        return;
+    }
+    std::cout << "[DEBUG] Target = " << targetNick << std::endl;
+   // chan->commandInvite(client, target);
+}
+
+#include "Server.hpp"
+#include "Channel.hpp"
+#include "Utils.hpp"
+
+
+void Server::handleCommand(Client *client, const Message &msg)
+{
+	if (msg.command == "PASS" || msg.command == "NICK" || msg.command == "USER")
+		handleRegistred(client, msg);
+	else if (msg.command == "PING" || msg.command == "PRIVMSG"
+		|| msg.command == "MODE" || msg.command == "JOIN" || msg.command == "KICK" || msg.command == "WHOIS")
+		handleServerCommand(client, msg);
+	// handle channel
+	else if (!client->isRegistered())
+		sendError(client->getFd(), "451", "*", "You have not registered");
+	else
+		sendError(client->getFd(), "421", msg.command, "Unknown command");
+}
+
+void Server::handleRegistred(Client *client, const Message &msg)
+{
+	if (msg.command == "PASS")
+		handlePASS(client, msg);
+	else if (msg.command == "NICK")
+		handleNICK(client, msg);
+	else if (msg.command == "USER")
+		handleUSER(client, msg);
+	else
+		return ;
+}
+
+void Server::handleServerCommand(Client *client, const Message &msg)
+{
+	if (msg.command == "PRIVMSG")
+		handlePRIVMSG(client, msg);
+	if (msg.command == "PING")
+		handlePING(client, msg);
+	else if (msg.command == "MODE")
+		handleMODE(client, msg);
+	else if (msg.command == "JOIN")
+		handleJOIN(client, msg);
+	else if (msg.command == "KICK")
+		handleKICK(client, msg);
+	else if (msg.command == "INVIT")
+		handleINVIT(client, msg);
+	else if (msg.command == "TOPIC")
+		handleTOPIC(client, msg);
+	else if (msg.command == "WHOIS")
+        handleWHOIS(client, msg);
+	else
+		return ;
+}
+
+/*======================== COMMAND ============================*/
+
+void Server::handlePASS(Client *client, const Message &msg)
+{
+	if (client->isRegistered())
+	{
+		sendError(client->getFd(), "462", "*", "You may not reregister");
+		return ;
+	}
+	if (msg.params.empty())
+	{
+		sendError(client->getFd(), "461", "PASS", "Not enough parameters");
+		return ;
+	}
+	if (msg.params[0] != _password)
+	{
+		sendError(client->getFd(), "464", "*", "Password incorrect");
+		return ;
+	}
+	client->setPass(msg.params[0]);
+	client->setHasPass(true);
+	if (client->hasNick() && client->hasUser() && client->hasPass())
+	{
+		completeRegistration(client);
+	}
+}
+
+void Server::handleNICK(Client *client, const Message &msg)
+{
+	std::string newNick = msg.params[0];
+	if (msg.params.size() < 1)
+	{
+		sendError(client->getFd(), "431", "*", "No nickname given");
+		return ;
+	}
+	for (std::map<int,
+		Client *>::iterator it = _clients.begin(); it != _clients.end(); ++it)
+	{
+		if (it->second != client && it->second->getNickname() == newNick)
+		{
+			sendError(client->getFd(), "433", "*",
+				"Nickname is already in use");
+			return ;
+		}
+	}
+	if (newNick.find_first_of(" ,*?!@") != std::string::npos)
+	{
+		sendError(client->getFd(), "432", "*", "Error nickname");
+		return ;
+	}
+	client->setNickname(newNick);
+	client->setHasNick(true);
+	if (client->hasNick() && client->hasUser() && client->hasPass())
+	{
+		completeRegistration(client);
+	}
+}
+
+void Server::handleUSER(Client *client, const Message &msg)
+{
+	if (client->isRegistered())
+	{
+		sendError(client->getFd(), "462", "*", "You may not register");
+		return ;
+	}
+	if (msg.params.size() < 2)
+	{
+		sendError(client->getFd(), "461", "USER", "Not enough parameters");
+		return ;
+	}
+	client->setUsername(msg.params[0]);
+	client->setRealname(msg.params[1]);
+	client->setHasUser(true);
+	if (client->hasNick() && client->hasUser() && client->hasPass())
+	{
+		completeRegistration(client);
+	}
+}
+
+void Server::handlePRIVMSG(Client* client, const Message& msg)
+{
+    if (!client->isRegistered())
+    {
+        sendError(client->getFd(), "451", "*", "You have not registered");
+        return;
+    }
+
+    if (msg.params.empty())
+    {
+        sendError(client->getFd(), "461", "PRIVMSG", "Not enough parameters");
+        return;
+    }
+	std::string target = msg.params[0];
+    std::string messageText = msg.trailing;
+    if (messageText.empty())
+    {
+        sendError(client->getFd(), "412", "PRIVMSG", "No text to send");
+        return;
+    }
+	std::cout << "[PRIVMSG] " << client->getNickname() << " -> " << msg.params[0] << ": " << msg.trailing << std::endl;
+	if (PvMsgToUser(client, target, messageText))
+        return;
+
+    
+    if (target[0] == '#' && MsgToChannel(client, target, messageText))
+    {
+        // Try sending to channel if it starts with #
+		return;
+	}
+	sendError(client->getFd(), "401", target, "No such nick/channel");
+
+}
+
+void Server::handlePING(Client *client, const Message &msg)
+{
+	if (msg.params.empty())
+	{
+		sendError(client->getFd(), "409", "*", "No origin specified");
+		return ;
+	}
+	std::string token = msg.params[0];
+	std::string response = ":" + _server_name + " PONG :" + token;
+	client->send_msg(response);
+	client->send_msg(_server_name + " :PONG sent by the server");
+}
+
+
+
+Client* Server::findByNick(const std::string& nickname)
+{
+    for (std::map<int, Client*>::iterator it = _clients.begin(); it != _clients.end(); ++it)
+    {
+        if (toLower(it->second->getNick()) == toLower(nickname))
+            return it->second;
+    }
+    return NULL;
+}
+
+void Server::handleWHOIS(Client* client, const Message &msg)
+{
+    std::cout << "DANS WHO IS\n";
+
+    if (msg.params.empty())
+    {
+        client->send_msg(":" + _server_name + " 431 " + client->getNick() + " :No nickname given");
+        return;
+    }
+
+    std::string target = msg.params[0];
+    Client* targetClient = findByNick(target);
+
+    if (!targetClient)
+    {
+        client->send_msg(":" + _server_name + " 401 " + client->getNick() + " " + target + " :No such nick");
+        return;
+    }
+
+    // WHOIS user line (code 311)
+    client->send_msg(":" + _server_name + " 311 " + client->getNick() + " " +
+                    targetClient->getNick() + " ~user localhost * :" + targetClient->getRealname());
+
+    // WHOIS end line (code 318)
+    client->send_msg(":" + _server_name + " 318 " + client->getNick() + " " +
+                    targetClient->getNick() + " :End of WHOIS list");
+
+}
+#include <Channel.hpp>
+
+/*========================== REMOVE ============================*/
+
+void Channel::removeOperator(Client *user)
+{
+	std::vector<Client *>::iterator it = std::find(_operators.begin(),
+			_operators.end(), user);
+	if (it != _operators.end())
+		_operators.erase(it);
+}
+
+void Channel::removeInvited(Client *user)
+{
+	std::vector<Client *>::iterator it = std::find(_isInvited.begin(),
+			_isInvited.end(), user);
+	if (it != _isInvited.end())
+		_isInvited.erase(it);
+}
+
+void Channel::removeUser(int fd)
+{
+	for (std::vector<Client *>::iterator it = _users.begin(); it != _users.end(); ++it)
+	{
+		if ((*it)->getFd() == fd)
+		{
+			_users.erase(it);
+			break ;
+		}
+	}
+	return ;
+}
+
+/*========================== VERIF ============================*/
+
+bool Channel::verifClientisInChannel(Client *client)
+{
+	if (std::find(_operators.begin(), _operators.end(),
+			client) != _operators.end() && std::find(_users.begin(),
+			_users.end(), client) != _users.end())
+		return (true);
+	return (false);
+}
+
+bool Channel::verifClientisOperator(Client *client)
+{
+	if (std::find(_users.begin(), _users.end(), client) != _users.end())
+		return (true);
+	return (false);
+}
+
+bool Channel::verifClientisUser(Client *client)
+{
+	return (std::find(_users.begin(), _users.end(), client) != _users.end());
+	return (false);
+}
+
+bool Channel::verifClientisInvited(Client *client)
+{
+	return (std::find(_isInvited.begin(), _isInvited.end(),
+			client) != _isInvited.end());
+}
+
+/*========================== PRINT / DEBUG ============================*/
+
+void Channel::printUsers() const
+{
+	for (std::vector<Client *>::const_iterator it = _users.begin(); it != _users.end(); ++it)
+		std::cout << "       - " << *it << "\n";
+	for (std::vector<Client *>::const_iterator it = _operators.begin(); it != _operators.end(); ++it)
+		std::cout << "       - (op) " << *it << "\n";
+}
+
+//---- DEBUG ZENABA
+void Channel::ChannelSend(const std::string &message, Client *sender)
+{
+	for (std::vector<Client *>::iterator it = _users.begin(); it != _users.end(); ++it)
+	{
+		if (*it != sender)
+			(*it)->send_msg(message);
+	}
+}
+
+void Channel::printClientVectors() const
+{
+	std::cout << "  [_users] Clients:\n";
+	for (std::vector<Client *>::const_iterator it = _users.begin(); it != _users.end(); ++it)
+		std::cout << "    - ptr: " << *it << " (" << (*it)->getNickname() << ")\n";
+
+	std::cout << "  [_operators] Clients:\n";
+	for (std::vector<Client *>::const_iterator it = _operators.begin(); it != _operators.end(); ++it)
+		std::cout << "   - ptr: " << *it << " (" << (*it)->getNickname() << ")\n";
+}
+#include <Channel.hpp>
+
+// MODE #channel i
+// i = on invitation only
+// +i : seuls ls invites accedent
+//-i : tout le monde accede
+void Channel::changeModeI(Server *server, Client *client, std::string arg)
+{
+	if (verifClientisOperator(client) == true)
+	{
+		if (arg == "-i")
+		{
+			this->_inviteOnly = false;
+			// reponse :<Nick>!user@host MODE #channel -i
+			// message :serveur 324 <nick> #channel -i
+		}
+		else if (arg == "+i")
+		{
+			this->_inviteOnly = true;
+			// reponse :<Nick>!user@host MODE #channel +i
+			// message :serveur 324 <nick> #channel +i
+		}
+	}
+	else
+	{
+		std::cout << "DEBUG ChangeModeI : client not an operator" << std::endl;
+		server->sendError(client->getFd(), "482", this->_name,
+			"You're not channel operator");
+	}
+}
+
+void Channel::changeModeT(Server *server, Client *client, std::string arg)
+{
+	if (verifClientisOperator(client) == true)
+	{
+		/// A SUPPRIMER /////
+		server->sendError(client->getFd(), "482", this->_name,
+			"You're not channel operator");
+		/////
+		if (arg == "+t")
+		{
+			this->_topicRestriction = true;
+			// message: :<nick>!user@host MODE #channel +t
+			// message :serveur 324 <nick> #channel +t
+		}
+		if (arg == "-t")
+		{
+			this->_topicRestriction = false;
+			// message: :<nick>!user@host MODE #channel -t
+			// message :serveur 324 <nick> #channel -t
+		}
+	}
+}
+
+void Channel::changeModeK(Server *server, Client *client, std::string arg,
+	std::string key)
+{
+	if (verifClientisOperator(client) == true)
+	{
+		if (arg == "+k")
+		{
+			if (this->_key == true)
+			{
+				server->sendError(client->getFd(), "467", this->_name,
+					"Channel key already set");
+				std::cout << "DEBUG ChangeModeK : channel a deja un password" << std::endl;
+			}
+			else if (this->_key == false && isValidChannelPW(key) == true)
+			{
+				this->_password = key;
+				this->_key = true;
+				// message: :<nick>!user@host MODE #channel +k
+				// :serveur 324 <nick> #channel +k motdepasse
+			}
+			else
+			{
+				std::cout << "DEBUG ChangeModeK : bad channel key - password non valid" << std::endl;
+				server->sendError(client->getFd(), "475", this->_name,
+					"Cannot join channel (+k)");
+			}
+		}
+		if (arg == "-k")
+		{
+			if (this->_key == true && this->_password == key)
+			{
+				this->_key = false;
+				// message: :<nick>!user@host MODE #channel -k
+				//:serveur 324 <nick> #channel -k
+			}
+			else if (this->_key == false)
+			{
+				std::cout << "DEBUG ChangeModeK : channel est deja en mode -k : message confirmation" << std::endl;
+				// message: :<nick>!user@host MODE #channel -k
+				//:serveur 324 <nick> #channel -k
+			}
+			else
+			{
+				std::cout << "DEBUG ChangeModeK : mauvais password de channel : mot de passe ignore et mode -k active" << std::endl;
+				// attention infos contradictoires trouvees sur le sujet
+				// server->sendError(client->getFd(), "475", this->_name, "Cannot join channel (+k)");
+				// message: :<nick>!user@host MODE #channel -k
+				//:serveur 324 <nick> #channel -k
+			}
+		}
+	}
+	else
+	{
+		std::cout << "DEBUT ChangeModeK : client not an operator" << std::endl;
+		server->sendError(client->getFd(), "482", this->_name,
+			"You're not channel operator");
+	}
+}
+
+void Channel::changeModeO(Server *server, Client *client, std::string arg,
+	Client *cible)
+{
+	if (verifClientisOperator(client) == true)
+	{
+		if (verifClientisInChannel(cible) == false)
+		{
+			std::cout << "DEBUT ChangeModeO : Cible not in channel" << std::endl;
+			server->sendError2(client->getFd(), "441", cible->getNick(),
+				this->_name, "They aren't on that channel");
+		}
+		else
+		{
+			if (arg == "+o" && verifClientisUser(cible) == true)
+			{
+				std::cout << "DEBUG ChangeModeO : cible passe de user a operator" << std::endl;
+				userToOperator(cible);
+				// message: :<nick>!<user>@<host> MODE #canal +o cible
+				//:serveur 324 <nick> #canal +o cible
+			}
+			else if (arg == "+o" && verifClientisUser(cible) == false)
+			{
+				std::cout << "DEBUT ChangeModeO : cible already operator : envoi message confirmation" << std::endl;
+				// message: :<nick>!<user>@<host> MODE #canal +o cible
+				//:serveur 324 <nick> #canal +o cible
+			}
+			else if (arg == "-o" && verifClientisOperator(cible) == true)
+			{
+				std::cout << "DEBUG ChangeModeO : cible passe de operator a user" << std::endl;
+				operatorToUser(cible);
+				// message: :<nick>!<user>@<host> MODE #canal -o cible
+				//:serveur 324 <nick> #canal -o cible
+			}
+			else
+			{
+				std::cout << "DEBUT ChangeModeO : cible not an operator : envoi message confirmation" << std::endl;
+				// message: :<nick>!<user>@<host> MODE #canal +o cible
+				//:serveur 324 <nick> #canal +o cible
+			}
+		}
+	}
+	else
+	{
+		std::cout << "DEBUT ChangeModeO : client not an operator" << std::endl;
+		server->sendError(client->getFd(), "482", this->_name,
+			"You're not channel operator");
+	}
+}
+
+void Channel::changeModeL(Server *server, Client *client, std::string arg,
+	int limit)
+{
+	if (verifClientisOperator(client) == true)
+	{
+		if (arg == "+l" && _hasLimit == false)
+		{
+			_hasLimit = true;
+			_limit = limit;
+			// message confirmation : :<nick>!<user>@<host> MODE #canal +l 10
+			// :serveur 324 <nick> #canal +l 10
+		}
+		else if (arg == "+l" && _hasLimit == true)
+		{
+			_limit = limit;
+			std::cout << "DEBUT ChangeModeL : limite modifiee" << std::endl;
+			// message confirmation : :<nick>!<user>@<host> MODE #canal +l 10
+			//:serveur 324 <nick> #canal +l 10
+		}
+		else if (arg == "-l" && _hasLimit == true)
+		{
+			_hasLimit = false;
+			// message confirmation : :<nick>!<user>@<host> MODE #canal -l
+			//:serveur 324 <nick> #canal -l
+		}
+		else
+		{
+			std::cout << "DEBUT ChangeModeL : no limit is set - commande ignoree" << std::endl;
+			// commande ignoree - aucun message
+		}
+	}
+	else
+	{
+		std::cout << "DEBUT ChangeModeL : client not an operator" << std::endl;
+		server->sendError(client->getFd(), "482", this->_name,
+			"You're not channel operator");
+	}
+}
+
+#include <Channel.hpp>
+
+/*========================== TOPIC ============================*/
+
+void Channel::changeTopic(Server *server, Client *client, std::string topic)
+{
+	if (_topicRestriction == true && verifClientisOperator(client) == false)
+	{
+		std::cout << "DEBUG changeTopic : refus de changement" << std::endl;
+		server->sendError(client->getFd(), "482", this->_name,
+			"You're not channel operator");
+	}
+	else
+	{
+		this->_topicName = topic;
+		this->_topic = true;
+		// message: :<nick>!user@host MODE #channel +t
+		// message :serveur 324 <nick> #channel -t
+	}
+}
+
+void Channel::commandTopic(Server *server, Client *client, std::string topic)
+{
+	// if topic est vide : afficher le topic
+	if (topic == "")
+	{
+		// message recu par tous les utilisateurs du canal y compris le demandeur :
+		//:<nick client>!user@host TOPIC <#channel> :<topic>
+		// pas de message specifique envoye uniquement au demandeur
+		std::cout << "DEBUG commtPOPIC : message topic actuel" << std::endl;
+	}
+	else if (_topicRestriction == true)
+	{
+		if (verifClientisOperator(client) == true)
+		{
+			_topicName = topic;
+			// message recu par tous les utilisateurs du canal y compris le demandeur :
+			//:<nick client>!user@host TOPIC <#channel> :<topic>
+			// pas de message specifique envoye uniquement au demandeur
+			std::cout << "DEBUG commtPOPIC : message nouveau topic" << std::endl;
+		}
+		else
+		{
+			server->sendError(client->getFd(), "482", this->_name,
+				"You're not channel operator");
+			std::cout << "DEBUG commtPOPIC : client not an operator" << std::endl;
+		}
+	}
+	else
+	{
+		_topicName = topic;
+		// message recu par tous les utilisateurs du canal y compris le demandeur :
+		//:<nick client>!user@host TOPIC <#channel> :<topic>
+		// pas de message specifique envoye uniquement au demandeur
+	}
+}
+
+/*========================== KICK ============================*/
+
+// client : celui qui envoie la commande
+// cible : nickname utilise dans la commande
+void Channel::commandKick(Server *server, Client *client, Client *cible,
+	std::string comment)
+{
+	if (verifClientisOperator(client) == true)
+	{
+		if (verifClientisInChannel(cible) == true)
+		{
+			removeUser(cible->getFd());
+			removeInvited(cible);
+			if (comment != "")
+			{
+				std::cout << "DEBUG commKick : message confirmation sans comment" << std::endl;
+				// message envoye a tous y compris client et cible
+				// message confirmation : :<nick>!user@host KICK #channel cible
+			}
+			else
+				std::cout << "DEBUG commKick : message confirmation avec comment" << std::endl;
+			// message envoye a tous y compris client et cible
+			// message confirmation : :<nick>!user@host KICK #channel cible :<comment>
+		}
+		else
+		{
+			std::cout << "DEBUG commKick : cible not in channel" << std::endl;
+			server->sendError2(client->getFd(), "441", cible->getNick(),
+				this->_name, "They aren't on that channel");
+		}
+	}
+	else
+	{
+		server->sendError(client->getFd(), "482", this->_name,
+			"You're not channel operator");
+		std::cout << "DEBUG commKick : client not an operator" << std::endl;
+	}
+}
+
+/*========================== INVIT ============================*/
+
+// inviter une personne deja invitee ne cree pas d'erreur et le message de confirmnation est envoye
+void Channel::commandInvite(Server *server, Client *client, Client *cible)
+{
+	if (verifClientisOperator(client) == true)
+	{
+		if (verifClientisInChannel(cible) == true)
+		{
+			server->sendError(client->getFd(), "443", cible->getNick(),
+				"is already on channel");
+			std::cout << "DEBUG commInvite : deja dans channel" << std::endl;
+		}
+		else
+		{
+			addInvited(cible);
+			// message:	:<Nick client>!user@host INVITE <nick cible> :#channel : recu uniquement par bob
+			// message:	:server 341 <Nick client> <nicjk cible> #channel : recu uniquement par client
+		}
+	}
+	else
+	{
+		server->sendError(client->getFd(), "482", this->_name,
+			"You're not channel operator");
+		std::cout << "DEBUG commInvite : client not an operator" << std::endl;
+	}
+}
+
+/*========================== ADDUSER ============================*/
+
+void Channel::addUser(Server *server, Client *user, std::string key)
+{
+	// si l'utilisateur est deja dans le channel (user ou chanop) :
+	if (verifClientisInChannel(user) == true)
+	{
+		server->sendError2(user->getFd(), "443", user->getNick(), this->_name,
+			"is already on channel");
+		std::cout << "DEBUG ADDUSER user already in the channel" << std::endl;
+	}
+	// si l'utilisateur est deja connecte a 10 channel /
+	// DEBUG(client->getFd(), "405", "channel name", "You have joined too many channels");
+	else if (_inviteOnly == true && verifClientisInvited(user) == false)
+	{
+		std::cout << "DEBUG ADDUSER channel on invite mode only" << std::endl;
+		server->sendError(user->getFd(), "473", this->_name,
+			"Cannot join channel (+i)");
+	}
+	else if (_hasLimit == true && (_users.size() + _operators.size()) < _limit)
+	{
+		std::cout << "DEBUG ADDUSER Too much users in this channel" << std::endl;
+		server->sendError(user->getFd(), "471", this->_name,
+			"Cannot join channel (+l)");
+	}
+	else if (this->_key && this->_password != key)
+	{
+		server->sendError(user->getFd(), "475", this->_name,
+			"Cannot join channel (+k)");
+		std::cout << "DEBUG ADDUSER bad password" << std::endl;
+	}
+	else if (_operators.empty())
+		_operators.push_back(user);
+	// envoi des messages lies a la creation du channel ???
+	// message: :<nick>!<user>@<host> JOIN :#channel
+	//:<serveur> MODE #channel +o <nick>
+	// :<serveur> 324 <nick> #channel +o
+	// :<serveur> 353 <nick> = #channel :<nick>
+	// :<serveur> 366 <nick> #channel :End of NAMES list
+	// :<serveur> 331 <nick> #channel42 :No topic is set
+	else
+		_users.push_back(user);
+	// message: :<nick>!<user>@<host> JOIN :#channel
+	// message : liste des modes du channel
+	// message : liste des clients du channel
+	// message : topic du channel
+	return ;
+}
+
+# ================== CONFIGURATION ================== #
+NAME      := ircserv
+CC        := c++
+CFLAGS    := -Wall -Wextra -Werror -std=c++98 -MMD
+OPTIONS   := -I includes
+
+SRC_DIR   := srcs
+OBJ_DIR   := obj
+
+HEADER_NAMES := Channel.hpp Client.hpp CommandHanler.hpp Message.hpp Server.hpp
+SRC_FILES    := main.cpp \
+				server/Channel/Channel.cpp \
+				server/Channel/Mode.cpp \
+				server/Channel/otherCommand.cpp \
+				server/Channel/utils.cpp \
+				server/HandleCommand/HandleCommand.cpp \
+				server/HandleCommand/HandleInvit.cpp \
+				server/HandleCommand/HandleJoin.cpp \
+				server/HandleCommand/HandleKick.cpp \
+				server/HandleCommand/HandleMode.cpp \
+				server/HandleCommand/HandleTopic.cpp \
+				server/HandleCommand/Registration.cpp \
+				server/HandleCommand/utils.cpp \
+				server/Client.cpp \
+				server/Message.cpp \
+				server/Server.cpp \
+
+SRC := $(addprefix $(SRC_DIR)/, $(SRC_FILES))
+HEADER_FILES := $(addprefix includes/, $(HEADER_NAMES))
+OBJS := $(addprefix $(OBJ_DIR)/, $(SRC_FILES:.cpp=.o))
+DEPS := $(OBJS:.o=.d)
+
+# ================== COULEURS ================== #
+GREEN  = \033[32m
+BLUE   = \033[34m
+RESET  = \033[0m
+RED    = \033[31m
+
+# ================== RÈGLES ================== #
+all: $(NAME)
+
+$(NAME): $(OBJS)
+	@echo "$(BLUE)Linking objects...$(RESET)"
+	@$(CC) $(CFLAGS) $(OPTIONS) $(OBJS) -o $(NAME)
+	@echo "$(GREEN)✓ Compilation réussie !$(RESET)"
+
+$(OBJ_DIR)/%.o: $(SRC_DIR)/%.cpp
+	@mkdir -p $(dir $@)
+	@$(CC) $(CFLAGS) $(OPTIONS) -c $< -o $@
+
+clean:
+	@rm -rf $(OBJ_DIR)
+	@echo "$(RED)✓ Objets et dépendances supprimés.$(RESET)"
+
+fclean: clean
+	@rm -f $(NAME)
+	@echo "$(RED)✓ Exécutable supprimé.$(RESET)"
+
+re: fclean all
+
+-include $(DEPS)
+
+.PHONY: all clean fclean re

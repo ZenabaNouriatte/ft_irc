@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   utils.cpp                                          :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: cschmid <cschmid@student.42.fr>            +#+  +:+       +#+        */
+/*   By: zmogne <zmogne@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/31 13:57:45 by cschmid           #+#    #+#             */
-/*   Updated: 2025/07/31 14:01:40 by cschmid          ###   ########.fr       */
+/*   Updated: 2025/08/04 11:22:37 by zmogne           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -96,4 +96,21 @@ bool Server::PvMsgToUser(Client* sender, const std::string& target, const std::s
         }
     }
     return false;
+}
+
+bool isValidNickname(const std::string& nick) 
+{
+    if (nick.empty())
+        return false;
+    if (!std::isalpha(nick[0]))
+        return false;
+    for (size_t i = 1; i < nick.size(); ++i) 
+    {
+        char c = nick[i];
+        if (!std::isalnum(c) &&
+            c != '-' && c != '[' && c != ']' && c != '\\' &&
+            c != '`' && c != '^' && c != '{' && c != '}')
+            return false;
+    }
+    return true;
 }

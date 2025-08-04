@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   HandleCommand.cpp                                  :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: zmogne <zmogne@student.42.fr>              +#+  +:+       +#+        */
+/*   By: cschmid <cschmid@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/21 14:30:34 by cschmid           #+#    #+#             */
-/*   Updated: 2025/08/03 19:50:47 by zmogne           ###   ########.fr       */
+/*   Updated: 2025/08/04 16:21:22 by cschmid          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,7 +20,9 @@ void Server::handleCommand(Client *client, const Message &msg)
 	if (msg.command == "PASS" || msg.command == "NICK" || msg.command == "USER")
 		handleRegistred(client, msg);
 	else if (msg.command == "PING" || msg.command == "PRIVMSG"
-		|| msg.command == "MODE" || msg.command == "JOIN" || msg.command == "KICK" || msg.command == "WHOIS")
+		|| msg.command == "MODE" || msg.command == "JOIN" 
+		|| msg.command == "TOPIC" || msg.command == "PART"
+		|| msg.command == "KICK" || msg.command == "WHOIS")
 		handleServerCommand(client, msg);
 	// handle channel
 	else if (!client->isRegistered())
@@ -43,6 +45,7 @@ void Server::handleRegistred(Client *client, const Message &msg)
 
 void Server::handleServerCommand(Client *client, const Message &msg)
 {
+	std::cout << "[DEBUG] HANDLE SERVER COMMAND , msg command [" << msg.command << "]" << std::endl;
 	if (msg.command == "PRIVMSG")
 		handlePRIVMSG(client, msg);
 	if (msg.command == "PING")
@@ -57,6 +60,8 @@ void Server::handleServerCommand(Client *client, const Message &msg)
 		handleINVIT(client, msg);
 	else if (msg.command == "TOPIC")
 		handleTOPIC(client, msg);
+	else if (msg.command == "PART")
+		handlePART(client, msg);
 	else if (msg.command == "WHOIS")
         handleWHOIS(client, msg);
 	else
@@ -108,7 +113,7 @@ void Server::handleNICK(Client *client, const Message &msg)
 			return ;
 		}
 	}
-	if (newNick.find_first_of(" ,*?!@") != std::string::npos)
+	if (!isValidNickname(newNick))
 	{
 		sendError(client->getFd(), "432", "*", "Error nickname");
 		return ;

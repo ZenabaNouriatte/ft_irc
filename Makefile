@@ -6,7 +6,7 @@
 #    By: cschmid <cschmid@student.42.fr>            +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2025/07/04 16:33:23 by zmogne            #+#    #+#              #
-#    Updated: 2025/07/31 14:23:12 by cschmid          ###   ########.fr        #
+#    Updated: 2025/08/04 16:09:06 by cschmid          ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -30,6 +30,7 @@ SRC_FILES    := main.cpp \
 				server/HandleCommand/HandleJoin.cpp \
 				server/HandleCommand/HandleKick.cpp \
 				server/HandleCommand/HandleMode.cpp \
+				server/HandleCommand/HandlePart.cpp \
 				server/HandleCommand/HandleTopic.cpp \
 				server/HandleCommand/Registration.cpp \
 				server/HandleCommand/utils.cpp \

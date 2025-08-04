@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   utils.cpp                                          :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: cschmid <cschmid@student.42.fr>            +#+  +:+       +#+        */
+/*   By: zmogne <zmogne@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/31 14:07:32 by cschmid           #+#    #+#             */
-/*   Updated: 2025/07/31 14:14:40 by cschmid          ###   ########.fr       */
+/*   Updated: 2025/08/04 13:18:23 by zmogne           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -48,7 +48,7 @@ void Channel::removeUser(int fd)
 bool Channel::verifClientisInChannel(Client *client)
 {
 	if (std::find(_operators.begin(), _operators.end(),
-			client) != _operators.end() && std::find(_users.begin(),
+			client) != _operators.end() || std::find(_users.begin(),
 			_users.end(), client) != _users.end())
 		return (true);
 	return (false);
@@ -86,12 +86,22 @@ void Channel::printUsers() const
 //---- DEBUG ZENABA
 void Channel::ChannelSend(const std::string &message, Client *sender)
 {
+	// user
 	for (std::vector<Client *>::iterator it = _users.begin(); it != _users.end(); ++it)
 	{
 		if (*it != sender)
 			(*it)->send_msg(message);
 	}
+
+	// operator
+	for (std::vector<Client *>::iterator it = _operators.begin(); it != _operators.end(); ++it)
+	{
+		// pouor ne pas aussi envoyer a user donc 2 fois
+		if (*it != sender && std::find(_users.begin(), _users.end(), *it) == _users.end())
+			(*it)->send_msg(message);
+	}
 }
+
 
 void Channel::printClientVectors() const
 {
