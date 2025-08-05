@@ -106,8 +106,7 @@ class Server
     void handlePASS (Client* client, const Message& msg);
     void handleNICK (Client* client, const Message& msg);
     bool isNicknameInUse(const std::string &nick);
-    //std::string findAvailableNick(const std::string& baseNick);
-
+    void handleQUIT(Client* client, const Message& msg);
     void handleUSER (Client* client, const Message& msg);
     void handlePRIVMSG(Client* client, const Message& msg);
     void handleWHOIS(Client* client, const Message &msg);

@@ -22,7 +22,7 @@ void Server::handleCommand(Client *client, const Message &msg)
 	else if (msg.command == "PING" || msg.command == "PRIVMSG"
 		|| msg.command == "MODE" || msg.command == "JOIN" 
 		|| msg.command == "TOPIC" || msg.command == "PART"
-		|| msg.command == "KICK" || msg.command == "WHOIS")
+		|| msg.command == "KICK" || msg.command == "WHOIS" || msg.command == "QUIT")
 		handleServerCommand(client, msg);
 	// handle channel
 	else if (!client->isRegistered())
@@ -62,6 +62,8 @@ void Server::handleServerCommand(Client *client, const Message &msg)
 		handleTOPIC(client, msg);
 	else if (msg.command == "WHOIS")
         handleWHOIS(client, msg);
+    else if (msg.command == "QUIT")
+        handleQUIT(client, msg);
 	else
 		return ;
 }
@@ -93,45 +95,6 @@ void Server::handlePASS(Client *client, const Message &msg)
 	}
 }
 
-// void Server::handleNICK(Client *client, const Message &msg)
-// {
-	
-// 	if (msg.params.size() < 1)
-// 	{
-// 		sendError(client->getFd(), "431", "*", "No nickname given");
-// 		return ;
-// 	}
-// 	std::string newNick = msg.params[0];
-// 	for (std::map<int,
-// 		Client *>::iterator it = _clients.begin(); it != _clients.end(); ++it)
-// 	{
-// 		if (it->second != client && it->second->getNickname() == newNick)
-// 		{
-// 			sendError(client->getFd(), "433", "*",
-// 				"Nickname is already in use");
-// 			return; // boucle inifinie ici
-// 		}
-
-// 	}
-// 	if (!isValidNickname(newNick))
-// 	{
-// 		sendError(client->getFd(), "432", "*", "Error nickname");
-// 		return ;
-// 	}
-// 	if (client->isRegistered())
-// 	{
-// 		std::string oldNick = client->getNickname();
-// 		std::string nickMsg = ":" + oldNick + "!~" + client->getUsername() +
-// 			"@localhost NICK :" + newNick + "\r\n";
-// 		sendToAllClients(nickMsg); // ou sendToChannelClients si tu préfères
-// 	}
-// 	client->setNickname(newNick);
-// 	client->setHasNick(true);
-// 	if (client->hasNick() && client->hasUser() && client->hasPass())
-// 	{
-// 		completeRegistration(client);
-// 	}
-// }
 
 bool Server::isNicknameInUse(const std::string &nick)
 {
@@ -145,7 +108,8 @@ bool Server::isNicknameInUse(const std::string &nick)
 
 void Server::handleNICK(Client *client, const Message &msg) 
 {
-    if (msg.params.size() < 1) {
+    if (msg.params.size() < 1) 
+    {
         sendError(client->getFd(), "431", "*", ":No nickname given");
         disconnectClient(client->getFd());
         return;
@@ -163,12 +127,12 @@ void Server::handleNICK(Client *client, const Message &msg)
     }
 
     // Si c'est le même pseudonyme que celui du client, ignorer
-    if (client->getNickname() == requestedNick) {
+    if (client->getNickname() == requestedNick)
         return;
-    }
 
     // Vérifier si le pseudonyme est déjà utilisé
-    if (isNicknameInUse(requestedNick)) {
+    if (isNicknameInUse(requestedNick)) 
+    {
         std::string currentNick = client->getNickname().empty() ? "*" : client->getNickname();
         
         // Envoyer l'erreur 433 avec le bon format et déconnecter
@@ -178,7 +142,8 @@ void Server::handleNICK(Client *client, const Message &msg)
     }
 
     // Le pseudonyme est disponible et valide
-    if (client->isRegistered() && !client->getNickname().empty()) {
+    if (client->isRegistered() && !client->getNickname().empty()) 
+    {
         // Client déjà enregistré qui change de pseudonyme
         std::string oldNick = client->getNickname();
         std::string nickMsg = ":" + oldNick + "!~" + client->getUsername() + 
@@ -302,3 +267,37 @@ void Server::handleWHOIS(Client* client, const Message &msg)
                     targetClient->getNick() + " :End of WHOIS list");
 
 }
+
+void Server::handleQUIT(Client *client, const Message &msg)
+{
+	std::string reason = "Client Quit";
+	if (!msg.params.empty())
+		reason = msg.params[0];
+
+	// Construire le message de QUIT
+	std::string quitMsg = ":" + client->getPrefix() + " QUIT :" + reason + "\r\n";
+
+	// Prévenir tous les channels du départ du client
+	for (std::vector<Channel*>::iterator it = _channels.begin(); it != _channels.end(); )
+	{
+		Channel *channel = *it;
+		if (channel->verifClientisInChannel(client))
+		{
+			channel->ChannelSend(quitMsg, client);
+			channel->removeUser(client->getFd());
+			channel->removeOperator(client); // nettoyage optionnel
+
+			if (channel->isChannelEmpty()) {
+				delete channel;
+				it = _channels.erase(it); // erase retourne le nouvel itérateur
+				continue;
+			}
+		}
+		++it;
+	}
+
+	// Déconnecter proprement le client
+	disconnectClient(client->getFd());
+}
+
+

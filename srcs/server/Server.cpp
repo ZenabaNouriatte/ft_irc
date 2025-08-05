@@ -144,7 +144,7 @@ void Server::handlePollEvents()
 
         if (_poll_fds[i].revents & (POLLHUP | POLLERR))
         {
-            removeClient(fd);
+            disconnectClient(fd);
             i--; // Ajuster car remove modifie la taille
         }
         else if (_poll_fds[i].revents & POLLIN)
@@ -259,32 +259,33 @@ void Server::handleClientDisconnection(Client* client, int client_fd, ssize_t re
     }
     else
         handleError("DEBUG ERROR recv()");
-    removeClient(client_fd);
+    Message quitMsg("QUIT :Client disconnected");
+	handleQUIT(client, quitMsg);
 }
 
 
 
-void Server::removeClient(int client_fd)
-{
-    // Fermer la socket
-    close(client_fd);
-    //Supprimer le pollfd associe
-    for (std::vector<pollfd>::iterator it = _poll_fds.begin(); it != _poll_fds.end(); ++it)
-    {
-        if (it->fd == client_fd)
-        {
-            _poll_fds.erase(it);
-            break;
-        }
-    }
-    // Supprimer le client de la map + memoire
-    std::map<int, Client*>::iterator it = _clients.find(client_fd);
-    if (it != _clients.end())
-    {
-        delete it->second;
-        _clients.erase(it);
-    }
-}
+// void Server::removeClient(int client_fd)
+// {
+//     // Fermer la socket
+//     close(client_fd);
+//     //Supprimer le pollfd associe
+//     for (std::vector<pollfd>::iterator it = _poll_fds.begin(); it != _poll_fds.end(); ++it)
+//     {
+//         if (it->fd == client_fd)
+//         {
+//             _poll_fds.erase(it);
+//             break;
+//         }
+//     }
+//     // Supprimer le client de la map + memoire
+//     std::map<int, Client*>::iterator it = _clients.find(client_fd);
+//     if (it != _clients.end())
+//     {
+//         delete it->second;
+//         _clients.erase(it);
+//     }
+// }
 
 
 /*========== SERVER CONSOLE ==========*/
