@@ -50,9 +50,6 @@ void Server::handleSingleJoin(Client *client, const std::string &channelName, co
     }
 	// Ajouter le client au channel
 	chan->addUser(this, client, key);
-	// std::string joinMsg = ":" + client->getPrefix() + " JOIN :" + channelName + "\r\n";
-	// chan->ChannelSend(joinMsg, NULL); // envoyer à tous y compris l'émetteur
-	//fonctions a integrer
 	sendJoinMsg(client, chan);
 	sendTopic(client, chan);
 	sendNameList(client, chan);
@@ -182,29 +179,6 @@ void Server::leaveAllChannels(Client *client)
     }
 }
 
-
-// void Server::sendNameList(Client* client, Channel* chan)
-// {
-// 	std::string memberList;
-// 	const std::vector<Client*>& users = chan->getUsers(); 
-
-// 	for (size_t i = 0; i < users.size(); ++i)
-// 	{
-// 		if (chan->verifClientisOperator(users[i]))
-// 			memberList += "@";
-// 		memberList += users[i]->getNickname();
-// 		if (i != users.size() - 1)
-// 			memberList += " ";
-// 	}
-
-// 	std::string namesMsg = ":" + _server_name + " 353 " + client->getNickname() +
-// 		" = " + chan->getName() + " :" + memberList + "\r\n";
-// 	client->send_msg(namesMsg);
-
-// 	std::string endNamesMsg = ":" + _server_name + " 366 " + client->getNickname() +
-// 		" " + chan->getName() + " :End of /NAMES list\r\n";
-// 	client->send_msg(endNamesMsg);
-// }
 
 void Server::sendNameList(Client* client, Channel* chan)
 {
