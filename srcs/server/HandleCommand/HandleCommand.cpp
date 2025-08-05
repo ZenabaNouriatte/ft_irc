@@ -184,6 +184,7 @@ void Server::handleUSER(Client *client, const Message &msg)
 
 void Server::handlePRIVMSG(Client* client, const Message& msg)
 {
+	std::cout << "Msg\n";
     if (!client->isRegistered())
     {
         sendError(client->getFd(), "451", "*", "You have not registered");
