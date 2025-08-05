@@ -88,6 +88,7 @@ class Server
 	void handleKICK(Client *client, const Message &msg);
 	void handleINVIT(Client *client, const Message &msg);
 	void handleTOPIC(Client *client, const Message &msg);
+    void handlePART(Client* client, const Message& msg);
 
 
 
@@ -129,6 +130,8 @@ class Server
     bool ValidChannelName(const std::string &name);
     void leaveAllChannels(Client *client);
     int ClientChannelCount(Client* client) const;
+	void verifIfCloseChannel(Channel* channel);
+	void commandPart(Client* client, Channel* channel, std::string comment);
     void sendNameList(Client* client, Channel* chan);
     void sendTopic(Client* client, Channel* chan);
     void sendJoinMsg(Client* client, Channel* chan);

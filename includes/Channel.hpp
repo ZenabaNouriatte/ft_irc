@@ -27,7 +27,7 @@ class Channel
 	public :
 		Channel();
 		Channel(std::string name);
-		Channel(std::string name, std::string topicName);
+//		Channel(std::string name, std::string topicName);
 		~Channel();
 	
 
@@ -68,6 +68,7 @@ class Channel
 	void removeOperator(Client* user);
 	void userToOperator (Client* user);
 	void operatorToUser (Client* user);
+	int affectNextOperator();
 
 	int isChannelEmpty() const; // renvoie le nombre d'utilisateurs du channel
 	bool isValidChannelPW(const std::string& password);
@@ -105,12 +106,3 @@ class Channel
 
 };
 
-//Modification de Client en Client* : coherence avec le reste du projet 
-//Ne pas creer une copie mais utiliser l'objet client
-//Utiliser des const quqnd on ne modifie pas la string
-
-
-//dans le client :
-// map (channel, droit)
-// gere les droits du client dans chaque Channel
-// droit : operateur ou utilisateur
