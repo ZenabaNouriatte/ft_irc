@@ -108,24 +108,6 @@ void Channel::printUsers() const
 		std::cout << "       - (op) " << *it << "\n";
 }
 
-//---- DEBUG ZENABA
-// void Channel::ChannelSend(const std::string &message, Client *sender)
-// {
-// 	// user
-// 	for (std::vector<Client *>::iterator it = _users.begin(); it != _users.end(); ++it)
-// 	{
-// 		if (*it != sender)
-// 			(*it)->send_msg(message);
-// 	}
-
-// 	// operator
-// 	for (std::vector<Client *>::iterator it = _operators.begin(); it != _operators.end(); ++it)
-// 	{
-// 		// pouor ne pas aussi envoyer a user donc 2 fois
-// 		if (*it != sender && std::find(_users.begin(), _users.end(), *it) == _users.end())
-// 			(*it)->send_msg(message);
-// 	}
-// }
 
 void Channel::ChannelSend(const std::string &message, Client *sender)
 {

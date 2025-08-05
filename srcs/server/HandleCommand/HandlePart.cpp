@@ -15,16 +15,36 @@
 
 // commande PART dans server
 
+// void Server::verifIfCloseChannel(Channel* channel)
+// {
+// 	///// SEGFAULT A CE NIVEAU : voir ce qui ne va pas avec DELETE
+// 	if (channel->isChannelEmpty() == 0)
+// 	{
+// 		if (channel)
+// 			delete channel;
+// 		std::cout << "[DEBUG] channel" << channel->getName() << "has been deleted" << std::endl;
+// 	}
+// }
+
 void Server::verifIfCloseChannel(Channel* channel)
 {
-	///// SEGFAULT A CE NIVEAU : voir ce qui ne va pas avec DELETE
-	if (channel->isChannelEmpty() == 0)
+	if (channel && channel->isChannelEmpty() == 0)
 	{
-		if (channel)
-			delete channel;
-		std::cout << "[DEBUG] channel" << channel->getName() << "has been deleted" << std::endl;
+		std::string name = channel->getName();
+
+		for (std::vector<Channel*>::iterator it = _channels.begin(); it != _channels.end(); ++it)
+		{
+			if (*it == channel)
+			{
+				_channels.erase(it);
+				break;
+			}
+		}
+		delete channel;
+		std::cout << "[DEBUG] channel " << name << " has been deleted" << std::endl;
 	}
 }
+
 
 
 void Server::commandPart(Client* client, Channel* channel, std::string comment)
@@ -34,19 +54,21 @@ void Server::commandPart(Client* client, Channel* channel, std::string comment)
         std::cout << "[DEBUG] commande PART -> client is present in channel!\n";
     	   //message a tous les membres du channel + le client qui vient de partir;
 		std::string partMsg;
-		if (comment.empty())
-            partMsg = ":" + client->getPrefix() + " PART " + channel->getName() + " :" + comment + "\r\n";
+		if (!comment.empty())
+			partMsg = ":" + client->getPrefix() + " PART " + channel->getName() + " :" + comment + "\r\n";
 		else
-		    partMsg = ":" + client->getPrefix() + " PART " + channel->getName() + "\r\n";
-        channel->ChannelSend(partMsg, client);
-        std::cout << "[DEBUG] commande PART -> left channel " << channel->getName() << "\n";
+			partMsg = ":" + client->getPrefix() + " PART " + channel->getName() + "\r\n";
+        //std::cout << "[DEBUG] commande PART -> left channel " << channel->getName() << "\n";
+		channel->ChannelSend(partMsg, client);
+		client->send_msg(partMsg);
 		channel->removeUser(client->getFd());
         channel->removeOperator(client);
 			std::cout << "[DEBUG]ICI" << std::endl;
 		if (channel->affectNextOperator() == 1)
 		{
 			std::cout << "[DEBUG]LA" << std::endl;
-				verifIfCloseChannel(channel);
+			verifIfCloseChannel(channel);
+			channel = NULL;
 			std::cout << "[DEBUG]APRES DELETE" << std::endl;	
 			// std::cout << "[DEBUG] channel deleted" << channel->getName() << "has been deleted" << std::endl;
 			//message ??
