@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   otherCommand.cpp                                   :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: zmogne <zmogne@student.42.fr>              +#+  +:+       +#+        */
+/*   By: smolines <smolines@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/31 14:14:57 by cschmid           #+#    #+#             */
-/*   Updated: 2025/08/04 15:17:29 by zmogne           ###   ########.fr       */
+/*   Updated: 2025/08/05 12:37:07 by smolines         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -108,7 +108,6 @@ void Channel::commandTopic(Server *server, Client *client, std::string topic)
 	}
 
 	_topicName = topic;
-
 	std::cout << "[DEBUG][TOPIC] Nouveau topic défini pour le channel '" << _name << "'\n";
 	std::string topicMsg = ":" + client->getPrefix() + " TOPIC " + _name + " :" + topic + "\r\n";
 	ChannelSend(topicMsg, NULL); // Diffusion à tous les membres du channel
@@ -122,22 +121,31 @@ void Channel::commandTopic(Server *server, Client *client, std::string topic)
 void Channel::commandKick(Server *server, Client *client, Client *cible,
 	std::string comment)
 {
+	if (client == cible)
+		return;
 	if (verifClientisOperator(client) == true)
 	{
-		if (verifClientisInChannel(cible) == true)
+		if (verifClientisInChannel(cible))
 		{
 			removeUser(cible->getFd());
 			removeInvited(cible);
+			removeOperator(client);
 			if (comment != "")
 			{
 				std::cout << "DEBUG commKick : message confirmation sans comment" << std::endl;
 				// message envoye a tous y compris client et cible
 				// message confirmation : :<nick>!user@host KICK #channel cible
+				std::string kickMsg = ":" + client->getPrefix() + " KICK " + _name + cible->getNick() + "\r\n";
+				ChannelSend(kickMsg, NULL); // Diffusion à tous les membres du channel
 			}
 			else
-				std::cout << "DEBUG commKick : message confirmation avec comment" << std::endl;
+			{
+			std::cout << "DEBUG commKick : message confirmation avec comment" << std::endl;
 			// message envoye a tous y compris client et cible
 			// message confirmation : :<nick>!user@host KICK #channel cible :<comment>
+			std::string kickMsg = ":" + client->getPrefix() + " KICK " + _name + cible->getNick() + comment +"\r\n";
+			ChannelSend(kickMsg, NULL); // Diffusion à tous les membres du channel
+			}
 		}
 		else
 		{
