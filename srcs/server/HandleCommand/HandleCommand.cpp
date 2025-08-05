@@ -143,81 +143,53 @@ bool Server::isNicknameInUse(const std::string &nick)
     return false;
 }
 
-// Fonction pour générer un pseudonyme alternatif
-std::string Server::generateAlternativeNickname(const std::string &originalNick)
+void Server::handleNICK(Client *client, const Message &msg) 
 {
-    // Essayer avec un underscore à la fin
-    std::string altNick = originalNick + "_";
-    if (!isNicknameInUse(altNick) && isValidNickname(altNick))
-        return altNick;
-    
-    // Essayer avec des chiffres
-    for (int i = 1; i <= 99; ++i)
-    {
-        std::ostringstream oss;
-        oss << originalNick << i;
-        altNick = oss.str();
-        
-        if (!isNicknameInUse(altNick) && isValidNickname(altNick))
-            return altNick;
-    }
-    
-    // Si rien ne fonctionne, retourner une chaîne vide
-    return "";
-}
-
-void Server::handleNICK(Client *client, const Message &msg)
-{
-    if (msg.params.size() < 1)
-    {
+    if (msg.params.size() < 1) {
         sendError(client->getFd(), "431", "*", ":No nickname given");
+        disconnectClient(client->getFd());
         return;
     }
-    
-    std::string newNick = msg.params[0];
-    
-    // Si c'est le même pseudonyme, pas besoin de faire quoi que ce soit
-    if (!client->getNickname().empty() && client->getNickname() == newNick)
-        return;
-    
-    // Vérifier si le pseudonyme est déjà utilisé par un autre client
-    for (std::map<int, Client *>::iterator it = _clients.begin(); it != _clients.end(); ++it)
-    {
-        if (it->second != client && it->second->getNickname() == newNick)
-        {
-            // Format RFC 2812 correct pour l'erreur 433
-            std::string currentNick = client->getNickname().empty() ? "*" : client->getNickname();
-            std::string errorMsg = ":" + _serverName + " 433 " + currentNick + " " + newNick + " :Nickname is already in use\r\n";
-            send(client->getFd(), errorMsg.c_str(), errorMsg.length(), 0);
-            return;
-        }
-    }
-    
+
+    std::string requestedNick = msg.params[0];
+
     // Vérifier la validité du pseudonyme
-    if (!isValidNickname(newNick))
+    if (!isValidNickname(requestedNick)) 
     {
         std::string currentNick = client->getNickname().empty() ? "*" : client->getNickname();
-        std::string errorMsg = ":" + _serverName + " 432 " + currentNick + " " + newNick + " :Erroneous nickname\r\n";
-        send(client->getFd(), errorMsg.c_str(), errorMsg.length(), 0);
+        sendError(client->getFd(), "432", currentNick, requestedNick + " :Erroneous nickname");
+        disconnectClient(client->getFd());
         return;
     }
-    
-    // Si le client était déjà enregistré, notifier le changement
-    if (client->isRegistered() && !client->getNickname().empty())
-    {
+
+    // Si c'est le même pseudonyme que celui du client, ignorer
+    if (client->getNickname() == requestedNick) {
+        return;
+    }
+
+    // Vérifier si le pseudonyme est déjà utilisé
+    if (isNicknameInUse(requestedNick)) {
+        std::string currentNick = client->getNickname().empty() ? "*" : client->getNickname();
+        
+        // Envoyer l'erreur 433 avec le bon format et déconnecter
+        sendError(client->getFd(), "433", currentNick, requestedNick + " :Nickname is already in use");
+        disconnectClient(client->getFd());
+        return;
+    }
+
+    // Le pseudonyme est disponible et valide
+    if (client->isRegistered() && !client->getNickname().empty()) {
+        // Client déjà enregistré qui change de pseudonyme
         std::string oldNick = client->getNickname();
-        std::string nickMsg = ":" + oldNick + "!~" + client->getUsername() + "@localhost NICK :" + newNick + "\r\n";
-        // Envoyer à tous les clients qui partagent des canaux ou à tous
+        std::string nickMsg = ":" + oldNick + "!~" + client->getUsername() + 
+                             "@localhost NICK :" + requestedNick + "\r\n";
         sendToAllClients(nickMsg);
     }
-    
-    // Définir le nouveau pseudonyme
-    client->setNickname(newNick);
+
+    client->setNickname(requestedNick);
     client->setHasNick(true);
-    
-    // Vérifier si l'enregistrement peut être complété
-    if (client->hasNick() && client->hasUser() && client->hasPass())
-    {
+
+    if (client->hasNick() && client->hasUser() && client->hasPass()) {
         completeRegistration(client);
     }
 }

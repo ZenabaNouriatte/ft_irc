@@ -328,11 +328,49 @@ std::vector<std::string> Server::splitCommand(const std::string& command)
     return tokens;
 }
 
-	// void Server::suppressChannel(const Channel & channel)  
-	// {
-	// 	if (channel.isChannelEmpty() == 0)
-	// {
-	// 	// supprimer le channel du vecteur channel du serveur
-	// }
-	// }
-	
+void Server::disconnectClient(int clientFd)
+{
+    std::cout << "DEBUG: Attempting to disconnect client " << clientFd << std::endl;
+
+    // Supprimer le client de la map _clients
+    std::map<int, Client*>::iterator it = _clients.find(clientFd);
+    if (it == _clients.end()) {
+        std::cout << "WARNING: Client " << clientFd << " not found in _clients map" << std::endl;
+    }
+
+    Client* client = NULL;
+    if (it != _clients.end()) {
+        client = it->second;
+        if (!client->getNickname().empty()) {
+            std::cout << "Disconnecting client " << clientFd << " (" << client->getNickname() << ")" << std::endl;
+        } else {
+            std::cout << "Disconnecting client " << clientFd << std::endl;
+        }
+
+        _clients.erase(it);  // Supprimer de _clients
+    }
+
+    // Supprimer le clientFd de _pollfds
+    for (std::vector<struct pollfd>::iterator p = _poll_fds.begin(); p != _poll_fds.end(); ++p) {
+        if (p->fd == clientFd) {
+            _poll_fds.erase(p);
+            std::cout << "DEBUG: Removed fd " << clientFd << " from _pollfds" << std::endl;
+            break;
+        }
+    }
+
+    // Fermer le socket
+    if (close(clientFd) == -1) {
+        std::cerr << "ERROR: Failed to close fd " << clientFd << ": " << strerror(errno) << std::endl;
+    } else {
+        std::cout << "DEBUG: Closed socket fd " << clientFd << std::endl;
+    }
+
+    // Libérer la mémoire de l'objet Client*
+    if (client) {
+        delete client;
+        std::cout << "DEBUG: Deleted Client* for fd " << clientFd << std::endl;
+    }
+
+    std::cout << "DEBUG: Client " << clientFd << " successfully disconnected\n" << std::endl;
+}
