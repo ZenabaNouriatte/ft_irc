@@ -75,6 +75,11 @@ bool Server::MsgToChannel(Client* sender, const std::string& channelName, const 
         sendError(sender->getFd(), "403", channelName, "No such channel");
         return false;
     }
+    if (!channel->verifClientisUser(sender) && !channel->verifClientisOperator(sender))
+    {
+        sendError(sender->getFd(), "442", channelName, "You're not on that channel");
+        return false;
+    }
 
     std::string irc_line = ":" + sender->getPrefix() + " PRIVMSG " + channelName + " :" + message + "\r\n";
 

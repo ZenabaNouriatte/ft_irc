@@ -56,7 +56,7 @@ bool Channel::verifClientisInChannel(Client *client)
 
 bool Channel::verifClientisOperator(Client *client)
 {
-	if (std::find(_users.begin(), _users.end(), client) != _users.end())
+	if (std::find(_operators.begin(), _operators.end(), client) != _operators.end())
 		return (true);
 	return (false);
 }
@@ -84,22 +84,47 @@ void Channel::printUsers() const
 }
 
 //---- DEBUG ZENABA
+// void Channel::ChannelSend(const std::string &message, Client *sender)
+// {
+// 	// user
+// 	for (std::vector<Client *>::iterator it = _users.begin(); it != _users.end(); ++it)
+// 	{
+// 		if (*it != sender)
+// 			(*it)->send_msg(message);
+// 	}
+
+// 	// operator
+// 	for (std::vector<Client *>::iterator it = _operators.begin(); it != _operators.end(); ++it)
+// 	{
+// 		// pouor ne pas aussi envoyer a user donc 2 fois
+// 		if (*it != sender && std::find(_users.begin(), _users.end(), *it) == _users.end())
+// 			(*it)->send_msg(message);
+// 	}
+// }
+
 void Channel::ChannelSend(const std::string &message, Client *sender)
 {
-	// user
-	for (std::vector<Client *>::iterator it = _users.begin(); it != _users.end(); ++it)
-	{
-		if (*it != sender)
-			(*it)->send_msg(message);
-	}
+    std::set<Client*> recipients;
 
-	// operator
-	for (std::vector<Client *>::iterator it = _operators.begin(); it != _operators.end(); ++it)
-	{
-		// pouor ne pas aussi envoyer a user donc 2 fois
-		if (*it != sender && std::find(_users.begin(), _users.end(), *it) == _users.end())
-			(*it)->send_msg(message);
-	}
+    // Ajouter les utilisateurs (sauf sender)
+    for (std::vector<Client*>::iterator it = _users.begin(); it != _users.end(); ++it)
+    {
+        if (*it != sender)
+            recipients.insert(*it);
+    }
+
+    // Ajouter les opérateurs (sauf sender)
+    for (std::vector<Client*>::iterator it = _operators.begin(); it != _operators.end(); ++it)
+    {
+        if (*it != sender)
+            recipients.insert(*it); // set évite les doublons automatiquement
+    }
+
+    // Envoyer le message à chaque destinataire unique
+    for (std::set<Client*>::iterator it = recipients.begin(); it != recipients.end(); ++it)
+    {
+        (*it)->send_msg(message);
+    }
 }
 
 
