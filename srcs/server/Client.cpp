@@ -6,7 +6,7 @@
 /*   By: zmogne <zmogne@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/21 14:30:25 by cschmid           #+#    #+#             */
-/*   Updated: 2025/08/03 18:02:05 by zmogne           ###   ########.fr       */
+/*   Updated: 2025/08/04 20:00:44 by zmogne           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,7 +14,7 @@
 
 /*========== CONSTRUCTEUR ==========*/
 
-Client::Client(int fd) : _fd(fd), _has_pass(false), _has_nick(false), _has_user(false), _registred(false) {}
+Client::Client(int fd) : _fd(fd), _nickname(""), _has_pass(false), _has_nick(false), _has_user(false), _registred(false) {}
 
 /*========== DESTRUCTEUR ==========*/
 
@@ -41,6 +41,8 @@ void Client::setHasPass(bool value){
 }
 
 void Client::setNickname(const std::string& nick){
+
+    std::cout << "Setting nickname from '" << _nickname << "' to '" << nick << "'" << std::endl;
     _nickname = nick; 
 }
 

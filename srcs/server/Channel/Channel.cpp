@@ -6,7 +6,7 @@
 /*   By: smolines <smolines@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/31 14:04:03 by cschmid           #+#    #+#             */
-/*   Updated: 2025/08/04 12:45:24 by smolines         ###   ########.fr       */
+/*   Updated: 2025/08/05 14:17:34 by smolines         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,6 +23,7 @@ Channel::Channel(std::string name)
 	this->_hasLimit = false;
 	this->_key = false;
 	std::cout << GREEN << BOLD << "Channel [" << this->_name << "] successfully created" << RESET << std::endl;
+	std::cout << "   - ptr: " << this << "\n";
 	return ;
 }
 

@@ -55,6 +55,7 @@ class Server
 	void handleError(const std::string &message);
 	// Print error and close server socket
 	void cleanExit(); // Cleanup sockets and memory
+    void cleanupChannels();
 
     /*===== GETTERS =====*/
 
@@ -106,6 +107,8 @@ class Server
     
     void handlePASS (Client* client, const Message& msg);
     void handleNICK (Client* client, const Message& msg);
+    bool isNicknameInUse(const std::string &nick);
+    void handleQUIT(Client* client, const Message& msg);
     void handleUSER (Client* client, const Message& msg);
     void handlePRIVMSG(Client* client, const Message& msg);
     void handleWHOIS(Client* client, const Message &msg);
@@ -129,6 +132,9 @@ class Server
     int ClientChannelCount(Client* client) const;
 	void verifIfCloseChannel(Channel* channel);
 	void commandPart(Client* client, Channel* channel, std::string comment);
+    void sendNameList(Client* client, Channel* chan);
+    void sendTopic(Client* client, Channel* chan);
+    void sendJoinMsg(Client* client, Channel* chan);
 
     /*===== Server Console Input =====*/
     void handleConsoleInput();                              // Read from stdin
@@ -150,4 +156,5 @@ class Server
 
 
 	void suppressChannel(const Channel & channel);
+    void disconnectClient(int clientFd);
 };

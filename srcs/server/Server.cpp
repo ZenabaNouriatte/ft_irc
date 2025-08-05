@@ -52,6 +52,20 @@ void Server::catchSignal(int signum)
 {
     signal = signum;
 }
+
+void Server::cleanupChannels() 
+{
+	std::cout << "DEBUG: Cleaning up channels..." << std::endl;
+	for (std::vector<Channel*>::iterator it = _channels.begin(); it != _channels.end(); ++it) {
+		if (*it) {
+			std::cout << "DEBUG: Deleting channel " << (*it)->getName() << std::endl;
+			delete *it;
+		}
+	}
+	_channels.clear();
+	std::cout << "DEBUG: Channel cleanup completed." << std::endl;
+}
+
 void Server::cleanExit() 
 {
     for (size_t i = 0; i < _poll_fds.size(); ++i)
@@ -62,6 +76,7 @@ void Server::cleanExit()
 
     _poll_fds.clear();
     _clients.clear();
+    cleanupChannels();
 }
 
 /*==========CONNEXION SETUP ==========*/
@@ -144,7 +159,7 @@ void Server::handlePollEvents()
 
         if (_poll_fds[i].revents & (POLLHUP | POLLERR))
         {
-            removeClient(fd);
+            disconnectClient(fd);
             i--; // Ajuster car remove modifie la taille
         }
         else if (_poll_fds[i].revents & POLLIN)
@@ -211,21 +226,35 @@ void Server::handleClient(int client_fd)
 }
 
 
+
+
 void Server::handleClientRead(Client* client, const std::string& input)
 {
+    int clientFd = client->getFd();
     client->appendToBuffer(input);
     std::vector<std::string> commands = client->extractCompleteCommands();
 
     for (size_t i = 0; i < commands.size(); ++i)
     {
+        // 🔒 Re-vérification si le client existe encore
+        std::map<int, Client*>::iterator it = _clients.find(clientFd);
+        if (it == _clients.end()) {
+            std::cout << "Client " << clientFd << " was disconnected during command processing" << std::endl;
+            return; 
+        }
+
+        // meaj pointeur
+        client = it->second;
+
         const std::string& raw_message = commands[i];
-        std::cout << BOLD << "Client [" << client->getFd() << "] [RECV] " 
+        std::cout << BOLD << "Client [" << clientFd << "] [RECV] " 
                   << raw_message << RESET << std::endl;
 
         Message msg(raw_message);
         handleCommand(client, msg);
     }
 }
+
 
 void Server::handleClientDisconnection(Client* client, int client_fd, ssize_t received_bytes)
 {
@@ -245,32 +274,33 @@ void Server::handleClientDisconnection(Client* client, int client_fd, ssize_t re
     }
     else
         handleError("DEBUG ERROR recv()");
-    removeClient(client_fd);
+    Message quitMsg("QUIT :Client disconnected");
+	handleQUIT(client, quitMsg);
 }
 
 
 
-void Server::removeClient(int client_fd)
-{
-    // Fermer la socket
-    close(client_fd);
-    //Supprimer le pollfd associe
-    for (std::vector<pollfd>::iterator it = _poll_fds.begin(); it != _poll_fds.end(); ++it)
-    {
-        if (it->fd == client_fd)
-        {
-            _poll_fds.erase(it);
-            break;
-        }
-    }
-    // Supprimer le client de la map + memoire
-    std::map<int, Client*>::iterator it = _clients.find(client_fd);
-    if (it != _clients.end())
-    {
-        delete it->second;
-        _clients.erase(it);
-    }
-}
+// void Server::removeClient(int client_fd)
+// {
+//     // Fermer la socket
+//     close(client_fd);
+//     //Supprimer le pollfd associe
+//     for (std::vector<pollfd>::iterator it = _poll_fds.begin(); it != _poll_fds.end(); ++it)
+//     {
+//         if (it->fd == client_fd)
+//         {
+//             _poll_fds.erase(it);
+//             break;
+//         }
+//     }
+//     // Supprimer le client de la map + memoire
+//     std::map<int, Client*>::iterator it = _clients.find(client_fd);
+//     if (it != _clients.end())
+//     {
+//         delete it->second;
+//         _clients.erase(it);
+//     }
+// }
 
 
 /*========== SERVER CONSOLE ==========*/
@@ -328,11 +358,55 @@ std::vector<std::string> Server::splitCommand(const std::string& command)
     return tokens;
 }
 
-	// void Server::suppressChannel(const Channel & channel)  
-	// {
-	// 	if (channel.isChannelEmpty() == 0)
-	// {
-	// 	// supprimer le channel du vecteur channel du serveur
-	// }
-	// }
-	
+void Server::disconnectClient(int clientFd)
+{
+    std::cout << "DEBUG: Attempting to disconnect client " << clientFd << std::endl;
+
+    // Supprimer le client de la map _clients
+    std::map<int, Client*>::iterator it = _clients.find(clientFd);
+    if (it == _clients.end()) {
+        std::cout << "WARNING: Client " << clientFd << " not found in _clients map" << std::endl;
+    }
+
+    Client* client = NULL;
+    if (it != _clients.end()) 
+    {
+        client = it->second;
+        if (!client->getNickname().empty()) 
+
+            std::cout << "Disconnecting client " << clientFd << " (" << client->getNickname() << ")" << std::endl;
+        else 
+            std::cout << "Disconnecting client " << clientFd << std::endl;
+
+        _clients.erase(it);  // Supprimer de _clients
+    }
+
+    // Supprimer le clientFd de _pollfds
+    for (std::vector<struct pollfd>::iterator p = _poll_fds.begin(); p != _poll_fds.end(); ++p) 
+    {
+        if (p->fd == clientFd) 
+        {
+            _poll_fds.erase(p);
+            std::cout << "DEBUG: Removed fd " << clientFd << " from _pollfds" << std::endl;
+            break;
+        }
+    }
+
+    // Fermer le socket
+    if (close(clientFd) == -1) 
+    {
+        std::cerr << "ERROR: Failed to close fd " << clientFd << ": " << strerror(errno) << std::endl;
+    } 
+    else 
+    {
+        std::cout << "DEBUG: Closed socket fd " << clientFd << std::endl;
+    }
+
+    // Libérer la mémoire de l'objet Client*
+    if (client) {
+        delete client;
+        std::cout << "DEBUG: Deleted Client* for fd " << clientFd << std::endl;
+    }
+
+    std::cout << "DEBUG: Client " << clientFd << " successfully disconnected\n" << std::endl;
+}

@@ -6,7 +6,7 @@
 /*   By: smolines <smolines@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/31 14:14:57 by cschmid           #+#    #+#             */
-/*   Updated: 2025/08/05 12:37:07 by smolines         ###   ########.fr       */
+/*   Updated: 2025/08/05 14:18:00 by smolines         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -108,7 +108,10 @@ void Channel::commandTopic(Server *server, Client *client, std::string topic)
 	}
 
 	_topicName = topic;
-	std::cout << "[DEBUG][TOPIC] Nouveau topic défini pour le channel '" << _name << "'\n";
+
+	std::cout << "[DEBUG][TOPIC] Nouveau topic : [" 
+		<< _topicName << "] défini pour le channel " 
+		<< _name << "   - ptr: " << this << std::endl;
 	std::string topicMsg = ":" + client->getPrefix() + " TOPIC " + _name + " :" + topic + "\r\n";
 	ChannelSend(topicMsg, NULL); // Diffusion à tous les membres du channel
 }
@@ -178,7 +181,7 @@ void Channel::commandInvite(Server *server, Client *client, Client *cible)
 		else
 		{
 			addInvited(cible);
-			// message:	:<Nick client>!user@host INVITE <nick cible> :#channel : recu uniquement par bob
+			// message:	:<Nick client>!user@host INVITE <nick cible> :#channel : recu uniquement par cible
 			// message:	:server 341 <Nick client> <nicjk cible> #channel : recu uniquement par client
 		}
 	}
@@ -222,7 +225,10 @@ void Channel::addUser(Server *server, Client *user, std::string key)
 		std::cout << "DEBUG ADDUSER bad password" << std::endl;
 	}
 	else if (_operators.empty())
+	{
+		std::cout << "DEBUG ADDUSER ajouter operator" << std::endl;
 		_operators.push_back(user);
+	}
 	// envoi des messages lies a la creation du channel ???
 	// message: :<nick>!<user>@<host> JOIN :#channel
 	//:<serveur> MODE #channel +o <nick>
@@ -231,7 +237,10 @@ void Channel::addUser(Server *server, Client *user, std::string key)
 	// :<serveur> 366 <nick> #channel :End of NAMES list
 	// :<serveur> 331 <nick> #channel42 :No topic is set
 	else
+	{
+		std::cout << "DEBUG ADDUSER ajouter user" << std::endl;
 		_users.push_back(user);
+	}
 	// message: :<nick>!<user>@<host> JOIN :#channel
 	// message : liste des modes du channel
 	// message : liste des clients du channel
