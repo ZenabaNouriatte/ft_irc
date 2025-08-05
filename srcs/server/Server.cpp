@@ -52,6 +52,20 @@ void Server::catchSignal(int signum)
 {
     signal = signum;
 }
+
+void Server::cleanupChannels() 
+{
+	std::cout << "DEBUG: Cleaning up channels..." << std::endl;
+	for (std::vector<Channel*>::iterator it = _channels.begin(); it != _channels.end(); ++it) {
+		if (*it) {
+			std::cout << "DEBUG: Deleting channel " << (*it)->getName() << std::endl;
+			delete *it;
+		}
+	}
+	_channels.clear();
+	std::cout << "DEBUG: Channel cleanup completed." << std::endl;
+}
+
 void Server::cleanExit() 
 {
     for (size_t i = 0; i < _poll_fds.size(); ++i)
@@ -62,6 +76,7 @@ void Server::cleanExit()
 
     _poll_fds.clear();
     _clients.clear();
+    cleanupChannels();
 }
 
 /*==========CONNEXION SETUP ==========*/

@@ -55,6 +55,7 @@ class Server
 	void handleError(const std::string &message);
 	// Print error and close server socket
 	void cleanExit(); // Cleanup sockets and memory
+    void cleanupChannels();
 
     /*===== GETTERS =====*/
 
