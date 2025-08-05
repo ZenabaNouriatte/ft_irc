@@ -1,0 +1,93 @@
+<< CAP LS
+<< NICK smolines
+<< USER smolines smolines irc.dal.net :Sandrine Molines
+>> :bitcoin.uk.eu.dal.net NOTICE AUTH :*** Looking up your hostname...
+>> :bitcoin.uk.eu.dal.net NOTICE AUTH :*** Found your hostname
+>> :bitcoin.uk.eu.dal.net 001 smolines :Welcome to the DALnet IRC Network smolines!~smolines@62.210.33.129
+<< MODE smolines +i
+>> :bitcoin.uk.eu.dal.net 002 smolines :Your host is bitcoin.uk.eu.dal.net, running version bahamut-2.2.4
+>> :bitcoin.uk.eu.dal.net 003 smolines :This server was created Fri 22 Nov 2024 at 04:12:23 GMT
+>> :bitcoin.uk.eu.dal.net 004 smolines bitcoin.uk.eu.dal.net bahamut-2.2.4 aAbcCdefFghHiIjkKmnoOPrRsSwxXy AbceiIjklLmMnoOpPrRsStv beIjklov
+>> :bitcoin.uk.eu.dal.net 005 smolines NETWORK=DALnet SAFELIST MAXBANS=200 MAXCHANNELS=50 CHANNELLEN=32 KICKLEN=307 NICKLEN=30 TOPICLEN=307 MODES=6 CHANTYPES=# CHANLIMIT=#:50 PREFIX=(ohv)@%+ STATUSMSG=@%+ :are available on this server
+>> :bitcoin.uk.eu.dal.net 005 smolines CASEMAPPING=ascii WATCH=128 SILENCE=10 ELIST=cmntu EXCEPTS INVEX CHANMODES=beI,k,jl,ciPAmMnOprRsSt MAXLIST=b:200,e:100,I:100 TARGMAX=DCCALLOW:,JOIN:,KICK:4,KILL:20,NOTICE:20,PART:,PRIVMSG:20,WHOIS:,WHOWAS: :are available on this server
+>> :bitcoin.uk.eu.dal.net 251 smolines :There are 90 users and 6777 invisible on 39 servers
+>> :bitcoin.uk.eu.dal.net 252 smolines 82 :IRC Operators online
+>> :bitcoin.uk.eu.dal.net 254 smolines 3479 :channels formed
+>> :bitcoin.uk.eu.dal.net 255 smolines :I have 242 clients and 1 servers
+>> :bitcoin.uk.eu.dal.net 265 smolines :Current local users: 242 Max: 4001
+>> :bitcoin.uk.eu.dal.net 266 smolines :Current global users: 6867 Max: 12809
+>> :bitcoin.uk.eu.dal.net NOTICE smolines :*** Notice -- motd was last changed at 9/11/2017 12:51
+>> :bitcoin.uk.eu.dal.net 375 smolines :- bitcoin.uk.eu.dal.net Message of the Day - 
+>> :bitcoin.uk.eu.dal.net 372 smolines :-9/11/2017 12:51
+>> :bitcoin.uk.eu.dal.net 372 smolines :-                 [ bitcoin.uk.eu.dal.net    ]
+>> :bitcoin.uk.eu.dal.net 372 smolines :- 
+>> :bitcoin.uk.eu.dal.net 372 smolines :-                 [ Accessible via...        ]
+>> :bitcoin.uk.eu.dal.net 372 smolines :-                 [ ipv4: bitcoin.dal.net    ]
+>> :bitcoin.uk.eu.dal.net 372 smolines :- 
+>> :bitcoin.uk.eu.dal.net 372 smolines :- Thank you to Private Internet Access (https://www.privateinternetaccess.com) 
+>> :bitcoin.uk.eu.dal.net 372 smolines :- for sponsoring this server.
+>> :bitcoin.uk.eu.dal.net 372 smolines :- 
+>> :bitcoin.uk.eu.dal.net 372 smolines :- Welcome to DALnet!  By connecting to this network, you agree to abide
+>> :bitcoin.uk.eu.dal.net 372 smolines :- by its acceptable use policy, available here: http://www.dal.net/aup
+>> :bitcoin.uk.eu.dal.net 372 smolines :- 
+>> :bitcoin.uk.eu.dal.net 372 smolines :- Server Policies:
+>> :bitcoin.uk.eu.dal.net 372 smolines :- 
+>> :bitcoin.uk.eu.dal.net 372 smolines :-    *   We reserve the right to deny access to this server without
+>> :bitcoin.uk.eu.dal.net 372 smolines :-        warning or explanation
+>> :bitcoin.uk.eu.dal.net 372 smolines :-    *   No malicious bots, including flood and nick/channel chasers
+>> :bitcoin.uk.eu.dal.net 372 smolines :-    *   No channel filler bots/clients/psybncs
+>> :bitcoin.uk.eu.dal.net 372 smolines :-          - A channel filler is a client, bnc, or bot which is
+>> :bitcoin.uk.eu.dal.net 372 smolines :-            connected just to fill a channel and make it look
+>> :bitcoin.uk.eu.dal.net 372 smolines :-            bigger
+>> :bitcoin.uk.eu.dal.net 372 smolines :-    *   Operator impersonation, spamming, or any other abuse will
+>> :bitcoin.uk.eu.dal.net 372 smolines :-        cause you to be banned from this server
+>> :bitcoin.uk.eu.dal.net 372 smolines :-    *   Abide by DALnet's AUP (www.dal.net/aup)
+>> :bitcoin.uk.eu.dal.net 372 smolines :-    *   Please have fun and enjoy DALnet!
+>> :bitcoin.uk.eu.dal.net 372 smolines :- 
+>> :bitcoin.uk.eu.dal.net 372 smolines :- Server Administrator: tyler
+>> :bitcoin.uk.eu.dal.net 372 smolines :- 
+>> :bitcoin.uk.eu.dal.net 372 smolines :- Thank you to Private Internet Access (https://www.privateinternetaccess.com) for sponsori
+>> :bitcoin.uk.eu.dal.net 372 smolines :- ng this server.
+>> :bitcoin.uk.eu.dal.net 372 smolines :- 
+>> :bitcoin.uk.eu.dal.net 372 smolines :- For IRCop assistance, please /join #operhelp or message one of our
+>> :bitcoin.uk.eu.dal.net 372 smolines :- friendly server staff listed above.
+>> :bitcoin.uk.eu.dal.net 372 smolines :- 
+>> :bitcoin.uk.eu.dal.net 372 smolines :- For multilingual information:  <http://docs.dal.net/>
+>> :bitcoin.uk.eu.dal.net 372 smolines :- 
+>> :bitcoin.uk.eu.dal.net 372 smolines :- Thank you for using DALnet!  We hope you have a pleasant day.
+>> :bitcoin.uk.eu.dal.net 376 smolines :End of /MOTD command.
+>> :smolines MODE smolines :+iH
+<< PING bitcoin.uk.eu.dal.net
+>> :bitcoin.uk.eu.dal.net PONG bitcoin.uk.eu.dal.net :smolines
+--> lag pong
+<< NICK a02
+>> :smolines!~smolines@4a22-6afe-5cfa-6be6-6eeb.210.62.ip NICK :a02
+<< PING bitcoin.uk.eu.dal.net
+>> :bitcoin.uk.eu.dal.net PONG bitcoin.uk.eu.dal.net :a02
+--> lag pong
+<< JOIN #jpp
+>> :a02!~smolines@4a22-6afe-5cfa-6be6-6eeb.210.62.ip JOIN :#jpp
+>> :bitcoin.uk.eu.dal.net 353 a02 = #jpp :a02 @a01 
+>> :bitcoin.uk.eu.dal.net 366 a02 #jpp :End of /NAMES list.
+<< MODE #jpp
+>> :bitcoin.uk.eu.dal.net 324 a02 #jpp + 
+--> chanquery mode
+<< WHO #jpp
+>> :bitcoin.uk.eu.dal.net 329 a02 #jpp 1754404483
+--> event 329
+>> :bitcoin.uk.eu.dal.net 352 a02 #jpp ~smolines 4a22-6afe-5cfa-6be6-6eeb.210.62.ip bitcoin.uk.eu.dal.net a02 H :0 Sandrine Molines
+--> silent event who
+>> :bitcoin.uk.eu.dal.net 352 a02 #jpp ~smolines 4a22-6afe-5cfa-6be6-6eeb.210.62.ip nibiru.ix.eu.dal.net a01 H@ :3 Sandrine Molines
+--> silent event who
+>> :bitcoin.uk.eu.dal.net 315 a02 #jpp :End of /WHO list.
+--> chanquery who end
+<< MODE #jpp b
+>> :bitcoin.uk.eu.dal.net 368 a02 #jpp :End of Channel Ban List
+--> chanquery ban end
+>> :a01!~smolines@4a22-6afe-5cfa-6be6-6eeb.210.62.ip KICK #jpp a02 :a01
+<< PING bitcoin.uk.eu.dal.net
+>> :bitcoin.uk.eu.dal.net PONG bitcoin.uk.eu.dal.net :a02
+--> lag pong
+<< PING bitcoin.uk.eu.dal.net
+>> :bitcoin.uk.eu.dal.net PONG bitcoin.uk.eu.dal.net :a02
+--> lag pong
