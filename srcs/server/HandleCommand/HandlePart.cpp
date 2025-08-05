@@ -6,7 +6,7 @@
 /*   By: smolines <smolines@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/30 12:17:37 by cschmid           #+#    #+#             */
-/*   Updated: 2025/08/04 16:36:50 by smolines         ###   ########.fr       */
+/*   Updated: 2025/08/05 15:00:33 by smolines         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,9 +17,13 @@
 
 void Server::verifIfCloseChannel(Channel* channel)
 {
+	///// SEGFAULT A CE NIVEAU : voir ce qui ne va pas avec DELETE
 	if (channel->isChannelEmpty() == 0)
-		delete channel;
-	std::cout << "[DEBUG] channel" << channel->getName() << "has been deleted" << std::endl;
+	{
+		if (channel)
+			delete channel;
+		std::cout << "[DEBUG] channel" << channel->getName() << "has been deleted" << std::endl;
+	}
 }
 
 
@@ -38,7 +42,16 @@ void Server::commandPart(Client* client, Channel* channel, std::string comment)
         std::cout << "[DEBUG] commande PART -> left channel " << channel->getName() << "\n";
 		channel->removeUser(client->getFd());
         channel->removeOperator(client);
-		verifIfCloseChannel(channel);
+			std::cout << "[DEBUG]ICI" << std::endl;
+		if (channel->affectNextOperator() == 1)
+		{
+			std::cout << "[DEBUG]LA" << std::endl;
+				verifIfCloseChannel(channel);
+			std::cout << "[DEBUG]APRES DELETE" << std::endl;	
+			// std::cout << "[DEBUG] channel deleted" << channel->getName() << "has been deleted" << std::endl;
+			//message ??
+		}
+		
 		// A VOIR SI A AJOUTER DANS REMOVE OPERATOR
     }
 	else

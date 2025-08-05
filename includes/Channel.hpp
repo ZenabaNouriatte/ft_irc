@@ -68,7 +68,7 @@ class Channel
 	void removeOperator(Client* user);
 	void userToOperator (Client* user);
 	void operatorToUser (Client* user);
-	void affectNextOperator();
+	int affectNextOperator();
 
 	int isChannelEmpty() const; // renvoie le nombre d'utilisateurs du channel
 	bool isValidChannelPW(const std::string& password);

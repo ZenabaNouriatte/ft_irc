@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Client.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: zmogne <zmogne@student.42.fr>              +#+  +:+       +#+        */
+/*   By: smolines <smolines@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/21 14:30:25 by cschmid           #+#    #+#             */
-/*   Updated: 2025/08/04 20:00:44 by zmogne           ###   ########.fr       */
+/*   Updated: 2025/08/05 15:45:50 by smolines         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -117,10 +117,12 @@ void Client::appendToBuffer(const std::string& data)
 
 void Client::send_msg(const std::string& message)
 {
-    
+//    std::cout << "[DEBUG] dans send-msg 1" << std::endl;
     std::string full_message = message + "\r\n";
+//    std::cout << "[DEBUG] dans send-msg 2" << std::endl;
 
     ssize_t sent = send(_fd, full_message.c_str(), full_message.size(), 0);
+//    std::cout << "[DEBUG] dans send-msg 3" << std::endl;
 
     if (sent == -1)
     {
