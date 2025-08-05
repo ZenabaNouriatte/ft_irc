@@ -211,21 +211,35 @@ void Server::handleClient(int client_fd)
 }
 
 
+
+
 void Server::handleClientRead(Client* client, const std::string& input)
 {
+    int clientFd = client->getFd();
     client->appendToBuffer(input);
     std::vector<std::string> commands = client->extractCompleteCommands();
 
     for (size_t i = 0; i < commands.size(); ++i)
     {
+        // 🔒 Re-vérification si le client existe encore
+        std::map<int, Client*>::iterator it = _clients.find(clientFd);
+        if (it == _clients.end()) {
+            std::cout << "Client " << clientFd << " was disconnected during command processing" << std::endl;
+            return; 
+        }
+
+        // meaj pointeur
+        client = it->second;
+
         const std::string& raw_message = commands[i];
-        std::cout << BOLD << "Client [" << client->getFd() << "] [RECV] " 
+        std::cout << BOLD << "Client [" << clientFd << "] [RECV] " 
                   << raw_message << RESET << std::endl;
 
         Message msg(raw_message);
         handleCommand(client, msg);
     }
 }
+
 
 void Server::handleClientDisconnection(Client* client, int client_fd, ssize_t received_bytes)
 {
@@ -339,20 +353,23 @@ void Server::disconnectClient(int clientFd)
     }
 
     Client* client = NULL;
-    if (it != _clients.end()) {
+    if (it != _clients.end()) 
+    {
         client = it->second;
-        if (!client->getNickname().empty()) {
+        if (!client->getNickname().empty()) 
+
             std::cout << "Disconnecting client " << clientFd << " (" << client->getNickname() << ")" << std::endl;
-        } else {
+        else 
             std::cout << "Disconnecting client " << clientFd << std::endl;
-        }
 
         _clients.erase(it);  // Supprimer de _clients
     }
 
     // Supprimer le clientFd de _pollfds
-    for (std::vector<struct pollfd>::iterator p = _poll_fds.begin(); p != _poll_fds.end(); ++p) {
-        if (p->fd == clientFd) {
+    for (std::vector<struct pollfd>::iterator p = _poll_fds.begin(); p != _poll_fds.end(); ++p) 
+    {
+        if (p->fd == clientFd) 
+        {
             _poll_fds.erase(p);
             std::cout << "DEBUG: Removed fd " << clientFd << " from _pollfds" << std::endl;
             break;
@@ -360,9 +377,12 @@ void Server::disconnectClient(int clientFd)
     }
 
     // Fermer le socket
-    if (close(clientFd) == -1) {
+    if (close(clientFd) == -1) 
+    {
         std::cerr << "ERROR: Failed to close fd " << clientFd << ": " << strerror(errno) << std::endl;
-    } else {
+    } 
+    else 
+    {
         std::cout << "DEBUG: Closed socket fd " << clientFd << std::endl;
     }
 
