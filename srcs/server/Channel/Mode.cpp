@@ -6,7 +6,7 @@
 /*   By: smolines <smolines@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/31 14:10:02 by cschmid           #+#    #+#             */
-/*   Updated: 2025/08/07 15:13:09 by smolines         ###   ########.fr       */
+/*   Updated: 2025/08/07 18:57:06 by smolines         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -56,10 +56,6 @@ void Channel::changeModeT(Server *server, Client *client, std::string arg)
 {
 	if (verifClientisOperator(client) == true)
 	{
-		/// A SUPPRIMER /////
-		server->sendError(client->getFd(), "482", this->_name,
-			"You're not channel operator");
-		/////
 		if (arg == "+t")
 		{
 			this->_topicRestriction = true;
@@ -175,7 +171,7 @@ void Channel::changeModeO(Server *server, Client *client, std::string arg,
 				std::string modeMsg = ":" + client->getPrefix() + " MODE :" + _name + " +o " + cible->getNick() + "\r\n";
 				ChannelSend(modeMsg, NULL); 
 				// message: :<nick>!<user>@<host> MODE #canal +o cible
-				std::string Msg = ":" + server->getServerName() + " 324 " + client->getNickname() + " " + _name + " -o" + cible->getNick() +"\r\n";
+				std::string Msg = ":" + server->getServerName() + " 324 " + client->getNickname() + " " + _name + " -o " + cible->getNick() +"\r\n";
 				client->send_msg(Msg);
 				//:serveur 324 <nick> #canal +o cible
 			}
@@ -185,7 +181,7 @@ void Channel::changeModeO(Server *server, Client *client, std::string arg,
 				std::string modeMsg = ":" + client->getPrefix() + " MODE :" + _name + " +o " + cible->getNick() + "\r\n";
 				ChannelSend(modeMsg, NULL); 
 				// message: :<nick>!<user>@<host> MODE #canal +o cible
-				std::string Msg = ":" + server->getServerName() + " 324 " + client->getNickname() + " " + _name + " +o" + cible->getNick() +"\r\n";
+				std::string Msg = ":" + server->getServerName() + " 324 " + client->getNickname() + " " + _name + " +o " + cible->getNick() +"\r\n";
 				client->send_msg(Msg);
 				//:serveur 324 <nick> #canal +o cible
 			}
@@ -196,7 +192,7 @@ void Channel::changeModeO(Server *server, Client *client, std::string arg,
 				std::string modeMsg = ":" + client->getPrefix() + " MODE :" + _name + " -o " + cible->getNick() + "\r\n";
 				ChannelSend(modeMsg, NULL); 
 				// message: :<nick>!<user>@<host> MODE #canal -o cible
-				std::string Msg = ":" + server->getServerName() + " 324 " + client->getNickname() + " " + _name + " -o" + cible->getNick() +"\r\n";
+				std::string Msg = ":" + server->getServerName() + " 324 " + client->getNickname() + " " + _name + " -o " + cible->getNick() +"\r\n";
 				client->send_msg(Msg);
 				//:serveur 324 <nick> #canal -o cible
 			}
@@ -206,7 +202,7 @@ void Channel::changeModeO(Server *server, Client *client, std::string arg,
 				std::string modeMsg = ":" + client->getPrefix() + " MODE :" + _name + " +o " + cible->getNick() + "\r\n";
 				ChannelSend(modeMsg, NULL); 
 				// message: :<nick>!<user>@<host> MODE #canal +o cible
-				std::string Msg = ":" + server->getServerName() + " 324 " + client->getNickname() + " " + _name + " -o" + cible->getNick() +"\r\n";
+				std::string Msg = ":" + server->getServerName() + " 324 " + client->getNickname() + " " + _name + " -o " + cible->getNick() +"\r\n";
 				client->send_msg(Msg);
 				//:serveur 324 <nick> #canal +o cible
 			}
@@ -231,10 +227,10 @@ void Channel::changeModeL(Server *server, Client *client, std::string arg,
 			_limit = limit;
 			std::ostringstream oss;
 			oss << limit;
-			std::cout << "DEBUT ChangeModeO : cible already operator : envoi message confirmation" << std::endl;
+			std::cout << "DEBUT ChangeModeL : cible already operator : envoi message confirmation" << std::endl;
 			std::string modeMsg = ":" + client->getPrefix() + " MODE :" + _name + " +l " + oss.str() + "\r\n";			
 			// message confirmation : :<nick>!<user>@<host> MODE #canal +l 10
-			std::string Msg = ":" + server->getServerName() + " 324 " + client->getNickname() + " " + _name + " +l" + oss.str() +"\r\n";
+			std::string Msg = ":" + server->getServerName() + " 324 " + client->getNickname() + " " + _name + " +l " + oss.str() +"\r\n";
 			client->send_msg(Msg);
 			// :serveur 324 <nick> #canal +l 10
 		}
@@ -244,20 +240,20 @@ void Channel::changeModeL(Server *server, Client *client, std::string arg,
 			std::ostringstream oss;
 			oss << limit;
 			std::cout << "DEBUT ChangeModeL : limite modifiee" << std::endl;
-			std::cout << "DEBUT ChangeModeO : cible already operator : envoi message confirmation" << std::endl;
+			std::cout << "DEBUT ChangeModeL : cible already operator : envoi message confirmation" << std::endl;
 			std::string modeMsg = ":" + client->getPrefix() + " MODE :" + _name + " +l " + oss.str() + "\r\n";	
 			// message confirmation : :<nick>!<user>@<host> MODE #canal +l 10
-			std::string Msg = ":" + server->getServerName() + " 324 " + client->getNickname() + " " + _name + " +l" + oss.str() +"\r\n";
+			std::string Msg = ":" + server->getServerName() + " 324 " + client->getNickname() + " " + _name + " +l " + oss.str() +"\r\n";
 			client->send_msg(Msg);
 			//:serveur 324 <nick> #canal +l 10
 		}
 		else if (arg == "-l" && _hasLimit == true)
 		{
 			_hasLimit = false;
-			std::cout << "DEBUT ChangeModeO : cible already operator : envoi message confirmation" << std::endl;
+			std::cout << "DEBUT ChangeModeL : cible already operator : envoi message confirmation" << std::endl;
 			std::string modeMsg = ":" + client->getPrefix() + " MODE :" + _name + " -l " + "\r\n";	
 			// message confirmation : :<nick>!<user>@<host> MODE #canal -l
-			std::string Msg = ":" + server->getServerName() + " 324 " + client->getNickname() + " " + _name + " -l" +"\r\n";
+			std::string Msg = ":" + server->getServerName() + " 324 " + client->getNickname() + " " + _name + " -l " +"\r\n";
 			client->send_msg(Msg);
 			//:serveur 324 <nick> #canal -l
 		}
