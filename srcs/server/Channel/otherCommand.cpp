@@ -6,7 +6,7 @@
 /*   By: smolines <smolines@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/31 14:14:57 by cschmid           #+#    #+#             */
-/*   Updated: 2025/08/07 15:15:41 by smolines         ###   ########.fr       */
+/*   Updated: 2025/08/07 16:30:19 by smolines         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -196,6 +196,10 @@ void Channel::commandInvite(Server *server, Client *client, Client *cible)
 		else
 		{
 			addInvited(cible);
+			std::string inviteMsg = ":" + client->getPrefix() + " INVITE " + cible->getNick() + " :" + this->_name;
+			cible->send_msg(inviteMsg); 
+			std::string confirmMsg = ":" + server->getServerName() + " 341 " + client->getNick() + " " + cible->getNick() + " " + this->_name;
+			client->send_msg(confirmMsg);
 			// message:	:<Nick client>!user@host INVITE <nick cible> :#channel : recu uniquement par cible
 			// message:	:server 341 <Nick client> <nicjk cible> #channel : recu uniquement par client
 		}
@@ -207,6 +211,7 @@ void Channel::commandInvite(Server *server, Client *client, Client *cible)
 		std::cout << "DEBUG commInvite : client not an operator" << std::endl;
 	}
 }
+
 
 /*========================== ADDUSER ============================*/
 
