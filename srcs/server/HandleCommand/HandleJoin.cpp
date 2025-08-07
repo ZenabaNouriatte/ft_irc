@@ -49,19 +49,20 @@ void Server::handleSingleJoin(Client *client, const std::string &channelName, co
         return;
     }
 	// Ajouter le client au channel
-	chan->addUser(this, client, key);
-	sendJoinMsg(client, chan);
-	sendTopic(client, chan);
-	sendNameList(client, chan);
+	if (chan->addUser(this, client, key) == true)
+	{
+		sendJoinMsg(client, chan);
+		sendTopic(client, chan);
+		sendNameList(client, chan);
 
-	std::cout << "[DEBUG][JOIN] Client " << client->getNickname()
-			  << "[DEBUG] joined channel " << channelName
-			  << (key.empty() ? "[DEBUG] (no key)" : "[DEBUG] with key") << ".\n";
-    std::cout << GREEN << BOLD << "Client successfully added to channel" << RESET << std::endl;
+		std::cout << "[DEBUG][JOIN] Client " << client->getNickname()
+				  << "[DEBUG] joined channel " << channelName
+				  << (key.empty() ? "[DEBUG] (no key)" : "[DEBUG] with key") << ".\n";
+	    std::cout << GREEN << BOLD << "Client successfully added to channel" << RESET << std::endl;
 
-    std::cout << "[DEBUG] Clients in channel after join:\n";
-    chan->printClientVectors();
-
+	    std::cout << "[DEBUG] Clients in channel after join:\n";
+	    chan->printClientVectors();
+	}
 }
 
 bool Server::parseJoin(const Message &msg, std::string &channel,

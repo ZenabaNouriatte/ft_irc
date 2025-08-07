@@ -60,7 +60,7 @@ class Channel
 
 	// fonctions
 
-	void addUser(Server* server, Client* user, std::string key);
+	bool addUser(Server* server, Client* user, std::string key);
 	void addOperator(Client* user);
 	void addInvited(Client* client);
 	void removeUser(int fd);

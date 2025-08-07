@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   HandleMode.cpp                                     :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: zmogne <zmogne@student.42.fr>              +#+  +:+       +#+        */
+/*   By: smolines <smolines@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/30 12:17:37 by cschmid           #+#    #+#             */
-/*   Updated: 2025/08/04 12:51:57 by zmogne           ###   ########.fr       */
+/*   Updated: 2025/08/07 13:57:05 by smolines         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -89,7 +89,7 @@ void Server::handleModeWithParam(Client *client, Channel *chan,
 	Client	*target;
 	int		limit;
 
-	(void)sign;
+	
 	if (paramIndex >= msg.params.size())
 	{
 		std::cout << "Pas assez de paramètres pour le mode " << c << std::endl;
@@ -124,9 +124,6 @@ void Server::handleModeWithParam(Client *client, Channel *chan,
 
 void Server::handleModeNoParam(Client *client, Channel *chan, char c, char sign)
 {
-	(void)sign;
-	(void)chan;
-	(void)client;
 	if (c == 'i')
 	{
 		std::cout << "C'est un i" << std::endl;

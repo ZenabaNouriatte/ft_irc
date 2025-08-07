@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   HandleInvit.cpp                                    :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: zmogne <zmogne@student.42.fr>              +#+  +:+       +#+        */
+/*   By: smolines <smolines@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/31 09:42:56 by cschmid           #+#    #+#             */
-/*   Updated: 2025/08/04 13:01:43 by zmogne           ###   ########.fr       */
+/*   Updated: 2025/08/07 15:24:20 by smolines         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,7 +21,7 @@ void Server::handleINVIT(Client *client, const Message &msg)
     }
 
     std::string targetNick = msg.params[0];
-    std::string channelName = msg.params[1];
+    std::string channelName = msg.params[1];g
 
     Channel *chan = findChannel(channelName);
     if (!chan) {

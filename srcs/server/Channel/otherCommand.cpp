@@ -6,11 +6,13 @@
 /*   By: smolines <smolines@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/31 14:14:57 by cschmid           #+#    #+#             */
-/*   Updated: 2025/08/05 17:43:31 by smolines         ###   ########.fr       */
+/*   Updated: 2025/08/07 15:15:41 by smolines         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include <Channel.hpp>
+
+
 
 /*========================== TOPIC ============================*/
 
@@ -26,6 +28,8 @@ void Channel::changeTopic(Server *server, Client *client, std::string topic)
 	{
 		this->_topicName = topic;
 		this->_topic = true;
+		std::string modeMsg = ":" + client->getPrefix() + " MODE :" + _name + " +t" + "\r\n";
+		ChannelSend(modeMsg, NULL); 
 		// message: :<nick>!user@host MODE #channel +t
 		// message :serveur 324 <nick> #channel -t
 	}
@@ -206,7 +210,7 @@ void Channel::commandInvite(Server *server, Client *client, Client *cible)
 
 /*========================== ADDUSER ============================*/
 
-void Channel::addUser(Server *server, Client *user, std::string key)
+bool Channel::addUser(Server *server, Client *user, std::string key)
 {
 	// si l'utilisateur est deja dans le channel (user ou chanop) :
 	if (verifClientisInChannel(user) == true)
@@ -214,6 +218,7 @@ void Channel::addUser(Server *server, Client *user, std::string key)
 		server->sendError2(user->getFd(), "443", user->getNick(), this->_name,
 			"is already on channel");
 		std::cout << "DEBUG ADDUSER user already in the channel" << std::endl;
+		return (false);
 	}
 	// si l'utilisateur est deja connecte a 10 channel /
 	// DEBUG(client->getFd(), "405", "channel name", "You have joined too many channels");
@@ -222,23 +227,27 @@ void Channel::addUser(Server *server, Client *user, std::string key)
 		std::cout << "DEBUG ADDUSER channel on invite mode only" << std::endl;
 		server->sendError(user->getFd(), "473", this->_name,
 			"Cannot join channel (+i)");
+		return (false);
 	}
 	else if (_hasLimit == true && (_users.size() + _operators.size()) < _limit)
 	{
 		std::cout << "DEBUG ADDUSER Too much users in this channel" << std::endl;
 		server->sendError(user->getFd(), "471", this->_name,
 			"Cannot join channel (+l)");
+		return (false);
 	}
 	else if (this->_key && this->_password != key)
 	{
 		server->sendError(user->getFd(), "475", this->_name,
 			"Cannot join channel (+k)");
 		std::cout << "DEBUG ADDUSER bad password" << std::endl;
+		return (false);
 	}
 	else if (_operators.empty())
 	{
 		std::cout << "DEBUG ADDUSER ajouter operator" << std::endl;
 		_operators.push_back(user);
+		return (true);
 	}
 	// envoi des messages lies a la creation du channel ???
 	// message: :<nick>!<user>@<host> JOIN :#channel
@@ -251,10 +260,14 @@ void Channel::addUser(Server *server, Client *user, std::string key)
 	{
 		std::cout << "DEBUG ADDUSER ajouter user" << std::endl;
 		_users.push_back(user);
+		
+		return (true);
 	}
 	// message: :<nick>!<user>@<host> JOIN :#channel
 	// message : liste des modes du channel
 	// message : liste des clients du channel
 	// message : topic du channel
-	return ;
 }
+
+
+
