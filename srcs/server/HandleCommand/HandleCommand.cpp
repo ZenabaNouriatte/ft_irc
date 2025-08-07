@@ -6,7 +6,7 @@
 /*   By: zmogne <zmogne@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/21 14:30:34 by cschmid           #+#    #+#             */
-/*   Updated: 2025/08/07 10:42:12 by zmogne           ###   ########.fr       */
+/*   Updated: 2025/08/07 15:08:03 by zmogne           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -152,7 +152,12 @@ void Server::handleNICK(Client *client, const Message &msg)
         std::string oldNick = client->getNickname();
         std::string nickMsg = ":" + oldNick + "!~" + client->getUsername() + 
                              "@localhost NICK :" + requestedNick + "\r\n";
-        sendToAllClients(nickMsg);
+        	for (std::vector<Channel*>::iterator it = _channels.begin(); it != _channels.end(); ++it)
+			{
+				if ((*it)->verifClientisInChannel(client))
+					(*it)->ChannelSend(nickMsg, client);
+			}
+		client->send_msg(nickMsg);
     }
 
     client->setNickname(requestedNick);
