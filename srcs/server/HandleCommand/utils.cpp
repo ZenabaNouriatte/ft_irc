@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   utils.cpp                                          :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: zmogne <zmogne@student.42.fr>              +#+  +:+       +#+        */
+/*   By: smolines <smolines@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/31 13:57:45 by cschmid           #+#    #+#             */
-/*   Updated: 2025/08/04 19:55:53 by zmogne           ###   ########.fr       */
+/*   Updated: 2025/08/07 12:24:36 by smolines         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,14 +18,14 @@ void Server::sendError(int fd, const std::string &code,
 	const std::string &target, const std::string &message)
 {
 	std::string full = ":" + _server_name + " " + code + " " + target + " :"
-		+ message + "\n";
+		+ message + "\r\n";
     std::cout << " DEBUG Sending error to client " << fd << ": " << full << std::endl;
 	send(fd, full.c_str(), full.size(), 0);
 }
 
 void Server::sendError2(int fd, const std::string& code, const std::string& target, const std::string& targetBis, const std::string& message)
 {
-    std::string full = ":" + _server_name + " " + code + " " + target + " " + targetBis +" :" + message + "\n";
+    std::string full = ":" + _server_name + " " + code + " " + target + " " + targetBis +" :" + message + "\r\n";
     send(fd, full.c_str(), full.size(), 0);
 }
 

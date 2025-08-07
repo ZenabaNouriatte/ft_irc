@@ -6,7 +6,7 @@
 /*   By: zmogne <zmogne@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/21 14:30:34 by cschmid           #+#    #+#             */
-/*   Updated: 2025/08/07 15:08:03 by zmogne           ###   ########.fr       */
+/*   Updated: 2025/08/07 16:38:15 by zmogne           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,6 +21,7 @@ void Server::handleCommand(Client *client, const Message &msg)
 		handleRegistred(client, msg);
 	else if (msg.command == "PING" || msg.command == "PRIVMSG"
 		|| msg.command == "MODE" || msg.command == "JOIN" 
+		|| msg.command == "INVITE" 
 		|| msg.command == "TOPIC" || msg.command == "PART"
 		|| msg.command == "KICK" || msg.command == "WHOIS" || msg.command == "QUIT")
 		handleServerCommand(client, msg);
@@ -56,7 +57,7 @@ void Server::handleServerCommand(Client *client, const Message &msg)
 		handleJOIN(client, msg);
 	else if (msg.command == "KICK")
 		handleKICK(client, msg);
-	else if (msg.command == "INVIT")
+	else if (msg.command == "INVITE")
 		handleINVIT(client, msg);
 	else if (msg.command == "TOPIC")
 		handleTOPIC(client, msg);

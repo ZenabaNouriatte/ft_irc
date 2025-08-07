@@ -6,7 +6,11 @@
 /*   By: zmogne <zmogne@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/31 14:07:32 by cschmid           #+#    #+#             */
+<<<<<<< HEAD
 /*   Updated: 2025/08/07 16:29:37 by zmogne           ###   ########.fr       */
+=======
+/*   Updated: 2025/08/07 11:57:20 by smolines         ###   ########.fr       */
+>>>>>>> sandrine2help
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -77,7 +81,7 @@ bool Channel::verifClientisInChannel(Client *client)
 bool Channel::verifClientisOperator(Client *client)
 {
 	if (std::find(_operators.begin(), _operators.end(), client) != _operators.end())
-		{
+	{
 		std::cout << "[DEBUG] verifClientisOperator : trouve dans operators" << std::endl;	
 		return (true);
 	}

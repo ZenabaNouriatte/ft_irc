@@ -6,7 +6,7 @@
 /*   By: smolines <smolines@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/31 09:05:39 by cschmid           #+#    #+#             */
-/*   Updated: 2025/08/05 17:35:00 by smolines         ###   ########.fr       */
+/*   Updated: 2025/08/05 18:06:38 by smolines         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -40,7 +40,7 @@ void Server::handleKICK(Client *client, const Message &msg)
 	if (!chan->verifClientisInChannel(client))
 	{
 		std::cout << "DEBUG HANDLEKICK : le client/op n'est pas dans channel du kick" << std::endl;
-		sendError(client->getFd(), "442", chan->getName(), "You're not on that channel");
+		sendError(client->getFd(), "442", channelName, "You're not on that channel");
 		return;
 	}
 //////    
