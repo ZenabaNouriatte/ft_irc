@@ -27,34 +27,43 @@ void Server::handleSingleJoin(Client *client, const std::string &channelName, co
 		return;
 	}
 	Channel* chan = findChannel(channelName);
+	bool isNewChannel = false;
 	if (!chan)
 	{		
 		Channel* newChannel = new Channel(channelName);
 		_channels.push_back(newChannel);
 		chan = newChannel;
+		isNewChannel = true;
+	
 	}
 	else
 	{
-		std::cout << "[JOIN] Channel '" << channelName << "' already exists at ptr [" << chan << "]\n";
+		std::cout << "[JOIN] Channel '" << channelName << "' already exists."<< std::endl;
 	}
 	if (chan->verifClientisUser(client))
     {
-        std::cout << "[JOIN] Client already in channel '" << channelName << "'. Skipping.\n";
+        std::cout << "Client [" << client->getFd() << "] already in channel '" << channelName << std::endl;
         return;
     }
 	if (chan->addUser(this, client, key) == false)
 	{
-		std::cout << RED << "[JOIN] addUser() failed, aborting JOIN" << RESET << std::endl;
+		std::cout << RED << "Client [" << client->getFd() << "] JOIN failed" << RESET << std::endl;
 		return;
 	}
 	sendJoinMsg(client, chan);
 	sendTopic(client, chan);
 	sendNameList(client, chan);
-
+	if (isNewChannel)
+	{
+		std::string infoMsg = ":" + _server_name + " PRIVMSG " + chan->getName() +
+							" :Channel " + channelName + " created on " + getCurrentDate();
+		std::cout << "[DEBUG] Sending channel creation message: " << infoMsg << std::endl;
+		chan->ChannelSend(infoMsg, NULL);
+	}
 	std::cout << "[DEBUG][JOIN] Client " << client->getNickname()
 			<< "[DEBUG] joined channel " << channelName
 			<< (key.empty() ? "[DEBUG] (no key)" : "[DEBUG] with key") << ".\n";
-	std::cout << GREEN << BOLD << "Client successfully added to channel" << RESET << std::endl;
+	std::cout << GREEN << BOLD << "[DEBUG]Client successfully added to channel" << RESET << std::endl;
 
 	std::cout << "[DEBUG] Clients in channel after join:\n";
 	chan->printClientVectors();
@@ -119,7 +128,7 @@ void Server::handleJOIN(Client *client, const Message &msg)
 		}
         if (ClientChannelCount(client) >= 10)
         {
-			std::cout << "Client ["<< client->getFd() <<"] has 10 CHannels\n";
+			std::cout << "DEBUG Client ["<< client->getFd() <<"] has 10 CHannels\n";
             sendError(client->getFd(), "405", channel, "You have joined too many channels");
             return;
         }
@@ -129,7 +138,7 @@ void Server::handleJOIN(Client *client, const Message &msg)
 
 void Server::leaveAllChannels(Client *client) 
 {
-    std::cout << BOLD << "Client [" << client->getFd() << "] leaving all channels\n";
+    std::cout << BOLD << "DEBUG Client [" << client->getFd() << "] leaving all channels\n";
     for (std::vector<Channel*>::iterator it = _channels.begin(); it != _channels.end(); )
     {
         Channel* chan = *it;
@@ -168,6 +177,7 @@ void Server::leaveAllChannels(Client *client)
         {
             ++it;
         }
+		std::cout << "[DEBUG] fin leaveallchannels\n";
     }
 }
 

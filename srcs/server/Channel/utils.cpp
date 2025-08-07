@@ -6,7 +6,7 @@
 /*   By: zmogne <zmogne@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/31 14:07:32 by cschmid           #+#    #+#             */
-/*   Updated: 2025/08/07 16:39:24 by zmogne           ###   ########.fr       */
+/*   Updated: 2025/08/07 18:37:26 by zmogne           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -126,30 +126,8 @@ void Channel::ChannelSend(const std::string &message, Client *sender)
 		std::cout << "[DEBUG] OPE" << std::endl;
 		// pouor ne pas aussi envoyer a user donc 2 fois
 		if (*it != sender)
-			//&& std::find(_users.begin(), _users.end(), *it) == _users.end())
 			(*it)->send_msg(message);
 	}
-    // std::set<Client*> recipients;
-
-    // // Ajouter les utilisateurs (sauf sender)
-    // for (std::vector<Client*>::iterator it = _users.begin(); it != _users.end(); ++it)
-    // {
-    //     if (*it != sender)
-    //         recipients.insert(*it);
-    // }
-
-    // // Ajouter les opérateurs (sauf sender)
-    // for (std::vector<Client*>::iterator it = _operators.begin(); it != _operators.end(); ++it)
-    // {
-    //     if (*it != sender)
-    //         recipients.insert(*it); // set évite les doublons automatiquement
-    // }
-
-    // // Envoyer le message à chaque destinataire unique
-    // for (std::set<Client*>::iterator it = recipients.begin(); it != recipients.end(); ++it)
-    // {
-    //     (*it)->send_msg(message);
-    // }
 }
 
 
@@ -162,4 +140,13 @@ void Channel::printClientVectors() const
 	std::cout << "  [_operators] Clients:\n";
 	for (std::vector<Client *>::const_iterator it = _operators.begin(); it != _operators.end(); ++it)
 		std::cout << "   - ptr: " << *it << " (" << (*it)->getNickname() << ")\n";
+}
+
+std::string getCurrentDate()
+{
+    time_t now = time(0);
+    char buf[80];
+    struct tm tstruct = *localtime(&now);
+    strftime(buf, sizeof(buf), "%a %b %d %Y %H:%M:%S", &tstruct);
+    return std::string(buf);
 }

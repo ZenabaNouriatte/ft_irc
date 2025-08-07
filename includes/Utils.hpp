@@ -7,5 +7,6 @@
 
 std::string toLower(const std::string& str);
 bool isValidNickname(const std::string& nick);
+std::string getCurrentDate();
 
 #endif
