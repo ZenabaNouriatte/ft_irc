@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   utils.cpp                                          :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: smolines <smolines@student.42.fr>          +#+  +:+       +#+        */
+/*   By: zmogne <zmogne@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/31 14:07:32 by cschmid           #+#    #+#             */
-/*   Updated: 2025/08/05 17:31:06 by smolines         ###   ########.fr       */
+/*   Updated: 2025/08/07 16:29:37 by zmogne           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -77,7 +77,7 @@ bool Channel::verifClientisInChannel(Client *client)
 bool Channel::verifClientisOperator(Client *client)
 {
 	if (std::find(_operators.begin(), _operators.end(), client) != _operators.end())
-	{
+		{
 		std::cout << "[DEBUG] verifClientisOperator : trouve dans operators" << std::endl;	
 		return (true);
 	}
@@ -129,6 +129,27 @@ void Channel::ChannelSend(const std::string &message, Client *sender)
 			//&& std::find(_users.begin(), _users.end(), *it) == _users.end())
 			(*it)->send_msg(message);
 	}
+    // std::set<Client*> recipients;
+
+    // // Ajouter les utilisateurs (sauf sender)
+    // for (std::vector<Client*>::iterator it = _users.begin(); it != _users.end(); ++it)
+    // {
+    //     if (*it != sender)
+    //         recipients.insert(*it);
+    // }
+
+    // // Ajouter les opérateurs (sauf sender)
+    // for (std::vector<Client*>::iterator it = _operators.begin(); it != _operators.end(); ++it)
+    // {
+    //     if (*it != sender)
+    //         recipients.insert(*it); // set évite les doublons automatiquement
+    // }
+
+    // // Envoyer le message à chaque destinataire unique
+    // for (std::set<Client*>::iterator it = recipients.begin(); it != recipients.end(); ++it)
+    // {
+    //     (*it)->send_msg(message);
+    // }
 }
 
 

@@ -1,0 +1,69 @@
+
+"irssi"
+"/connect dalnet <port> "  et pas irc.dal.net
+"/rawlog save <nom du fichier> "
+le fichier de log sera sauvegarder sur le home
+
+
+
+
+A FAIRE
+//KICK et PART
+
+si un client quitte le channel
+- si il est operator et que c'est le dernier operator : le 1er client devient operator
+
+
+A TESTER :
+peut-on se KICK soi meme --> NON 
+
+
+
+
+
+
+
+
+
+"irssi"
+"/connect dalnet <port> "  et pas irc.dal.net
+"/rawlog save <nom du fichier> "
+le fichier de log sera sauvegarder sur le home
+
+
+comment est gere le manque de param dans molde ?
+        461     ERR_NEEDMOREPARAMS
+                        "<command> :Not enough parameters"
+
+                - Returned by the server by numerous commands to
+                  indicate to the client that it didn't supply enough
+                  parameters.
+
+
+que choisr entre err 475 et 467 ?
+
+        467     ERR_KEYSET
+         "<channel> :Channel key already set"
+        475     ERR_BADCHANNELKEY
+        "<channel> :Cannot join channel (+k)"
+
+
+NOM DU Channel1.3 Channels
+
+   Channels names are strings (beginning with a '&', '#', '+' or '!'
+   character) of length up to fifty (50) characters.  Apart from the
+   requirement that the first character is either '&', '#', '+' or '!',
+   the only restriction on a channel name is that it SHALL NOT contain
+   any spaces (' '), a control G (^G or ASCII 7), a comma (',').  Space
+   is used as parameter separator and command is used as a list item
+   separator by the protocol).  A colon (':') can also be used as a
+   delimiter for the channel mask.  Channel names are case insensitive.
+
+
+gerer les commandes pour lesquelles le client DOIT etre dans le channel
+           442     ERR_NOTONCHANNEL
+                        "<channel> :You're not on that channel"
+
+                - Returned by the server whenever a client tries to
+                  perform a channel effecting command for which the
+                  client isn't a member.
