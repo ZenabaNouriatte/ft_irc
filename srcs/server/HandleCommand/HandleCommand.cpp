@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   HandleCommand.cpp                                  :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: smolines <smolines@student.42.fr>          +#+  +:+       +#+        */
+/*   By: zmogne <zmogne@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/21 14:30:34 by cschmid           #+#    #+#             */
-/*   Updated: 2025/08/05 14:18:04 by smolines         ###   ########.fr       */
+/*   Updated: 2025/08/07 10:42:12 by zmogne           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -87,6 +87,8 @@ void Server::handlePASS(Client *client, const Message &msg)
 	if (msg.params[0] != _password)
 	{
 		sendError(client->getFd(), "464", "*", "Password incorrect");
+		close(client->getFd());
+		removeClient(client->getFd());
 		return ;
 	}
 	client->setPass(msg.params[0]);
