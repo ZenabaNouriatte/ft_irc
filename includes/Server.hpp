@@ -147,5 +147,4 @@ class Server
     void                            cleanupChannels();
 	void                            suppressChannel(const Channel & channel);
     void                            disconnectClient(int clientFd);
-    void                            removeClient(int client_fd);
 };
