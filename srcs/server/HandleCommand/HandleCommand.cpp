@@ -6,7 +6,7 @@
 /*   By: zmogne <zmogne@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/21 14:30:34 by cschmid           #+#    #+#             */
-/*   Updated: 2025/08/07 16:38:15 by zmogne           ###   ########.fr       */
+/*   Updated: 2025/08/07 19:27:53 by zmogne           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,7 +25,6 @@ void Server::handleCommand(Client *client, const Message &msg)
 		|| msg.command == "TOPIC" || msg.command == "PART"
 		|| msg.command == "KICK" || msg.command == "WHOIS" || msg.command == "QUIT")
 		handleServerCommand(client, msg);
-	// handle channel
 	else if (!client->isRegistered())
 		sendError(client->getFd(), "451", "*", "You have not registered");
 	else

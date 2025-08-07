@@ -114,7 +114,6 @@ void Server::handleJOIN(Client *client, const Message &msg)
 	std::vector<std::string> keys;
     if (msg.params.size() > 1)
 		keys = splitComma(msg.params[1]);
-
 	for (size_t i = 0; i < channels.size(); ++i)
 	{
 		std::string chan = channels[i];
@@ -129,7 +128,7 @@ void Server::handleJOIN(Client *client, const Message &msg)
         if (ClientChannelCount(client) >= 10)
         {
 			std::cout << "DEBUG Client ["<< client->getFd() <<"] has 10 CHannels\n";
-            sendError(client->getFd(), "405", channel, "You have joined too many channels");
+            sendError(client->getFd(), "405", channels[i], "You have joined too many channels");
             return;
         }
 		handleSingleJoin(client, chan, key); // logique unique join
@@ -171,7 +170,6 @@ void Server::leaveAllChannels(Client *client)
         {
             std::cout << "[DEBUG]  -> channel " << chan->getName() << " is now empty. Deleting it.\n";
             verifIfCloseChannel(chan);
-            it = _channels.erase(it); // erase retourne l'itérateur suivant
         }
         else
         {
