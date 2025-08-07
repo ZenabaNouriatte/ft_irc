@@ -3,10 +3,10 @@
 #                                                         :::      ::::::::    #
 #    Makefile                                           :+:      :+:    :+:    #
 #                                                     +:+ +:+         +:+      #
-#    By: cschmid <cschmid@student.42.fr>            +#+  +:+       +#+         #
+#    By: zmogne <zmogne@student.42.fr>              +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2025/07/04 16:33:23 by zmogne            #+#    #+#              #
-#    Updated: 2025/08/04 16:09:06 by cschmid          ###   ########.fr        #
+#    Updated: 2025/08/07 20:51:42 by zmogne           ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -21,22 +21,23 @@ OBJ_DIR   := obj
 
 HEADER_NAMES := Channel.hpp Client.hpp CommandHanler.hpp Message.hpp Server.hpp
 SRC_FILES    := main.cpp \
-				server/Channel/Channel.cpp \
-				server/Channel/Mode.cpp \
-				server/Channel/otherCommand.cpp \
-				server/Channel/utils.cpp \
-				server/HandleCommand/HandleCommand.cpp \
-				server/HandleCommand/HandleInvit.cpp \
-				server/HandleCommand/HandleJoin.cpp \
-				server/HandleCommand/HandleKick.cpp \
-				server/HandleCommand/HandleMode.cpp \
-				server/HandleCommand/HandlePart.cpp \
-				server/HandleCommand/HandleTopic.cpp \
-				server/HandleCommand/Registration.cpp \
-				server/HandleCommand/utils.cpp \
-				server/Client.cpp \
-				server/Message.cpp \
-				server/Server.cpp \
+				Channel/Channel.cpp \
+				Channel/Mode.cpp \
+				Channel/otherCommand.cpp \
+				Channel/utils.cpp \
+				HandleCommand/HandleCommand.cpp \
+				HandleCommand/HandleInvit.cpp \
+				HandleCommand/HandleJoin.cpp \
+				HandleCommand/HandleKick.cpp \
+				HandleCommand/HandleMode.cpp \
+				HandleCommand/HandlePart.cpp \
+				HandleCommand/HandleTopic.cpp \
+				HandleCommand/Registration.cpp \
+				HandleCommand/utils.cpp \
+				Client.cpp \
+				Message.cpp \
+				Server.cpp \
+				Quit.cpp \
 
 SRC := $(addprefix $(SRC_DIR)/, $(SRC_FILES))
 HEADER_FILES := $(addprefix includes/, $(HEADER_NAMES))

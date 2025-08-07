@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   utils.cpp                                          :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: smolines <smolines@student.42.fr>          +#+  +:+       +#+        */
+/*   By: zmogne <zmogne@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/31 13:57:45 by cschmid           #+#    #+#             */
-/*   Updated: 2025/08/07 12:24:36 by smolines         ###   ########.fr       */
+/*   Updated: 2025/08/07 20:45:32 by zmogne           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -127,4 +127,15 @@ std::string toLower(const std::string &str)
     for (size_t i = 0; i < str.size(); ++i)
         lower += std::tolower(str[i]);
     return lower;
+}
+
+std::vector<std::string> Server::splitComma(const std::string &input)
+{
+	std::vector<std::string> result;
+	std::stringstream ss(input);
+	std::string item;
+
+	while (std::getline(ss, item, ','))
+		result.push_back(item);
+	return result;
 }

@@ -1,18 +1,20 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   HandleJoin.cpp                                     :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: zmogne <zmogne@student.42.fr>              +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2025/08/07 20:20:42 by zmogne            #+#    #+#             */
+/*   Updated: 2025/08/07 20:46:13 by zmogne           ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #include "Channel.hpp"
 #include "Server.hpp"
 #include "Client.hpp"
 #include "Utils.hpp"
 
-std::vector<std::string> Server::splitComma(const std::string &input)
-{
-	std::vector<std::string> result;
-	std::stringstream ss(input);
-	std::string item;
-
-	while (std::getline(ss, item, ','))
-		result.push_back(item);
-	return result;
-}
 
 void Server::handleSingleJoin(Client *client, const std::string &channelName, const std::string &key)
 {
@@ -36,18 +38,18 @@ void Server::handleSingleJoin(Client *client, const std::string &channelName, co
 		isNewChannel = true;
 	
 	}
-	else
+	else //DEBUG 
 	{
-		std::cout << "[JOIN] Channel '" << channelName << "' already exists."<< std::endl;
+		std::cout << "DEBUG [JOIN] Channel '" << channelName << "' already exists."<< std::endl;
 	}
 	if (chan->verifClientisUser(client))
     {
-        std::cout << "Client [" << client->getFd() << "] already in channel '" << channelName << std::endl;
+        std::cout << " DEBUG Client [" << client->getFd() << "] already in channel '" << channelName << std::endl;
         return;
     }
 	if (chan->addUser(this, client, key) == false)
 	{
-		std::cout << RED << "Client [" << client->getFd() << "] JOIN failed" << RESET << std::endl;
+		std::cout << RED << " DEBUG Client [" << client->getFd() << "] JOIN failed" << RESET << std::endl;
 		return;
 	}
 	sendJoinMsg(client, chan);
@@ -184,38 +186,26 @@ void Server::sendNameList(Client* client, Channel* chan)
 {
 	std::string memberList;
 
-	// 1. Ajouter les opérateurs avec le préfixe '@'
 	const std::vector<Client*>& operators = chan->getOperators();
 	for (size_t i = 0; i < operators.size(); ++i)
 	{
 		memberList += "@" + operators[i]->getNickname();
 		memberList += " ";
 	}
-
-	// 2. Ajouter les utilisateurs (en évitant les doublons)
 	const std::vector<Client*>& users = chan->getUsers();
 	for (size_t i = 0; i < users.size(); ++i)
 	{
 		Client* user = users[i];
-
-		// Si l'utilisateur est déjà dans la liste des opérateurs, on le saute
 		if (std::find(operators.begin(), operators.end(), user) != operators.end())
 			continue;
-
 		memberList += user->getNickname();
 		memberList += " ";
 	}
-
-	// Supprimer l'espace final si besoin
 	if (!memberList.empty() && memberList[memberList.size() - 1] == ' ')
 		memberList.erase(memberList.size() - 1);
-
-	// 3. Envoi du message 353 (liste des membres)
 	std::string namesMsg = ":" + _server_name + " 353 " + client->getNickname() +
 		" = " + chan->getName() + " :" + memberList + "\r\n";
 	client->send_msg(namesMsg);
-
-	// 4. Envoi du message 366 (fin de la liste)
 	std::string endNamesMsg = ":" + _server_name + " 366 " + client->getNickname() +
 		" " + chan->getName() + " :End of /NAMES list\r\n";
 	client->send_msg(endNamesMsg);

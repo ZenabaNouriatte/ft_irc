@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Message.cpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: cschmid <cschmid@student.42.fr>            +#+  +:+       +#+        */
+/*   By: zmogne <zmogne@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/21 14:30:42 by cschmid           #+#    #+#             */
-/*   Updated: 2025/07/31 14:23:37 by cschmid          ###   ########.fr       */
+/*   Updated: 2025/08/07 21:13:48 by zmogne           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,12 +19,14 @@ Message::Message(std::string raw_msg): raw(raw_msg)
         debugPrint();
 }
 
+Message::~Message() {}
+
 void Message::msgParsing(std::string msg)
 {
         while (!msg.empty() && (msg[msg.length() - 1] == '\r' || msg[msg.length() - 1] == '\n'))
                 msg.erase(msg.length() - 1, 1);
         size_t i = 0;
-        if (!msg.empty() && msg[0] == ':') // trouver prefix
+        if (!msg.empty() && msg[0] == ':')
         {
                 size_t space = msg.find(' ');
                 if (space != std::string::npos)
@@ -36,7 +38,7 @@ void Message::msgParsing(std::string msg)
                         return;
         }
 
-        size_t space = msg.find(' ', i); // extraction commande
+        size_t space = msg.find(' ', i);
         if (space != std::string::npos)
         {
                 command = msg.substr(i, space - i);
@@ -47,7 +49,7 @@ void Message::msgParsing(std::string msg)
                 command = msg.substr(i);
                 return ;
         }
-        while (i <msg.size()) // extraction param et trailing
+        while (i <msg.size())
         {
                 if (msg[i] == ':')
                 {
@@ -71,7 +73,9 @@ void Message::msgParsing(std::string msg)
 
 /*============= DEBUG ================*/
 
-void Message::debugPrint() const {
+void Message::debugPrint() const 
+{
+        //DEBUG 
 	std::cout << "┌──────────── Parsed Message ────────────" << std::endl;
 	if (!prefix.empty())
 		std::cout << "│ Prefix   : " << prefix << std::endl;

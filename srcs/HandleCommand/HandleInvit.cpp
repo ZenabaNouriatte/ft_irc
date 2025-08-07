@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   HandleInvit.cpp                                    :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: smolines <smolines@student.42.fr>          +#+  +:+       +#+        */
+/*   By: zmogne <zmogne@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/31 09:42:56 by cschmid           #+#    #+#             */
-/*   Updated: 2025/08/07 16:30:55 by smolines         ###   ########.fr       */
+/*   Updated: 2025/08/07 20:45:00 by zmogne           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,7 +15,8 @@
 
 void Server::handleINVIT(Client *client, const Message &msg)
 {
-    if (msg.params.size() < 2) {
+    if (msg.params.size() < 2) 
+    {
         sendError(client->getFd(), "461", "INVITE", "Not enough parameters");
         return;
     }
@@ -24,13 +25,15 @@ void Server::handleINVIT(Client *client, const Message &msg)
     std::string channelName = msg.params[1];
 
     Channel *chan = findChannel(channelName);
-    if (!chan) {
+    if (!chan) 
+    {
         sendError(client->getFd(), "403", channelName, "No such channel");
         return;
     }
 
     Client *target = findClient(targetNick);
-    if (!target) {
+    if (!target) 
+    {
         sendError(client->getFd(), "401", targetNick, "No such nick");
         return;
     }

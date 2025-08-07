@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Client.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: smolines <smolines@student.42.fr>          +#+  +:+       +#+        */
+/*   By: zmogne <zmogne@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/21 14:30:25 by cschmid           #+#    #+#             */
-/*   Updated: 2025/08/05 15:45:50 by smolines         ###   ########.fr       */
+/*   Updated: 2025/08/07 20:47:45 by zmogne           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,7 +18,8 @@ Client::Client(int fd) : _fd(fd), _nickname(""), _has_pass(false), _has_nick(fal
 
 /*========== DESTRUCTEUR ==========*/
 
-Client::~Client() {
+Client::~Client() 
+{
     close(_fd);
 }
 
@@ -36,47 +37,57 @@ const std::string &Client::getRealname() const { return _realname;}
 
 /*========== SETTER ==========*/
 
-void Client::setHasPass(bool value){
+void Client::setHasPass(bool value)
+{
     _has_pass = value;
 }
 
-void Client::setNickname(const std::string& nick){
+void Client::setNickname(const std::string& nick)
+{
 
-    std::cout << "Setting nickname from '" << _nickname << "' to '" << nick << "'" << std::endl;
+    std::cout << " DEBUG Setting nickname from '" << _nickname << "' to '" << nick << "'" << std::endl;
     _nickname = nick; 
 }
 
-void Client::setHasNick(bool value) {
+void Client::setHasNick(bool value) 
+{
     _has_nick = value;
 }
 
-void Client::setUsername(const std::string& name){
+void Client::setUsername(const std::string& name)
+{
     _username = name;
 }
 
-void Client::setRealname(const std::string& name){
+void Client::setRealname(const std::string& name)
+{
     _realname = name;
 }
 
-void Client::setPass(const std::string& pass){
+void Client::setPass(const std::string& pass)
+{
     _pass = pass;
 }
 
-void Client::setHasUser(bool value){
+void Client::setHasUser(bool value)
+{
     _has_user = value;
 }
 
-void Client::setRegistered(bool value){
+void Client::setRegistered(bool value)
+{
     _registred = value;
 }
 
 /*========== GETTER ==========*/
 
-std::string Client::getNickname() const {
+std::string Client::getNickname() const 
+{
     return _nickname;
 }
 
-std::string Client::getUsername() const {
+std::string Client::getUsername() const 
+{
     return _username;
 }
 
@@ -92,7 +103,8 @@ int Client::getFd(void) const
 
 std::string Client::getPrefix() const 
 {
-    if (_nickname.empty() || _username.empty()) {
+    if (_nickname.empty() || _username.empty()) 
+    {
         std::ostringstream oss;
         oss << "user" << _fd << "@localhost";
         return oss.str();
@@ -117,13 +129,8 @@ void Client::appendToBuffer(const std::string& data)
 
 void Client::send_msg(const std::string& message)
 {
-//    std::cout << "[DEBUG] dans send-msg 1" << std::endl;
     std::string full_message = message + "\r\n";
-//    std::cout << "[DEBUG] dans send-msg 2" << std::endl;
-
     ssize_t sent = send(_fd, full_message.c_str(), full_message.size(), 0);
-//    std::cout << "[DEBUG] dans send-msg 3" << std::endl;
-
     if (sent == -1)
     {
         std::cerr << RED << BOLD << "[ERROR] Error sending msg to client." << _fd << RESET << std::endl;

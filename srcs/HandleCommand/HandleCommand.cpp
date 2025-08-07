@@ -6,7 +6,7 @@
 /*   By: zmogne <zmogne@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/21 14:30:34 by cschmid           #+#    #+#             */
-/*   Updated: 2025/08/07 19:27:53 by zmogne           ###   ########.fr       */
+/*   Updated: 2025/08/07 20:33:38 by zmogne           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -88,7 +88,8 @@ void Server::handlePASS(Client *client, const Message &msg)
 	{
 		sendError(client->getFd(), "464", "*", "Password incorrect");
 		close(client->getFd());
-		removeClient(client->getFd());
+		//removeClient(client->getFd());
+		disconnectClient(client->getFd());
 		return ;
 	}
 	client->setPass(msg.params[0]);
@@ -191,7 +192,7 @@ void Server::handleUSER(Client *client, const Message &msg)
 
 void Server::handlePRIVMSG(Client* client, const Message& msg)
 {
-	std::cout << "Msg\n";
+	std::cout << "DEBUG Msg\n";
     if (!client->isRegistered())
     {
         sendError(client->getFd(), "451", "*", "You have not registered");
@@ -251,23 +252,18 @@ Client* Server::findByNick(const std::string& nickname)
 
 void Server::handleWHOIS(Client* client, const Message &msg)
 {
-    std::cout << "DANS WHO IS\n";
-
     if (msg.params.empty())
     {
         client->send_msg(":" + _server_name + " 431 " + client->getNick() + " :No nickname given");
         return;
     }
-
     std::string target = msg.params[0];
     Client* targetClient = findByNick(target);
-
     if (!targetClient)
     {
         client->send_msg(":" + _server_name + " 401 " + client->getNick() + " " + target + " :No such nick");
         return;
     }
-
     // WHOIS user line (code 311)
     client->send_msg(":" + _server_name + " 311 " + client->getNick() + " " +
                     targetClient->getNick() + " ~user localhost * :" + targetClient->getRealname());
@@ -297,7 +293,8 @@ void Server::handleQUIT(Client *client, const Message &msg)
 			channel->removeUser(client->getFd());
 			channel->removeOperator(client); // nettoyage optionnel
 
-			if (channel->isChannelEmpty()) {
+			if (channel->isChannelEmpty())
+			{
 				delete channel;
 				it = _channels.erase(it); // erase retourne le nouvel itérateur
 				continue;

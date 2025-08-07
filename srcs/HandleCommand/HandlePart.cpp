@@ -3,35 +3,22 @@
 /*                                                        :::      ::::::::   */
 /*   HandlePart.cpp                                     :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: smolines <smolines@student.42.fr>          +#+  +:+       +#+        */
+/*   By: zmogne <zmogne@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/30 12:17:37 by cschmid           #+#    #+#             */
-/*   Updated: 2025/08/05 15:00:33 by smolines         ###   ########.fr       */
+/*   Updated: 2025/08/07 20:46:42 by zmogne           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "Channel.hpp"
 #include "Server.hpp"
 
-// commande PART dans server
-
-// void Server::verifIfCloseChannel(Channel* channel)
-// {
-// 	///// SEGFAULT A CE NIVEAU : voir ce qui ne va pas avec DELETE
-// 	if (channel->isChannelEmpty() == 0)
-// 	{
-// 		if (channel)
-// 			delete channel;
-// 		std::cout << "[DEBUG] channel" << channel->getName() << "has been deleted" << std::endl;
-// 	}
-// }
 
 void Server::verifIfCloseChannel(Channel* channel)
 {
 	if (channel && channel->isChannelEmpty() == 0)
 	{
 		std::string name = channel->getName();
-
 		for (std::vector<Channel*>::iterator it = _channels.begin(); it != _channels.end(); ++it)
 		{
 			if (*it == channel)
@@ -63,13 +50,10 @@ void Server::commandPart(Client* client, Channel* channel, std::string comment)
 		client->send_msg(partMsg);
 		channel->removeUser(client->getFd());
         channel->removeOperator(client);
-			std::cout << "[DEBUG]ICI" << std::endl;
 		if (channel->affectNextOperator() == 1)
 		{
-			std::cout << "[DEBUG]LA" << std::endl;
 			verifIfCloseChannel(channel);
 			channel = NULL;
-			std::cout << "[DEBUG]APRES DELETE" << std::endl;	
 			// std::cout << "[DEBUG] channel deleted" << channel->getName() << "has been deleted" << std::endl;
 			//message ??
 		}
@@ -86,7 +70,8 @@ void Server::commandPart(Client* client, Channel* channel, std::string comment)
 
 void Server::handlePART(Client* client, const Message& msg)
 {
-    if (msg.params.empty()) {
+    if (msg.params.empty()) 
+	{
         sendError(client->getFd(), "461", "PART", "Not enough parameters");
         return;
     }
@@ -98,10 +83,10 @@ void Server::handlePART(Client* client, const Message& msg)
         sendError(client->getFd(), "403", channelName, "No such channel");
         return;
     }
-    std::string comment = msg.trailing;
-    std::cout << "--------- HANDLE PART ---------" << std::endl;
-    std::cout << "PART = " << comment << std::endl;
-    std::cout << "Channel = " << channelName << std::endl;
+    std::string comment = msg.trailing; //DEBUG 
+    std::cout << "DEBUG --------- HANDLE PART ---------" << std::endl;
+    std::cout << "DEBUG PART = " << comment << std::endl;
+    std::cout << "DEBUG Channel = " << channelName << std::endl;
     std::cout << "-------------------------------" << std::endl;
     commandPart(client, chan, comment);
 }

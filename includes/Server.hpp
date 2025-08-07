@@ -48,113 +48,104 @@ class Server
 	/*===== Constructors / Destructor =====*/
 	Server(int port, const std::string &password);
 	~Server();
+
 	/*===== Startup / Signal Handling / Error =====*/
-	void start(); // Main loop
-	static void catchSignal(int);
-	// Handle Ctrl+C or kill signals
-	void handleError(const std::string &message);
-	// Print error and close server socket
-	void cleanExit(); // Cleanup sockets and memory
-    void cleanupChannels();
+	void                            start(); // Main loop
+	static void                     catchSignal(int);
+	void                            handleError(const std::string &message);
+
 
     /*===== GETTERS =====*/
 
-    const std::string &getServerName() const;
+    const std::string               &getServerName() const;
 
-	/*===== Server Setup =====*/
-	bool setupServerSocket(); // Create, bind, listen on socket
-	void setupPollFds();      // Add server socket and stdin to poll()
-	void printStart();        // Display server start message
-	void handlePollEvents();  // Process events returned by poll()
-
-	/*===== Client Connection Management =====*/
-	void acceptNewClient();
-	// Accept new connection and register client
-	void removeClient(int client_fd); // Remove client (socket, pollfd, memory)
-
+	/*===== Server Setup & Client Connection Management =====*/
+	bool                            setupServerSocket(); 
+	void                            setupPollFds();      
+	void                            printStart();     
+	void                            handlePollEvents();  
+	void                            acceptNewClient();
 	
+
+	/*===== Client Communication =====*/
+    void                            handleClient(int client_fd);                                                           // Read data from client
+    void                            handleClientRead(Client* client, const std::string& input);                            // Handle full commands
+    void                            handleClientDisconnection(Client* client, int client_fd, ssize_t received_bytes);      // Manage disconnect or error
+
+
 	/*===== MODE =====*/
 
-	//Client findClientByNick(const std::string &nick);
-	bool isValidModeCommand(Client *client, const Message &msg);
-	void parseModeBlock(Client *client, Channel *chan, const Message &msg,
-		const std::string &modes, size_t &paramIndex);
-	void handleModeWithParam(Client *client, Channel *chan, const Message &msg,
-		char c, char sign, size_t &paramIndex);
-	void handleModeNoParam(Client *client, Channel *chan, char c, char sign);
+	bool                            isValidModeCommand(Client *client, const Message &msg);
+	void                            parseModeBlock(Client *client, Channel *chan, const Message &msg,
+		                                const std::string &modes, size_t &paramIndex);
+	void                            handleModeWithParam(Client *client, Channel *chan, const Message &msg,
+		                                char c, char sign, size_t &paramIndex);
+	void                            handleModeNoParam(Client *client, Channel *chan, char c, char sign);
 
-	/*===== Kick =====*/
-
-	void handleKICK(Client *client, const Message &msg);
-	void handleINVIT(Client *client, const Message &msg);
-	void handleTOPIC(Client *client, const Message &msg);
-    void handlePART(Client* client, const Message& msg);
-
-
-
-
-    /*===== Client Communication =====*/
-    void handleClient(int client_fd);                                                           // Read data from client
-    void handleClientRead(Client* client, const std::string& input);                            // Handle full commands
-    void handleClientDisconnection(Client* client, int client_fd, ssize_t received_bytes);      // Manage disconnect or error
-
-    
     /*===== IRC Command Handling =====*/
-    void handleCommand(Client* client, const Message& msg);
-    void completeRegistration(Client* client);
-    void handleRegistred(Client* client, const Message& msg);
-    void handleServerCommand (Client* client, const Message& msg);
+    void                            handleCommand(Client* client, const Message& msg);
+    void                            completeRegistration(Client* client);
+    void                            handleRegistred(Client* client, const Message& msg);
+    void                            handleServerCommand (Client* client, const Message& msg);
     
-    void handlePASS (Client* client, const Message& msg);
-    void handleNICK (Client* client, const Message& msg);
-    bool isNicknameInUse(const std::string &nick);
-    void handleQUIT(Client* client, const Message& msg);
-    void handleUSER (Client* client, const Message& msg);
-    void handlePRIVMSG(Client* client, const Message& msg);
-    void handleWHOIS(Client* client, const Message &msg);
-    bool MsgToChannel(Client* sender, const std::string& channelName, const std::string& message);
-    bool PvMsgToUser(Client* sender, const std::string& target, const std::string& message);
+    void                            handlePASS (Client* client, const Message& msg);
+    void                            handleNICK (Client* client, const Message& msg);
+    void                            handleUSER (Client* client, const Message& msg);
+    void                            handleQUIT(Client* client, const Message& msg);
+    void                            handlePRIVMSG(Client* client, const Message& msg);
+    void                            handleWHOIS(Client* client, const Message &msg);
+	void                            handleKICK(Client *client, const Message &msg);
+	void                            handleINVIT(Client *client, const Message &msg);
+	void                            handleTOPIC(Client *client, const Message &msg);
+    void                            handlePART(Client* client, const Message& msg);
+    void                            handlePING (Client* client, const Message& msg);
+    void                            handleMODE (Client* client, const Message& msg);
+    void                            handleJOIN (Client* client, const Message& msg);
 
+    /*===== IRC Command Helpers =====*/
+    bool                            isNicknameInUse(const std::string &nick);
+    bool                            MsgToChannel(Client* sender, const std::string& channelName, const std::string& message);
+    bool                            PvMsgToUser(Client* sender, const std::string& target, const std::string& message);
+    bool                            parseJoin(const Message &msg, std::string &channel, std::string &key);
+	bool                            PrefixUser(const Message &msg, std::string &User,
+	                                    std::string &channel, std::string &key);
+    std::string                     userPrefix(const std::string& prefix);
+    Channel*                        findChannel(const std::string& name);
+	Client *                        findClient(const std::string &nickname);
+    std::vector<std::string>        splitComma(const std::string &input);
+    void                            handleSingleJoin(Client *client, const std::string &channelName, const std::string &key);
+    bool                            ValidChannelName(const std::string &name);
+    void                            leaveAllChannels(Client *client);
+    int                             ClientChannelCount(Client* client) const;
+	void                            verifIfCloseChannel(Channel* channel);
+	void                            commandPart(Client* client, Channel* channel, std::string comment);
+    void                            sendNameList(Client* client, Channel* chan);
+    void                            sendTopic(Client* client, Channel* chan);
+    void                            sendJoinMsg(Client* client, Channel* chan);
 
-    void handlePING (Client* client, const Message& msg);
-    void handleMODE (Client* client, const Message& msg);
-    void handleJOIN (Client* client, const Message& msg);
-    bool parseJoin(const Message &msg, std::string &channel, std::string &key);
-	bool PrefixUser(const Message &msg, std::string &User,
-	    std::string &channel, std::string &key);
-    std::string userPrefix(const std::string& prefix);
-    Channel* findChannel(const std::string& name);
-	Client *findClient(const std::string &nickname);
-    std::vector<std::string> splitComma(const std::string &input);
-    void handleSingleJoin(Client *client, const std::string &channelName, const std::string &key);
-    bool ValidChannelName(const std::string &name);
-    void leaveAllChannels(Client *client);
-    int ClientChannelCount(Client* client) const;
-	void verifIfCloseChannel(Channel* channel);
-	void commandPart(Client* client, Channel* channel, std::string comment);
-    void sendNameList(Client* client, Channel* chan);
-    void sendTopic(Client* client, Channel* chan);
-    void sendJoinMsg(Client* client, Channel* chan);
 
     /*===== Server Console Input =====*/
-    void handleConsoleInput();                              // Read from stdin
-    void sendToAllClients(const std::string& text);         // Send message to all clients
-    void welcomeServer();                                   // Print welcome message
-    void welcomeClient(Client* client);                     // Send welcome message to client
+    void                            handleConsoleInput();                             
+    void                            sendToAllClients(const std::string& text);         
+    void                            welcomeServer();                                   
+    void                            welcomeClient(Client* client);                     
 
 
     /*===== Utilities =====*/
-    void sendError(int fd, const std::string& code,
-        const std::string& target, const std::string& message);             // IRC error sender
-	void sendError2(int fd, const std::string& code, 
-		const std::string& target, const std::string& targetBis, const std::string& message);
-	std::vector<std::string> splitCommand(const std::string& command);      // Split input string into tokens
-    Client* findByNick(const std::string& nickname);
+    void                            sendError(int fd, const std::string& code,
+                                        const std::string& target, const std::string& message);             
+	void                            sendError2(int fd, const std::string& code, 
+		                                const std::string& target, const std::string& targetBis, const std::string& message);
+	std::vector<std::string>        splitCommand(const std::string& command);     
+    Client*                         findByNick(const std::string& nickname);
 
     /*===== Global Signal Flag =====*/
-    static int signal;
+    static int                      signal;
 
-
-	void suppressChannel(const Channel & channel);
-    void disconnectClient(int clientFd);
+    /*===== QUIT =====*/
+    void                            cleanExit();
+    void                            cleanupChannels();
+	void                            suppressChannel(const Channel & channel);
+    void                            disconnectClient(int clientFd);
+    void                            removeClient(int client_fd);
 };

@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   HandleMode.cpp                                     :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: smolines <smolines@student.42.fr>          +#+  +:+       +#+        */
+/*   By: zmogne <zmogne@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/30 12:17:37 by cschmid           #+#    #+#             */
-/*   Updated: 2025/08/07 19:08:58 by smolines         ###   ########.fr       */
+/*   Updated: 2025/08/07 20:06:24 by zmogne           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -101,7 +101,7 @@ void Server::handleModeWithParam(Client *client, Channel *chan,
 	
 	if (paramIndex >= msg.params.size())
 	{
-		std::cout << "Pas assez de paramètres pour le mode " << c << std::endl;
+		std::cout << "DEBUG  Pas assez de paramètres pour le mode " << c << std::endl;
 		return ;
 	}
 	std::string param = msg.params[paramIndex];
@@ -116,19 +116,19 @@ void Server::handleModeWithParam(Client *client, Channel *chan,
 		}				
 		else
 		{
-			std::cout << "C'est un o avec " << param << std::endl;
+			std::cout << " DEBUG C'est un o avec " << param << std::endl;
 			chan->changeModeO(this,client, std::string(1, sign) + "o", target);
 		}
 	}
 	else if (c == 'k')
 	{
-		std::cout << "C'est un k avec " << param << std::endl;
+		std::cout << " DEBUG C'est un k avec " << param << std::endl;
 		chan->changeModeK(this,client, std::string(1, sign) + "k", param);
 	}
 	else if (c == 'l')
 	{
 		limit = atoi(param.c_str());
-		std::cout << "C'est un l avec " << limit << std::endl;
+		std::cout << " DEBUG C'est un l avec " << limit << std::endl;
 		chan->changeModeL(this, client, std::string(1, sign) + "l", limit);
 	}
 	paramIndex++;
@@ -138,16 +138,16 @@ void Server::handleModeNoParam(Client *client, Channel *chan, char c, char sign)
 {
 	if (c == 'i')
 	{
-		std::cout << "C'est un i" << std::endl;
+		std::cout << "DEBUG C'est un i" << std::endl;
 		chan->changeModeI(this,client, std::string(1, sign) + "i");
 	}
 	else if (c == 't')
 	{
-		std::cout << "C'est un t" << std::endl;
+		std::cout << "DEBUG C'est un t" << std::endl;
 		chan->changeModeT(this,client, std::string(1, sign) + "t");
 	}
 	else
 	{
-		std::cout << "Mode inconnu : " << c << std::endl;
+		std::cout << " DEBUG Mode inconnu : " << c << std::endl;
 	}
 }
