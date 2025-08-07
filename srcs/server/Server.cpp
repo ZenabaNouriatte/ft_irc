@@ -6,7 +6,7 @@
 /*   By: zmogne <zmogne@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/21 14:30:56 by cschmid           #+#    #+#             */
-/*   Updated: 2025/08/04 15:11:58 by zmogne           ###   ########.fr       */
+/*   Updated: 2025/08/07 10:43:07 by zmogne           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -280,27 +280,27 @@ void Server::handleClientDisconnection(Client* client, int client_fd, ssize_t re
 
 
 
-// void Server::removeClient(int client_fd)
-// {
-//     // Fermer la socket
-//     close(client_fd);
-//     //Supprimer le pollfd associe
-//     for (std::vector<pollfd>::iterator it = _poll_fds.begin(); it != _poll_fds.end(); ++it)
-//     {
-//         if (it->fd == client_fd)
-//         {
-//             _poll_fds.erase(it);
-//             break;
-//         }
-//     }
-//     // Supprimer le client de la map + memoire
-//     std::map<int, Client*>::iterator it = _clients.find(client_fd);
-//     if (it != _clients.end())
-//     {
-//         delete it->second;
-//         _clients.erase(it);
-//     }
-// }
+void Server::removeClient(int client_fd)
+{
+    // Fermer la socket
+    close(client_fd);
+    //Supprimer le pollfd associe
+    for (std::vector<pollfd>::iterator it = _poll_fds.begin(); it != _poll_fds.end(); ++it)
+    {
+        if (it->fd == client_fd)
+        {
+            _poll_fds.erase(it);
+            break;
+        }
+    }
+    // Supprimer le client de la map + memoire
+    std::map<int, Client*>::iterator it = _clients.find(client_fd);
+    if (it != _clients.end())
+    {
+        delete it->second;
+        _clients.erase(it);
+    }
+}
 
 
 /*========== SERVER CONSOLE ==========*/
