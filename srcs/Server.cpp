@@ -6,7 +6,7 @@
 /*   By: zmogne <zmogne@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/21 14:30:56 by cschmid           #+#    #+#             */
-/*   Updated: 2025/08/07 21:12:13 by zmogne           ###   ########.fr       */
+/*   Updated: 2025/08/07 21:18:24 by zmogne           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -160,6 +160,7 @@ void Server::acceptNewClient()
 
 }
 
+// Read data from client
 void Server::handleClient(int client_fd)
 {
     std::map<int, Client*>::iterator it = _clients.find(client_fd);
@@ -180,7 +181,7 @@ void Server::handleClient(int client_fd)
         handleClientDisconnection(client, client_fd, received_bytes);
 }
 
-
+// Handle full commands
 void Server::handleClientRead(Client* client, const std::string& input)
 {
     int clientFd = client->getFd();
@@ -203,8 +204,6 @@ void Server::handleClientRead(Client* client, const std::string& input)
     }
 }
 
-
-
 /*========== SERVER CONSOLE ==========*/
 
 void Server::handleConsoleInput()
@@ -224,6 +223,7 @@ void Server::handleConsoleInput()
     if (!input.empty())
         sendToAllClients(input);
 }
+
 void Server::sendToAllClients(const std::string& text)
 {
     const std::string prefix = ":gossip.irc.localhost NOTICE * :";

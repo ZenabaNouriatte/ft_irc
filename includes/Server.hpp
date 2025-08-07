@@ -50,7 +50,7 @@ class Server
 	~Server();
 
 	/*===== Startup / Signal Handling / Error =====*/
-	void                            start(); // Main loop
+	void                            start();
 	static void                     catchSignal(int);
 	void                            handleError(const std::string &message);
 
@@ -68,9 +68,9 @@ class Server
 	
 
 	/*===== Client Communication =====*/
-    void                            handleClient(int client_fd);                                                           // Read data from client
-    void                            handleClientRead(Client* client, const std::string& input);                            // Handle full commands
-    void                            handleClientDisconnection(Client* client, int client_fd, ssize_t received_bytes);      // Manage disconnect or error
+    void                            handleClient(int client_fd);                                                           
+    void                            handleClientRead(Client* client, const std::string& input);                            
+    void                            handleClientDisconnection(Client* client, int client_fd, ssize_t received_bytes);      
 
 
 	/*===== MODE =====*/

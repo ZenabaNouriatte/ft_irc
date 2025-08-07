@@ -12,3 +12,4 @@ a.out
 **/.json
 **/*.d
 **/*.log
+**/* .gitignore
