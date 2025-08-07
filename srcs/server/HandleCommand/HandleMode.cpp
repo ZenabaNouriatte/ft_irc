@@ -6,7 +6,7 @@
 /*   By: smolines <smolines@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/30 12:17:37 by cschmid           #+#    #+#             */
-/*   Updated: 2025/08/07 13:57:05 by smolines         ###   ########.fr       */
+/*   Updated: 2025/08/07 19:08:58 by smolines         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -65,6 +65,15 @@ bool Server::isValidModeCommand(Client *client, const Message &msg)
 	return (true);
 }
 
+
+// fonction a modifier :
+// si c == o -> handleModeWithParam
+// si c == k et pas de param -> handleModeWithParam
+// SI C == K et il existe un param : handleModeNoParam
+// si c == l et pas de param -> handleModeWithParam
+// SI C == l et il existe un param : handleModeNoParam
+// else handleModeNoParam
+
 void Server::parseModeBlock(Client *client, Channel *chan, const Message &msg,
 	const std::string &modes, size_t &paramIndex)
 {
@@ -101,7 +110,10 @@ void Server::handleModeWithParam(Client *client, Channel *chan,
 	{
 		target = chan->findClientByNick(param);
 		if (!target)
-			sendError(client->getFd(), "401", param, "No such nick");
+		{	
+			sendError(client->getFd(), "401", param, "No such nick/channel");
+			sendError2(client->getFd(), "441", param, chan->getName(), "They aren't on that channel");
+		}				
 		else
 		{
 			std::cout << "C'est un o avec " << param << std::endl;
