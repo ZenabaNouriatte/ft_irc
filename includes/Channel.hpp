@@ -101,7 +101,6 @@ class Channel
 	
 	// a supprimer
 	void printUsers() const;
-	void printClientVectors() const;
 
 };
 

@@ -6,7 +6,7 @@
 /*   By: cschmid <cschmid@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/07 20:18:15 by zmogne            #+#    #+#             */
-/*   Updated: 2025/08/08 15:38:56 by cschmid          ###   ########.fr       */
+/*   Updated: 2025/08/08 15:44:31 by cschmid          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -43,7 +43,7 @@ void Server::disconnectClient(int clientFd)
     std::cout << RED << BOLD << "Client [" << clientFd << "] disconnected\n" << RESET << std::endl;
 }
 
-void Server::handleClientDisconnection(Client* client, int client_fd, ssize_t received_bytes)
+void Server::handleClientDisconnection(Client* client, ssize_t received_bytes)
 {
     if (received_bytes == 0)
     {

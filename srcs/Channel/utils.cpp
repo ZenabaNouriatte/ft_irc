@@ -6,7 +6,7 @@
 /*   By: cschmid <cschmid@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/31 14:07:32 by cschmid           #+#    #+#             */
-/*   Updated: 2025/08/08 15:33:28 by cschmid          ###   ########.fr       */
+/*   Updated: 2025/08/08 15:46:48 by cschmid          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -87,16 +87,6 @@ bool Channel::verifClientisInvited(Client *client)
 			client) != _isInvited.end());
 }
 
-/*========================== PRINT / DEBUG ============================*/
-
-void Channel::printUsers() const
-{
-	for (std::vector<Client *>::const_iterator it = _users.begin(); it != _users.end(); ++it)
-		std::cout << "       - " << *it << "\n";
-	for (std::vector<Client *>::const_iterator it = _operators.begin(); it != _operators.end(); ++it)
-		std::cout << "       - (op) " << *it << "\n";
-}
-
 
 void Channel::ChannelSend(const std::string &message, Client *sender)
 {
@@ -112,16 +102,6 @@ void Channel::ChannelSend(const std::string &message, Client *sender)
 	}
 }
 
-
-void Channel::printClientVectors() const
-{
-	for (std::vector<Client *>::const_iterator it = _users.begin(); it != _users.end(); ++it)
-		std::cout << "    - ptr: " << *it << " (" << (*it)->getNickname() << ")\n";
-
-	std::cout << "  [_operators] Clients:\n";
-	for (std::vector<Client *>::const_iterator it = _operators.begin(); it != _operators.end(); ++it)
-		std::cout << "   - ptr: " << *it << " (" << (*it)->getNickname() << ")\n";
-}
 
 std::string getCurrentDate()
 {

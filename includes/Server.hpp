@@ -70,7 +70,7 @@ class Server
 	/*===== Client Communication =====*/
     void                            handleClient(int client_fd);                                                           
     void                            handleClientRead(Client* client, const std::string& input);                            
-    void                            handleClientDisconnection(Client* client, int client_fd, ssize_t received_bytes);      
+    void                            handleClientDisconnection(Client* client, ssize_t received_bytes);      
 
 
 	/*===== MODE =====*/

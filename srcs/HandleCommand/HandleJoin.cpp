@@ -6,7 +6,7 @@
 /*   By: cschmid <cschmid@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/07 20:20:42 by zmogne            #+#    #+#             */
-/*   Updated: 2025/08/08 15:35:13 by cschmid          ###   ########.fr       */
+/*   Updated: 2025/08/08 15:46:38 by cschmid          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -46,7 +46,6 @@ void Server::handleSingleJoin(Client *client, const std::string &channelName, co
 							" :Channel " + channelName + " created on " + getCurrentDate();
 		chan->ChannelSend(infoMsg, NULL);
 	}
-	chan->printClientVectors();
 }
 
 bool Server::parseJoin(const Message &msg, std::string &channel,
@@ -124,8 +123,6 @@ void Server::leaveAllChannels(Client *client)
     for (std::vector<Channel*>::iterator it = _channels.begin(); it != _channels.end(); )
     {
         Channel* chan = *it;
-        chan->printUsers();
-
         if (chan->verifClientisUser(client) || chan->verifClientisOperator(client))
         {
             chan->removeUser(client->getFd());
@@ -136,7 +133,6 @@ void Server::leaveAllChannels(Client *client)
 			client->send_msg(partMsg);
         }
         int result = chan->getClientCount();
-        chan->printClientVectors();
         if (result == 0)
             verifIfCloseChannel(chan);
         else

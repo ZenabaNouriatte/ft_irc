@@ -18,6 +18,5 @@ class Message
         ~Message();
         
         void                        msgParsing(std::string raw_msg);
-        void                        debugPrint() const;
 
 };

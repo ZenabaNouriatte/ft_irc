@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Server.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: zmogne <zmogne@student.42.fr>              +#+  +:+       +#+        */
+/*   By: cschmid <cschmid@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/21 14:30:56 by cschmid           #+#    #+#             */
-/*   Updated: 2025/08/08 13:12:46 by zmogne           ###   ########.fr       */
+/*   Updated: 2025/08/08 15:44:25 by cschmid          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -178,7 +178,7 @@ void Server::handleClient(int client_fd)
         handleClientRead(client, buffer);
     }
     else
-        handleClientDisconnection(client, client_fd, received_bytes);
+        handleClientDisconnection(client, received_bytes);
 }
 
 // Handle full commands

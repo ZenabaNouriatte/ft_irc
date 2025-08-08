@@ -6,7 +6,7 @@
 /*   By: cschmid <cschmid@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/31 14:04:03 by cschmid           #+#    #+#             */
-/*   Updated: 2025/08/08 15:27:08 by cschmid          ###   ########.fr       */
+/*   Updated: 2025/08/08 15:47:58 by cschmid          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,8 +22,6 @@ Channel::Channel(std::string name)
 	this->_topicRestriction = false;
 	this->_hasLimit = false;
 	this->_key = false;
-	std::cout << GREEN << BOLD << "Channel [" << this->_name << "] successfully created" << RESET << std::endl;
-	std::cout << "   - ptr: " << this << "\n";
 	return ;
 }
 

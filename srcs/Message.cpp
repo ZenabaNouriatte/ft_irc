@@ -6,7 +6,7 @@
 /*   By: cschmid <cschmid@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/21 14:30:42 by cschmid           #+#    #+#             */
-/*   Updated: 2025/08/08 15:39:40 by cschmid          ###   ########.fr       */
+/*   Updated: 2025/08/08 15:46:07 by cschmid          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -67,24 +67,4 @@ void Message::msgParsing(std::string msg)
                 while (i < msg.size() && msg[i] == ' ')
                         ++i;
         }
-}
-
-
-/*============= DEBUG ================*/
-
-void Message::debugPrint() const 
-{
-        //DEBUG 
-	std::cout << "┌──────────── Parsed Message ────────────" << std::endl;
-	if (!prefix.empty())
-		std::cout << "│ Prefix   : " << prefix << std::endl;
-	std::cout << "│ Command  : " << command << std::endl;
-	std::cout << "│ Params   : ";
-	if (params.empty()) std::cout << "(none)";
-	else for (size_t i = 0; i < params.size(); ++i)
-		std::cout << "[" << i << "] = '" << params[i] << "'  ";
-	std::cout << std::endl;
-	if (!trailing.empty())
-		std::cout << "│ Trailing : " << trailing << std::endl;
-	std::cout << "└────────────────────────────────────────" << std::endl;
 }
