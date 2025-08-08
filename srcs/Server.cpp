@@ -6,7 +6,7 @@
 /*   By: cschmid <cschmid@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/21 14:30:56 by cschmid           #+#    #+#             */
-/*   Updated: 2025/08/08 15:44:25 by cschmid          ###   ########.fr       */
+/*   Updated: 2025/08/08 17:17:17 by cschmid          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -192,10 +192,7 @@ void Server::handleClientRead(Client* client, const std::string& input)
     {
         std::map<int, Client*>::iterator it = _clients.find(clientFd);
         if (it == _clients.end()) 
-        {
-            std::cout << "Client " << clientFd << " was disconnected during command processing" << std::endl;
             return; 
-        }
         client = it->second;
         const std::string& raw_message = commands[i];
         std::cout << BOLD << "Client [" << clientFd << "] [RECV] " 

@@ -6,7 +6,7 @@
 /*   By: cschmid <cschmid@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/31 14:04:03 by cschmid           #+#    #+#             */
-/*   Updated: 2025/08/08 15:47:58 by cschmid          ###   ########.fr       */
+/*   Updated: 2025/08/08 16:58:25 by cschmid          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -148,6 +148,10 @@ void Channel::addInvited(Client *client)
 void Channel::userToOperator(Client *user)
 {
 	_operators.push_back(user);
+	std::string modeMsg = ":" + user->getPrefix() + " MODE " + _name + " +o " + user->getNick() + "\r\n";
+	ChannelSend(modeMsg, user);
+	std::string Msg = ":gossip.irc.localhost 324 " + user->getNickname() + " " + _name + " +o " + user->getNick() +"\r\n";
+	user->send_msg(Msg);
 	std::vector<Client *>::iterator it = std::find(_users.begin(), _users.end(),
 			user);
 	if (it != _users.end())

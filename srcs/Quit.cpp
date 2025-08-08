@@ -6,7 +6,7 @@
 /*   By: cschmid <cschmid@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/07 20:18:15 by zmogne            #+#    #+#             */
-/*   Updated: 2025/08/08 15:44:31 by cschmid          ###   ########.fr       */
+/*   Updated: 2025/08/08 16:42:26 by cschmid          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,8 +30,6 @@ void Server::disconnectClient(int clientFd)
             break;
         }
     }
-
-
     if (close(clientFd) == -1) 
     {
         std::cerr << "ERROR: Failed to close fd " << clientFd << ": " << strerror(errno) << std::endl;

@@ -6,7 +6,7 @@
 /*   By: cschmid <cschmid@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/21 14:30:34 by cschmid           #+#    #+#             */
-/*   Updated: 2025/08/08 15:33:52 by cschmid          ###   ########.fr       */
+/*   Updated: 2025/08/08 17:14:55 by cschmid          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,6 +29,8 @@ void Server::handleCommand(Client *client, const Message &msg)
 		client->send_msg(modeLine);
 		return;
 	}
+	else if (msg.command == "WHO")
+		return;
 	else if(msg.params.size() == 1 && msg.command == "MODE" && msg.params[0][0] == '#')
 		return;
 	else if (msg.command == "PING" || msg.command == "PRIVMSG"
@@ -210,27 +212,14 @@ void Server::handlePRIVMSG(Client* client, const Message& msg)
         return;
     }
 	std::cout << "[PRIVMSG] " << client->getNickname() << " -> " << msg.params[0] << ": " << msg.trailing << std::endl;
-	if (target[0] == '#')
+	if (PvMsgToUser(client, target, messageText))
+			return;
+
+	if (target[0] == '#' && MsgToChannel(client, target, messageText))
 	{
-		Channel* chan = findChannel(target);
-		if (!chan) 
-		{
-			sendError(client->getFd(), "403", target, "No such channel");
-			return;
-		}
-		if (!chan->verifClientisUser(client)) {
-			sendError(client->getFd(), "404", target, "Cannot send to channel");
-			return;
-		}
-		if (!MsgToChannel(client, target, messageText))
-			return;
-	}
-	else
-	{
-		if (!PvMsgToUser(client, target, messageText))
-			sendError(client->getFd(), "401", target, "No such nick");
 		return;
 	}
+	sendError(client->getFd(), "401", target, "No such nick/channel");
 
 }
 
@@ -294,17 +283,15 @@ void Server::handleQUIT(Client *client, const Message &msg)
 		{
 			channel->ChannelSend(quitMsg, client);
 			channel->removeUser(client->getFd());
-			channel->removeOperator(client); 
-
-			if (channel->isChannelEmpty())
+			channel->removeOperator(client);
+			if (channel->isChannelEmpty() > 0 && channel->affectNextOperator() == 1)
 			{
-				delete channel;
-				it = _channels.erase(it);
-				continue;
+				verifIfCloseChannel(channel);
 			}
 		}
 		++it;
 	}
+	std::cout << "DEBUG\n";
 	disconnectClient(client->getFd());
 }
 
