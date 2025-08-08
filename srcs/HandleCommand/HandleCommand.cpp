@@ -6,7 +6,7 @@
 /*   By: zmogne <zmogne@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/21 14:30:34 by cschmid           #+#    #+#             */
-/*   Updated: 2025/08/08 12:36:58 by zmogne           ###   ########.fr       */
+/*   Updated: 2025/08/08 13:59:50 by zmogne           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,7 +20,15 @@ void Server::handleCommand(Client *client, const Message &msg)
 	if (msg.command == "PASS" || msg.command == "NICK" || msg.command == "USER")
 		handleRegistred(client, msg);
 	else if(msg.params.size() >= 2 && msg.command == "MODE" && msg.params[0] == client->getNickname() && msg.params[1] == "+i")
+	{
+		std::string nick = client->getNickname();
+		std::string user = client->getUsername();
+		std::string host = "localhost";
+		std::string modeLine = ":" + nick + "!~" + user + "@" + host
+							+ " MODE " + nick + " +iH\r\n";
+		client->send_msg(modeLine);
 		return;
+	}
 	else if(msg.params.size() == 1 && msg.command == "MODE" && msg.params[0][0] == '#')
 		return;
 	else if (msg.command == "PING" || msg.command == "PRIVMSG"
@@ -205,16 +213,26 @@ void Server::handlePRIVMSG(Client* client, const Message& msg)
     }
 	std::cout << "[PRIVMSG] " << client->getNickname() << " -> " << msg.params[0] << ": " << msg.trailing << std::endl;
 	if (target[0] == '#')
-    {
-        if (!MsgToChannel(client, target, messageText))
-        	return;
-    }
-    else
-    {
-        if (!PvMsgToUser(client, target, messageText))
-            sendError(client->getFd(), "401", target, "No such nick");
-        return;
-    }
+	{
+		Channel* chan = findChannel(target);
+		if (!chan) 
+		{
+			sendError(client->getFd(), "403", target, "No such channel");
+			return;
+		}
+		if (!chan->verifClientisUser(client)) {
+			sendError(client->getFd(), "404", target, "Cannot send to channel");
+			return;
+		}
+		if (!MsgToChannel(client, target, messageText))
+			return;
+	}
+	else
+	{
+		if (!PvMsgToUser(client, target, messageText))
+			sendError(client->getFd(), "401", target, "No such nick");
+		return;
+	}
 
 }
 

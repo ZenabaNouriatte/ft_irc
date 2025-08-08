@@ -6,7 +6,7 @@
 /*   By: zmogne <zmogne@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/21 14:30:25 by cschmid           #+#    #+#             */
-/*   Updated: 2025/08/07 20:47:45 by zmogne           ###   ########.fr       */
+/*   Updated: 2025/08/08 13:11:49 by zmogne           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -146,10 +146,10 @@ std::vector<std::string> Client::extractCompleteCommands()
     while ((pos = _buffer.find('\n')) != std::string::npos) 
     {
         std::string command = _buffer.substr(0, pos);
-        _buffer.erase(0, pos + 1); // supprimer la ligne + '\n'
+        _buffer.erase(0, pos + 1);
 
         if (!command.empty() && command[command.length() - 1] == '\r') 
-            command.erase(command.length() - 1); // enlever le '\r'
+            command.erase(command.length() - 1);
 
         if (!command.empty()) 
             commands.push_back(command);

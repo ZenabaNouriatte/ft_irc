@@ -6,7 +6,7 @@
 /*   By: zmogne <zmogne@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/21 14:30:56 by cschmid           #+#    #+#             */
-/*   Updated: 2025/08/07 23:12:19 by zmogne           ###   ########.fr       */
+/*   Updated: 2025/08/08 13:12:46 by zmogne           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -191,7 +191,8 @@ void Server::handleClientRead(Client* client, const std::string& input)
     for (size_t i = 0; i < commands.size(); ++i)
     {
         std::map<int, Client*>::iterator it = _clients.find(clientFd);
-        if (it == _clients.end()) {
+        if (it == _clients.end()) 
+        {
             std::cout << "Client " << clientFd << " was disconnected during command processing" << std::endl;
             return; 
         }

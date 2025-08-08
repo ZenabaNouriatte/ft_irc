@@ -1,8 +1,8 @@
 #pragma once
 #include <iostream>
 #include <cstdlib> 
-#include <sys/socket.h> // socket, bind, listen, accept
-#include <netinet/in.h> // sockaddr_in, htons, INADDR_ANY
+#include <sys/socket.h>
+#include <netinet/in.h>
 #include <unistd.h>
 #include <vector>
 #include <algorithm>

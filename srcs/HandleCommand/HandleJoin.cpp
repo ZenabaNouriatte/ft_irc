@@ -6,7 +6,7 @@
 /*   By: zmogne <zmogne@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/07 20:20:42 by zmogne            #+#    #+#             */
-/*   Updated: 2025/08/08 12:37:53 by zmogne           ###   ########.fr       */
+/*   Updated: 2025/08/08 13:40:49 by zmogne           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -81,8 +81,13 @@ bool Server::parseJoin(const Message &msg, std::string &channel,
 	if (p0.empty() || p0[0] != '#')
 		return (false);
 	channel = p0;
-	if (msg.params.size() >= 2)
-		key = msg.params[1];
+	if (msg.params.size() >= 2) 
+	{
+		if (!msg.params[1].empty() && msg.params[1][0] == '#')
+			key.clear();
+		else 
+			key = msg.params[1];
+	}
 	return (true);
 }
 
