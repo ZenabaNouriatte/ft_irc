@@ -6,7 +6,7 @@
 /*   By: smolines <smolines@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/31 14:14:57 by cschmid           #+#    #+#             */
-/*   Updated: 2025/08/08 13:47:21 by smolines         ###   ########.fr       */
+/*   Updated: 2025/08/08 15:23:26 by smolines         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -217,14 +217,6 @@ void Channel::commandInvite(Server *server, Client *client, Client *cible)
 bool Channel::addUser(Server *server, Client *user, std::string key)
 {
 	// si l'utilisateur est deja dans le channel (user ou chanop) :
-	int total = _users.size() + _operators.size();
-	
-	//////////////////////////
-	std::ostringstream oss;
-	oss << total;
-	std::cout << "DEBUT ADDUSER : total user du channel = " << oss.str() << std::endl;
-	//////////////////////////
-	
 
 	if (verifClientisInChannel(user) == true)
 	{
