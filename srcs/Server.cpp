@@ -6,7 +6,7 @@
 /*   By: zmogne <zmogne@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/21 14:30:56 by cschmid           #+#    #+#             */
-/*   Updated: 2025/08/07 21:18:24 by zmogne           ###   ########.fr       */
+/*   Updated: 2025/08/07 23:12:19 by zmogne           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -123,7 +123,7 @@ void Server::handlePollEvents()
         if (_poll_fds[i].revents & (POLLHUP | POLLERR))
         {
             disconnectClient(fd);
-            i--; // Ajuster car remove modifie la taille
+            i--;
         }
         else if (_poll_fds[i].revents & POLLIN)
         {

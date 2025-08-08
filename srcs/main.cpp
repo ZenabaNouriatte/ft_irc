@@ -6,7 +6,7 @@
 /*   By: zmogne <zmogne@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/21 14:31:03 by cschmid           #+#    #+#             */
-/*   Updated: 2025/07/25 10:12:42 by zmogne           ###   ########.fr       */
+/*   Updated: 2025/08/07 23:12:02 by zmogne           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,7 +21,6 @@ int main(int argc, char **argv)
     }
 
     int port = std::atoi(argv[1]);
-    // ?? must be an integer between 6660 and 6669 ??
     if (port < 1024 || port > 65535) 
     {
         std::cerr << "Error: Port number must be between 1024 and 65535." << std::endl;

@@ -6,7 +6,7 @@
 /*   By: zmogne <zmogne@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/21 14:30:34 by cschmid           #+#    #+#             */
-/*   Updated: 2025/08/07 20:33:38 by zmogne           ###   ########.fr       */
+/*   Updated: 2025/08/07 23:09:56 by zmogne           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,6 +19,10 @@ void Server::handleCommand(Client *client, const Message &msg)
 {
 	if (msg.command == "PASS" || msg.command == "NICK" || msg.command == "USER")
 		handleRegistred(client, msg);
+	// else if(msg.params.size() >= 2 && msg.command == "MODE" && msg.params[0] == client->getNickname() && msg.params[1] == "+i")
+	// 	return;
+	// else if(msg.params.size() == 1 && msg.command == "MODE" && msg.params[0][0] == '#')
+	// 	return;
 	else if (msg.command == "PING" || msg.command == "PRIVMSG"
 		|| msg.command == "MODE" || msg.command == "JOIN" 
 		|| msg.command == "INVITE" 

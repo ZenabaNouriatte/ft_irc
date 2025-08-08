@@ -6,7 +6,7 @@
 /*   By: zmogne <zmogne@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/07 20:18:15 by zmogne            #+#    #+#             */
-/*   Updated: 2025/08/07 21:12:36 by zmogne           ###   ########.fr       */
+/*   Updated: 2025/08/07 23:33:54 by zmogne           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,6 +23,11 @@ void Server::disconnectClient(int clientFd)
     }
 
     Client* client = it->second;
+    if (client && client->isRegistered())
+    {
+        client->setNickname("");
+        std::cout << "DEBUG: Removed nickname from nickname registry" << std::endl;
+    }
     _clients.erase(it);
     for (std::vector<struct pollfd>::iterator p = _poll_fds.begin(); p != _poll_fds.end(); ++p) 
     {
@@ -33,6 +38,8 @@ void Server::disconnectClient(int clientFd)
             break;
         }
     }
+
+
     if (close(clientFd) == -1) 
     {
         std::cerr << "ERROR: Failed to close fd " << clientFd << ": " << strerror(errno) << std::endl;
