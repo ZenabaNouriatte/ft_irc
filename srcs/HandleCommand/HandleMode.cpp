@@ -6,7 +6,7 @@
 /*   By: zmogne <zmogne@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/30 12:17:37 by cschmid           #+#    #+#             */
-/*   Updated: 2025/08/08 12:43:48 by zmogne           ###   ########.fr       */
+/*   Updated: 2025/08/08 14:01:40 by zmogne           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -105,7 +105,7 @@ void Server::handleModeWithParam(Client *client, Channel *chan,
 
 	if (paramIndex >= msg.params.size())
 	{
-		std::cout << "[DEBUG]  Pas assez de paramÃ¨tres pour le mode " << c << std::endl;
+		std::cout << "[DEBUG]  Pas assez de paramètres pour le mode " << c << std::endl;
 		return ;
 	}
 	std::string param = msg.params[paramIndex];
