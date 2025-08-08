@@ -6,7 +6,7 @@
 /*   By: smolines <smolines@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/31 14:10:02 by cschmid           #+#    #+#             */
-/*   Updated: 2025/08/07 18:57:06 by smolines         ###   ########.fr       */
+/*   Updated: 2025/08/08 13:47:27 by smolines         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,7 +26,7 @@ void Channel::changeModeI(Server *server, Client *client, std::string arg)
 		if (arg == "-i")
 		{
 			this->_inviteOnly = false;
-			std::string modeMsg = ":" + client->getPrefix() + " MODE :" + _name + " -i\r\n";
+			std::string modeMsg = ":" + client->getPrefix() + " MODE " + _name + " -i\r\n";
 			ChannelSend(modeMsg, NULL); 
 			// reponse :<Nick>!user@host MODE #channel -i
 			std::string Msg = ":" + server->getServerName() + " 324 " + client->getNickname() + " " + _name + " -i" + "\r\n";
@@ -36,7 +36,7 @@ void Channel::changeModeI(Server *server, Client *client, std::string arg)
 		else if (arg == "+i")
 		{
 			this->_inviteOnly = true;
-			std::string modeMsg = ":" + client->getPrefix() + " MODE :" + _name + " +i\r\n";
+			std::string modeMsg = ":" + client->getPrefix() + " MODE " + _name + " +i\r\n";
 			ChannelSend(modeMsg, NULL); 
 			// reponse :<Nick>!user@host MODE #channel +i
 			std::string Msg = ":" + server->getServerName() + " 324 " + client->getNickname() + " " + _name + " +i" + "\r\n";
@@ -59,7 +59,7 @@ void Channel::changeModeT(Server *server, Client *client, std::string arg)
 		if (arg == "+t")
 		{
 			this->_topicRestriction = true;
-			std::string modeMsg = ":" + client->getPrefix() + " MODE :" + _name + " +t\r\n";
+			std::string modeMsg = ":" + client->getPrefix() + " MODE " + _name + " +t\r\n";
 			ChannelSend(modeMsg, NULL); 
 			// message: :<nick>!user@host MODE #channel +t
 			std::string Msg = ":" + server->getServerName() + " 324 " + client->getNickname() + " " + _name + " +t" + "\r\n";
@@ -69,7 +69,7 @@ void Channel::changeModeT(Server *server, Client *client, std::string arg)
 		if (arg == "-t")
 		{
 			this->_topicRestriction = false;
-			std::string modeMsg = ":" + client->getPrefix() + " MODE :" + _name + " -t\r\n";
+			std::string modeMsg = ":" + client->getPrefix() + " MODE " + _name + " -t\r\n";
 			ChannelSend(modeMsg, NULL); 
 			// message: :<nick>!user@host MODE #channel -t
 			std::string Msg = ":" + server->getServerName() + " 324 " + client->getNickname() + " " + _name + " -t" + "\r\n";
@@ -96,12 +96,13 @@ void Channel::changeModeK(Server *server, Client *client, std::string arg,
 			{
 				this->_password = key;
 				this->_key = true;
-				std::string modeMsg = ":" + client->getPrefix() + " MODE :" + _name + " +k\r\n";
+				std::string modeMsg = ":" + client->getPrefix() + " MODE " + _name + " +k " + key + "\r\n";
+				std::cout << "DEBUG MODE K : " << modeMsg << std::endl;
 				ChannelSend(modeMsg, NULL); 
 				// message: :<nick>!user@host MODE #channel +k
-				std::string Msg = ":" + server->getServerName() + " 324 " + client->getNickname() + " " + _name + " +k " + key + "\r\n";
-				client->send_msg(Msg);
-				// :serveur 324 <nick> #channel +k motdepasse
+				// std::string Msg = ":" + server->getServerName() + " 324 " + client->getNickname() + " " + _name + " +k " + key + "\r\n";
+				// client->send_msg(Msg);
+				// // :serveur 324 <nick> #channel +k motdepasse
 			}
 			else
 			{
@@ -115,22 +116,21 @@ void Channel::changeModeK(Server *server, Client *client, std::string arg,
 			if (this->_key == true && this->_password == key)
 			{
 				this->_key = false;
-				std::string modeMsg = ":" + client->getPrefix() + " MODE :" + _name + " -k\r\n";
+				std::string modeMsg = ":" + client->getPrefix() + " MODE " + _name + " -k " + key + "\r\n";
 				ChannelSend(modeMsg, NULL); 
-
 				// message: :<nick>!user@host MODE #channel -k
-				std::string Msg = ":" + server->getServerName() + " 324 " + client->getNickname() + " " + _name + " -k" + "\r\n";
-				client->send_msg(Msg);
+				// std::string Msg = ":" + server->getServerName() + " 324 " + client->getNickname() + " " + _name + " -k " + key + "\r\n";
+				// client->send_msg(Msg);
 				//:serveur 324 <nick> #channel -k
 			}
 			else if (this->_key == false)
 			{
 				std::cout << "DEBUG ChangeModeK : channel est deja en mode -k : message confirmation" << std::endl;
-				std::string modeMsg = ":" + client->getPrefix() + " MODE :" + _name + " -k\r\n";
+				std::string modeMsg = ":" + client->getPrefix() + " MODE " + _name + " -k\r\n";
 				ChannelSend(modeMsg, NULL); 
 				// message: :<nick>!user@host MODE #channel -k
-				std::string Msg = ":" + server->getServerName() + " 324 " + client->getNickname() + " " + _name + " -k" + "\r\n";
-				client->send_msg(Msg);
+				// std::string Msg = ":" + server->getServerName() + " 324 " + client->getNickname() + " " + _name + " -k" + "\r\n";
+				// client->send_msg(Msg);
 				//:serveur 324 <nick> #channel -k
 			}
 			else
@@ -168,42 +168,42 @@ void Channel::changeModeO(Server *server, Client *client, std::string arg,
 			{
 				std::cout << "DEBUG ChangeModeO : cible passe de user a operator" << std::endl;
 				userToOperator(cible);
-				std::string modeMsg = ":" + client->getPrefix() + " MODE :" + _name + " +o " + cible->getNick() + "\r\n";
+				std::string modeMsg = ":" + client->getPrefix() + " MODE " + _name + " +o " + cible->getNick() + "\r\n";
 				ChannelSend(modeMsg, NULL); 
 				// message: :<nick>!<user>@<host> MODE #canal +o cible
-				std::string Msg = ":" + server->getServerName() + " 324 " + client->getNickname() + " " + _name + " -o " + cible->getNick() +"\r\n";
-				client->send_msg(Msg);
+				// std::string Msg = ":" + server->getServerName() + " 324 " + client->getNickname() + " " + _name + " +o " + cible->getNick() +"\r\n";
+				// client->send_msg(Msg);
 				//:serveur 324 <nick> #canal +o cible
 			}
 			else if (arg == "+o" && verifClientisUser(cible) == false)
 			{
 				std::cout << "DEBUT ChangeModeO : cible already operator : envoi message confirmation" << std::endl;
-				std::string modeMsg = ":" + client->getPrefix() + " MODE :" + _name + " +o " + cible->getNick() + "\r\n";
+				std::string modeMsg = ":" + client->getPrefix() + " MODE " + _name + " +o " + cible->getNick() + "\r\n";
 				ChannelSend(modeMsg, NULL); 
 				// message: :<nick>!<user>@<host> MODE #canal +o cible
-				std::string Msg = ":" + server->getServerName() + " 324 " + client->getNickname() + " " + _name + " +o " + cible->getNick() +"\r\n";
-				client->send_msg(Msg);
-				//:serveur 324 <nick> #canal +o cible
+				// // std::string Msg = ":" + server->getServerName() + " 324 " + client->getNickname() + " " + _name + " +o " + cible->getNick() +"\r\n";
+				// client->send_msg(Msg);
+				// //:serveur 324 <nick> #canal +o cible
 			}
 			else if (arg == "-o" && verifClientisOperator(cible) == true)
 			{
 				std::cout << "DEBUG ChangeModeO : cible passe de operator a user" << std::endl;
 				operatorToUser(cible);
-				std::string modeMsg = ":" + client->getPrefix() + " MODE :" + _name + " -o " + cible->getNick() + "\r\n";
+				std::string modeMsg = ":" + client->getPrefix() + " MODE " + _name + " -o " + cible->getNick() + "\r\n";
 				ChannelSend(modeMsg, NULL); 
 				// message: :<nick>!<user>@<host> MODE #canal -o cible
-				std::string Msg = ":" + server->getServerName() + " 324 " + client->getNickname() + " " + _name + " -o " + cible->getNick() +"\r\n";
-				client->send_msg(Msg);
+				// std::string Msg = ":" + server->getServerName() + " 324 " + client->getNickname() + " " + _name + " -o " + cible->getNick() +"\r\n";
+				// client->send_msg(Msg);
 				//:serveur 324 <nick> #canal -o cible
 			}
-			else
+			else if (arg == "-o" && verifClientisOperator(cible) == false)
 			{
 				std::cout << "DEBUT ChangeModeO : cible not an operator : envoi message confirmation" << std::endl;
-				std::string modeMsg = ":" + client->getPrefix() + " MODE :" + _name + " +o " + cible->getNick() + "\r\n";
+				std::string modeMsg = ":" + client->getPrefix() + " MODE " + _name + " -o " + cible->getNick() + "\r\n";
 				ChannelSend(modeMsg, NULL); 
 				// message: :<nick>!<user>@<host> MODE #canal +o cible
-				std::string Msg = ":" + server->getServerName() + " 324 " + client->getNickname() + " " + _name + " -o " + cible->getNick() +"\r\n";
-				client->send_msg(Msg);
+				// std::string Msg = ":" + server->getServerName() + " 324 " + client->getNickname() + " " + _name + " -o " + cible->getNick() +"\r\n";
+				// client->send_msg(Msg);
 				//:serveur 324 <nick> #canal +o cible
 			}
 		}
@@ -228,10 +228,11 @@ void Channel::changeModeL(Server *server, Client *client, std::string arg,
 			std::ostringstream oss;
 			oss << limit;
 			std::cout << "DEBUT ChangeModeL : cible already operator : envoi message confirmation" << std::endl;
-			std::string modeMsg = ":" + client->getPrefix() + " MODE :" + _name + " +l " + oss.str() + "\r\n";			
+			std::string modeMsg = ":" + client->getPrefix() + " MODE " + _name + " +l " + oss.str() + "\r\n";			
+			ChannelSend(modeMsg, NULL); 
 			// message confirmation : :<nick>!<user>@<host> MODE #canal +l 10
-			std::string Msg = ":" + server->getServerName() + " 324 " + client->getNickname() + " " + _name + " +l " + oss.str() +"\r\n";
-			client->send_msg(Msg);
+			// std::string Msg = ":" + server->getServerName() + " 324 " + client->getNickname() + " " + _name + " +l " + oss.str() +"\r\n";
+			// client->send_msg(Msg);
 			// :serveur 324 <nick> #canal +l 10
 		}
 		else if (arg == "+l" && _hasLimit == true)
@@ -241,20 +242,22 @@ void Channel::changeModeL(Server *server, Client *client, std::string arg,
 			oss << limit;
 			std::cout << "DEBUT ChangeModeL : limite modifiee" << std::endl;
 			std::cout << "DEBUT ChangeModeL : cible already operator : envoi message confirmation" << std::endl;
-			std::string modeMsg = ":" + client->getPrefix() + " MODE :" + _name + " +l " + oss.str() + "\r\n";	
+			std::string modeMsg = ":" + client->getPrefix() + " MODE " + _name + " +l " + oss.str() + "\r\n";	
+			ChannelSend(modeMsg, NULL); 
 			// message confirmation : :<nick>!<user>@<host> MODE #canal +l 10
-			std::string Msg = ":" + server->getServerName() + " 324 " + client->getNickname() + " " + _name + " +l " + oss.str() +"\r\n";
-			client->send_msg(Msg);
+			// std::string Msg = ":" + server->getServerName() + " 324 " + client->getNickname() + " " + _name + " +l " + oss.str() +"\r\n";
+			// client->send_msg(Msg);
 			//:serveur 324 <nick> #canal +l 10
 		}
 		else if (arg == "-l" && _hasLimit == true)
 		{
 			_hasLimit = false;
 			std::cout << "DEBUT ChangeModeL : cible already operator : envoi message confirmation" << std::endl;
-			std::string modeMsg = ":" + client->getPrefix() + " MODE :" + _name + " -l " + "\r\n";	
+			std::string modeMsg = ":" + client->getPrefix() + " MODE " + _name + " -l " + "\r\n";	
+			ChannelSend(modeMsg, NULL); 
 			// message confirmation : :<nick>!<user>@<host> MODE #canal -l
-			std::string Msg = ":" + server->getServerName() + " 324 " + client->getNickname() + " " + _name + " -l " +"\r\n";
-			client->send_msg(Msg);
+			// std::string Msg = ":" + server->getServerName() + " 324 " + client->getNickname() + " " + _name + " -l " +"\r\n";
+			// client->send_msg(Msg);
 			//:serveur 324 <nick> #canal -l
 		}
 		else

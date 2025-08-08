@@ -6,7 +6,7 @@
 /*   By: smolines <smolines@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/31 14:14:57 by cschmid           #+#    #+#             */
-/*   Updated: 2025/08/08 13:47:21 by smolines         ###   ########.fr       */
+/*   Updated: 2025/08/08 13:46:52 by smolines         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -249,7 +249,7 @@ bool Channel::addUser(Server *server, Client *user, std::string key)
 			"Cannot join channel (+l)");
 		return (0);
 	}
-	else if (this->_key && (this->_password != key || key.empty()))
+	else if (this->_key && this->_password != key)
 	{
 		server->sendError(user->getFd(), "475", this->_name,
 			"Cannot join channel (+k)");

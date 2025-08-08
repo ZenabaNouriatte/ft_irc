@@ -3,31 +3,30 @@
 /*                                                        :::      ::::::::   */
 /*   HandleMode.cpp                                     :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: zmogne <zmogne@student.42.fr>              +#+  +:+       +#+        */
+/*   By: smolines <smolines@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/30 12:17:37 by cschmid           #+#    #+#             */
-/*   Updated: 2025/08/07 20:06:24 by zmogne           ###   ########.fr       */
+/*   Updated: 2025/08/08 12:44:05 by smolines         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "Channel.hpp"
 #include "Server.hpp"
 
-Client* Channel::findClientByNick(const std::string &nick)
+Client *Channel::findClientByNick(const std::string &nick)
 {
-	for (std::vector<Client*>::iterator it = _users.begin(); it != _users.end(); ++it)
+	for (std::vector<Client *>::iterator it = _users.begin(); it != _users.end(); ++it)
 	{
 		if ((*it)->getNick() == nick)
 			return (*it);
 	}
-	for (std::vector<Client*>::iterator it = _operators.begin(); it != _operators.end(); ++it)
+	for (std::vector<Client *>::iterator it = _operators.begin(); it != _operators.end(); ++it)
 	{
 		if ((*it)->getNick() == nick)
 			return (*it);
 	}
 	return (NULL);
 }
-
 
 void Server::handleMODE(Client *client, const Message &msg)
 {
@@ -65,28 +64,34 @@ bool Server::isValidModeCommand(Client *client, const Message &msg)
 	return (true);
 }
 
-
-// fonction a modifier :
-// si c == o -> handleModeWithParam
-// si c == k et pas de param -> handleModeWithParam
-// SI C == K et il existe un param : handleModeNoParam
-// si c == l et pas de param -> handleModeWithParam
-// SI C == l et il existe un param : handleModeNoParam
-// else handleModeNoParam
-
 void Server::parseModeBlock(Client *client, Channel *chan, const Message &msg,
 	const std::string &modes, size_t &paramIndex)
 {
 	char	sign;
 	char	c;
+	bool	hasParam;
 
-	std::cout << "[DEBUG] : modes = " << modes << std::endl;
 	sign = modes[0];
 	for (size_t j = 1; j < modes.size(); ++j)
 	{
 		c = modes[j];
-		if (c == 'o' || c == 'k' || c == 'l')
+		hasParam = paramIndex < msg.params.size();
+		if (c == 'o')
 			handleModeWithParam(client, chan, msg, c, sign, paramIndex);
+		else if (c == 'k')
+		{
+			if (hasParam)
+				handleModeWithParam(client, chan, msg, c, sign, paramIndex);
+			else
+				handleModeNoParam(client, chan, c, sign);
+		}
+		else if (c == 'l')
+		{
+			if (hasParam)
+				handleModeWithParam(client, chan, msg, c, sign, paramIndex);
+			else
+				handleModeNoParam(client, chan, c, sign);
+		}
 		else
 			handleModeNoParam(client, chan, c, sign);
 	}
@@ -98,37 +103,33 @@ void Server::handleModeWithParam(Client *client, Channel *chan,
 	Client	*target;
 	int		limit;
 
-	
 	if (paramIndex >= msg.params.size())
 	{
-		std::cout << "DEBUG  Pas assez de paramètres pour le mode " << c << std::endl;
+		std::cout << "[DEBUG]  Pas assez de paramètres pour le mode " << c << std::endl;
 		return ;
 	}
 	std::string param = msg.params[paramIndex];
-	std::cout << "[DEBUG] : mode = " << c << " param = " << param << std::endl;
 	if (c == 'o')
 	{
 		target = chan->findClientByNick(param);
 		if (!target)
-		{	
+		{
 			sendError(client->getFd(), "401", param, "No such nick/channel");
-			sendError2(client->getFd(), "441", param, chan->getName(), "They aren't on that channel");
-		}				
+			sendError2(client->getFd(), "441", param, chan->getName(),
+				"They aren't on that channel");
+		}
 		else
 		{
-			std::cout << " DEBUG C'est un o avec " << param << std::endl;
-			chan->changeModeO(this,client, std::string(1, sign) + "o", target);
+			chan->changeModeO(this, client, std::string(1, sign) + "o", target);
 		}
 	}
 	else if (c == 'k')
 	{
-		std::cout << " DEBUG C'est un k avec " << param << std::endl;
-		chan->changeModeK(this,client, std::string(1, sign) + "k", param);
+		chan->changeModeK(this, client, std::string(1, sign) + "k", param);
 	}
 	else if (c == 'l')
 	{
 		limit = atoi(param.c_str());
-		std::cout << " DEBUG C'est un l avec " << limit << std::endl;
 		chan->changeModeL(this, client, std::string(1, sign) + "l", limit);
 	}
 	paramIndex++;
@@ -137,17 +138,19 @@ void Server::handleModeWithParam(Client *client, Channel *chan,
 void Server::handleModeNoParam(Client *client, Channel *chan, char c, char sign)
 {
 	if (c == 'i')
-	{
-		std::cout << "DEBUG C'est un i" << std::endl;
-		chan->changeModeI(this,client, std::string(1, sign) + "i");
-	}
+		chan->changeModeI(this, client, std::string(1, sign) + "i");
 	else if (c == 't')
+		chan->changeModeT(this, client, std::string(1, sign) + "t");
+	else if (c == 'k')
 	{
-		std::cout << "DEBUG C'est un t" << std::endl;
-		chan->changeModeT(this,client, std::string(1, sign) + "t");
+		std::cout << "DEBUG C'est un k (sans param)" << std::endl;
+		chan->changeModeK(this, client, std::string(1, sign) + "k", "");
+	}
+	else if (c == 'l')
+	{
+		std::cout << "DEBUG C'est un l (sans param)" << std::endl;
+		chan->changeModeL(this, client, std::string(1, sign) + "l", 0);
 	}
 	else
-	{
-		std::cout << " DEBUG Mode inconnu : " << c << std::endl;
-	}
+		std::cout << "DEBUG Mode inconnu : " << c << std::endl;
 }
