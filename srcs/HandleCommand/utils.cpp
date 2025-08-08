@@ -6,7 +6,7 @@
 /*   By: zmogne <zmogne@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/31 13:57:45 by cschmid           #+#    #+#             */
-/*   Updated: 2025/08/07 20:45:32 by zmogne           ###   ########.fr       */
+/*   Updated: 2025/08/08 12:39:26 by zmogne           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,7 +19,7 @@ void Server::sendError(int fd, const std::string &code,
 {
 	std::string full = ":" + _server_name + " " + code + " " + target + " :"
 		+ message + "\r\n";
-    std::cout << " DEBUG Sending error to client " << fd << ": " << full << std::endl;
+    std::cout << "Client [" << fd << "] >> " << full << std::endl;
 	send(fd, full.c_str(), full.size(), 0);
 }
 
@@ -95,9 +95,13 @@ bool Server::PvMsgToUser(Client* sender, const std::string& target, const std::s
         Client* dest = it->second;
         if (dest->getNickname() == target)
         {
-            std::string prefix = ":" + sender->getPrefix(); // pas de prefix dans client
-            std::string irc_line = prefix + " PRIVMSG " + target + " :" + message + "\r\n";
-            dest->send_msg(irc_line);
+            const std::string& nick = sender->getNickname();
+            const std::string& user = sender->getUsername();
+            const std::string  host = "localhost";      
+            std::string line = ":" + nick + "!~" + user + "@" + host
+                             + " PRIVMSG " + target + " :" + message + "\r\n";
+
+            dest->send_msg(line);   
             return true;
         }
     }

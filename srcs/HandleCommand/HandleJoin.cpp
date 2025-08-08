@@ -6,7 +6,7 @@
 /*   By: zmogne <zmogne@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/07 20:20:42 by zmogne            #+#    #+#             */
-/*   Updated: 2025/08/07 20:46:13 by zmogne           ###   ########.fr       */
+/*   Updated: 2025/08/08 12:37:53 by zmogne           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,7 +22,6 @@ void Server::handleSingleJoin(Client *client, const std::string &channelName, co
 	std::cout << "[DEBUG]  user    = " << client->getNickname() << "\n";
 	std::cout << "[DEBUG]  channel = " << channelName << "\n";
 	std::cout << "[DEBUG]  key     = " << (key.empty() ? "(no key)" : key) << "\n";
-	// Vérifie que le nom est valide
 	if (channelName.empty() || channelName[0] != '#')
 	{
 		sendError(client->getFd(), "403", channelName, "No such channel");
@@ -74,15 +73,15 @@ void Server::handleSingleJoin(Client *client, const std::string &channelName, co
 bool Server::parseJoin(const Message &msg, std::string &channel,
 	std::string &key)
 {
-	channel.clear(); // reset
+	channel.clear();
 	key.clear();
-	const std::string &p0 = msg.params[0]; // nom du channel
+	const std::string &p0 = msg.params[0];
 	if (msg.params.empty())
 		return (false);
-	if (p0.empty() || p0[0] != '#') // nom du channel doit commencer par # donc petite verif
+	if (p0.empty() || p0[0] != '#')
 		return (false);
 	channel = p0;
-	if (msg.params.size() >= 2) // si il y a un deuxieme paramettre c'est le mdp
+	if (msg.params.size() >= 2)
 		key = msg.params[1];
 	return (true);
 }
@@ -133,7 +132,7 @@ void Server::handleJOIN(Client *client, const Message &msg)
             sendError(client->getFd(), "405", channels[i], "You have joined too many channels");
             return;
         }
-		handleSingleJoin(client, chan, key); // logique unique join
+		handleSingleJoin(client, chan, key);
 	}
 }
 
@@ -162,12 +161,11 @@ void Server::leaveAllChannels(Client *client)
 
             std::cout << "[DEBUG]  -> left channel " << chan->getName() << "\n";
         }
-        int result = chan->getClientCount();  // ou isChannelEmpty()
+        int result = chan->getClientCount();
 
         std::cout << "[DEBUG] Clients in channel before delete:\n";
         chan->printClientVectors();
         std::cout << "[DEBUG] Get Client Count Result = " << result << std::endl;
-        // Supprimer le channel si vide
         if (result == 0)
         {
             std::cout << "[DEBUG]  -> channel " << chan->getName() << " is now empty. Deleting it.\n";
@@ -232,5 +230,5 @@ void Server::sendTopic(Client* client, Channel* chan)
 void Server::sendJoinMsg(Client* client, Channel* chan)
 {
 	std::string joinMsg = ":" + client->getPrefix() + " JOIN :" + chan->getName() + "\r\n";
-	chan->ChannelSend(joinMsg, NULL); // Diffusion à tous, y compris l'émetteur
+	chan->ChannelSend(joinMsg, NULL);
 }

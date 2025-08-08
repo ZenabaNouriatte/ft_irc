@@ -6,7 +6,7 @@
 /*   By: zmogne <zmogne@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/21 14:30:34 by cschmid           #+#    #+#             */
-/*   Updated: 2025/08/07 23:09:56 by zmogne           ###   ########.fr       */
+/*   Updated: 2025/08/08 12:36:58 by zmogne           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,10 +19,10 @@ void Server::handleCommand(Client *client, const Message &msg)
 {
 	if (msg.command == "PASS" || msg.command == "NICK" || msg.command == "USER")
 		handleRegistred(client, msg);
-	// else if(msg.params.size() >= 2 && msg.command == "MODE" && msg.params[0] == client->getNickname() && msg.params[1] == "+i")
-	// 	return;
-	// else if(msg.params.size() == 1 && msg.command == "MODE" && msg.params[0][0] == '#')
-	// 	return;
+	else if(msg.params.size() >= 2 && msg.command == "MODE" && msg.params[0] == client->getNickname() && msg.params[1] == "+i")
+		return;
+	else if(msg.params.size() == 1 && msg.command == "MODE" && msg.params[0][0] == '#')
+		return;
 	else if (msg.command == "PING" || msg.command == "PRIVMSG"
 		|| msg.command == "MODE" || msg.command == "JOIN" 
 		|| msg.command == "INVITE" 
@@ -92,7 +92,6 @@ void Server::handlePASS(Client *client, const Message &msg)
 	{
 		sendError(client->getFd(), "464", "*", "Password incorrect");
 		close(client->getFd());
-		//removeClient(client->getFd());
 		disconnectClient(client->getFd());
 		return ;
 	}
@@ -123,10 +122,7 @@ void Server::handleNICK(Client *client, const Message &msg)
         disconnectClient(client->getFd());
         return;
     }
-
     std::string requestedNick = msg.params[0];
-
-    // Vérifier la validité du pseudonyme
     if (!isValidNickname(requestedNick)) 
     {
         std::string currentNick = client->getNickname().empty() ? "*" : client->getNickname();
@@ -134,26 +130,18 @@ void Server::handleNICK(Client *client, const Message &msg)
         disconnectClient(client->getFd());
         return;
     }
-
-    // Si c'est le même pseudonyme que celui du client, ignorer
     if (client->getNickname() == requestedNick)
         return;
-
-    // Vérifier si le pseudonyme est déjà utilisé
     if (isNicknameInUse(requestedNick)) 
     {
         std::string currentNick = client->getNickname().empty() ? "*" : client->getNickname();
-        
-        // Envoyer l'erreur 433 avec le bon format et déconnecter
         sendError(client->getFd(), "433", currentNick, requestedNick + " :Nickname is already in use");
         disconnectClient(client->getFd());
         return;
     }
 
-    // Le pseudonyme est disponible et valide
     if (client->isRegistered() && !client->getNickname().empty()) 
     {
-        // Client déjà enregistré qui change de pseudonyme
         std::string oldNick = client->getNickname();
         std::string nickMsg = ":" + oldNick + "!~" + client->getUsername() + 
                              "@localhost NICK :" + requestedNick + "\r\n";
@@ -216,16 +204,17 @@ void Server::handlePRIVMSG(Client* client, const Message& msg)
         return;
     }
 	std::cout << "[PRIVMSG] " << client->getNickname() << " -> " << msg.params[0] << ": " << msg.trailing << std::endl;
-	if (PvMsgToUser(client, target, messageText))
-        return;
-
-    
-    if (target[0] == '#' && MsgToChannel(client, target, messageText))
+	if (target[0] == '#')
     {
-        // Try sending to channel if it starts with #
-		return;
-	}
-	sendError(client->getFd(), "401", target, "No such nick/channel");
+        if (!MsgToChannel(client, target, messageText))
+        	return;
+    }
+    else
+    {
+        if (!PvMsgToUser(client, target, messageText))
+            sendError(client->getFd(), "401", target, "No such nick");
+        return;
+    }
 
 }
 
@@ -268,11 +257,8 @@ void Server::handleWHOIS(Client* client, const Message &msg)
         client->send_msg(":" + _server_name + " 401 " + client->getNick() + " " + target + " :No such nick");
         return;
     }
-    // WHOIS user line (code 311)
     client->send_msg(":" + _server_name + " 311 " + client->getNick() + " " +
                     targetClient->getNick() + " ~user localhost * :" + targetClient->getRealname());
-
-    // WHOIS end line (code 318)
     client->send_msg(":" + _server_name + " 318 " + client->getNick() + " " +
                     targetClient->getNick() + " :End of WHOIS list");
 
@@ -284,10 +270,7 @@ void Server::handleQUIT(Client *client, const Message &msg)
 	if (!msg.params.empty())
 		reason = msg.params[0];
 
-	// Construire le message de QUIT
 	std::string quitMsg = ":" + client->getPrefix() + " QUIT :" + reason + "\r\n";
-
-	// Prévenir tous les channels du départ du client
 	for (std::vector<Channel*>::iterator it = _channels.begin(); it != _channels.end(); )
 	{
 		Channel *channel = *it;
@@ -295,19 +278,17 @@ void Server::handleQUIT(Client *client, const Message &msg)
 		{
 			channel->ChannelSend(quitMsg, client);
 			channel->removeUser(client->getFd());
-			channel->removeOperator(client); // nettoyage optionnel
+			channel->removeOperator(client); 
 
 			if (channel->isChannelEmpty())
 			{
 				delete channel;
-				it = _channels.erase(it); // erase retourne le nouvel itérateur
+				it = _channels.erase(it);
 				continue;
 			}
 		}
 		++it;
 	}
-
-	// Déconnecter proprement le client
 	disconnectClient(client->getFd());
 }
 
