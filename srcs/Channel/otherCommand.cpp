@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   otherCommand.cpp                                   :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: smolines <smolines@student.42.fr>          +#+  +:+       +#+        */
+/*   By: cschmid <cschmid@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/31 14:14:57 by cschmid           #+#    #+#             */
-/*   Updated: 2025/08/07 18:58:30 by smolines         ###   ########.fr       */
+/*   Updated: 2025/08/08 13:27:14 by cschmid          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -249,7 +249,7 @@ bool Channel::addUser(Server *server, Client *user, std::string key)
 			"Cannot join channel (+l)");
 		return (0);
 	}
-	else if (this->_key && this->_password != key)
+	else if (this->_key && this->_password != key )
 	{
 		server->sendError(user->getFd(), "475", this->_name,
 			"Cannot join channel (+k)");
