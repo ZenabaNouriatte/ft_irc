@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Channel.cpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: smolines <smolines@student.42.fr>          +#+  +:+       +#+        */
+/*   By: cschmid <cschmid@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/31 14:04:03 by cschmid           #+#    #+#             */
-/*   Updated: 2025/08/05 14:17:34 by smolines         ###   ########.fr       */
+/*   Updated: 2025/08/08 15:27:08 by cschmid          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,20 +26,6 @@ Channel::Channel(std::string name)
 	std::cout << "   - ptr: " << this << "\n";
 	return ;
 }
-
-// Channel::Channel(std::string name, std::string topicName)
-// {
-// 	this->_topicName = topicName;
-// 	this->_name = name;
-// 	this->_inviteOnly = 0;
-// 	this->_limit = 0;
-// 	this->_topic = true;
-// 	this->_topicRestriction = false;
-// 	this->_hasLimit = false;
-// 	this->_key = false;
-// 	std::cout << GREEN << BOLD << "Channel [" << this->_name << "] successfully created" << RESET << std::endl;
-// 	return ;
-// }
 
 /*===================== Destructor =====================*/
 
@@ -62,6 +48,7 @@ std::string Channel::getTopicName()
 {
 	return (_topicName);
 }
+
 std::string Channel::getPassWord(){return (this->_password);}
 bool Channel::getTopicRestriction(){return (this->_topicRestriction);}
 bool Channel::getInviteOnly(){return (this->_inviteOnly);}
@@ -73,11 +60,9 @@ std::vector<Client *> Channel::getOperators(){return (this->_operators);}
 
 int Channel::getClientCount() const
 {
-	std::set<Client *> uniqueClients; // stl set pas de doublon
+	std::set<Client *> uniqueClients;
 
-	// Ajouter tous les user
 	uniqueClients.insert(_users.begin(), _users.end());
-	// Ajouter operator (pour poas ajouter deux fois)
 	uniqueClients.insert(_operators.begin(), _operators.end());
 	return (uniqueClients.size());
 }
@@ -143,14 +128,12 @@ void Channel::setKey(bool key)
 
 /*===================== METHODE =====================*/
 
-int Channel::isChannelEmpty() const // renvoie le nombre d'utilisateurs connectes au channel : user + operator
+int Channel::isChannelEmpty() const
 {
 	return (_users.size() + _operators.size());
 }
 
 void Channel::addOperator(Client *client)
-// a la creation : operator = user numero 1. Si user#1 quitte : definir un nouvel operator
-// ajouter un op
 {
 	if (verifClientisUser(client) == true)
 		userToOperator(client);
@@ -159,7 +142,6 @@ void Channel::addOperator(Client *client)
 }
 
 void Channel::addInvited(Client *client)
-// ajouter un nick a la liste des invites
 {
 	if (verifClientisInvited(client) == false)
 		_isInvited.push_back(client);

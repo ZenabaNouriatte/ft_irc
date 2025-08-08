@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Message.cpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: zmogne <zmogne@student.42.fr>              +#+  +:+       +#+        */
+/*   By: cschmid <cschmid@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/21 14:30:42 by cschmid           #+#    #+#             */
-/*   Updated: 2025/08/07 21:13:48 by zmogne           ###   ########.fr       */
+/*   Updated: 2025/08/08 15:39:40 by cschmid          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,7 +16,6 @@
 Message::Message(std::string raw_msg): raw(raw_msg)
 {
         msgParsing(raw);
-        debugPrint();
 }
 
 Message::~Message() {}

@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   HandleTopic.cpp                                    :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: smolines <smolines@student.42.fr>          +#+  +:+       +#+        */
+/*   By: cschmid <cschmid@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/31 09:58:55 by cschmid           #+#    #+#             */
-/*   Updated: 2025/08/05 14:18:14 by smolines         ###   ########.fr       */
+/*   Updated: 2025/08/08 15:37:09 by cschmid          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,11 +15,8 @@
 
 void Server::handleTOPIC(Client *client, const Message &msg)
 {
-    std::cout << "[DEBUG] HANDLE TOPIC" << std::endl;
     if (msg.params.empty())
-//    (msg.params[0].empty())
     {
-        std::cout << "[DEBUG] MSG.PARAM EMPTY" << std::endl;
         sendError(client->getFd(), "461", "TOPIC", "Not enough parameters");
         return;
     }
@@ -33,8 +30,6 @@ void Server::handleTOPIC(Client *client, const Message &msg)
     }
     if (msg.trailing.empty())
     {
-        //sendError(client->getFd(), "461", "TOPIC", "Not enough parameters");
-        std::cout << "[DEBUG] MSG.PARAM EMPTY && TRAILING EMPTY" << std::endl;
         chan->commandTopic(this,client,"");
         return;
     }
@@ -47,15 +42,8 @@ void Server::handleTOPIC(Client *client, const Message &msg)
     std::string topic;
     
     if (!msg.trailing.empty())
-    {
         topic = msg.trailing;
-    }
     else
-    {
-        std::cout << "[DEBUG] Dans else" << topic << std::endl;
         topic = "";
-    }
-
-    std::cout << "[DEBUG] topic = " << topic << std::endl;
     chan->commandTopic(this,client, topic);
 }

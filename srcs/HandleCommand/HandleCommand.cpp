@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   HandleCommand.cpp                                  :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: zmogne <zmogne@student.42.fr>              +#+  +:+       +#+        */
+/*   By: cschmid <cschmid@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/21 14:30:34 by cschmid           #+#    #+#             */
-/*   Updated: 2025/08/08 13:59:50 by zmogne           ###   ########.fr       */
+/*   Updated: 2025/08/08 15:33:52 by cschmid          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -57,7 +57,6 @@ void Server::handleRegistred(Client *client, const Message &msg)
 
 void Server::handleServerCommand(Client *client, const Message &msg)
 {
-	std::cout << "[DEBUG] HANDLE SERVER COMMAND , msg command [" << msg.command << "]" << std::endl;
 	if (msg.command == "PRIVMSG")
 		handlePRIVMSG(client, msg);
 	if (msg.command == "PING")
@@ -192,7 +191,6 @@ void Server::handleUSER(Client *client, const Message &msg)
 
 void Server::handlePRIVMSG(Client* client, const Message& msg)
 {
-	std::cout << "DEBUG Msg\n";
     if (!client->isRegistered())
     {
         sendError(client->getFd(), "451", "*", "You have not registered");

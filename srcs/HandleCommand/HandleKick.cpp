@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   HandleKick.cpp                                     :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: smolines <smolines@student.42.fr>          +#+  +:+       +#+        */
+/*   By: cschmid <cschmid@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/31 09:05:39 by cschmid           #+#    #+#             */
-/*   Updated: 2025/08/05 18:06:38 by smolines         ###   ########.fr       */
+/*   Updated: 2025/08/08 15:35:31 by cschmid          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -36,21 +36,16 @@ void Server::handleKICK(Client *client, const Message &msg)
         sendError(client->getFd(), "403", channelName, "No such channel");
         return;
     }
-///// le message ne revient pas a l'auteur de la commande
 	if (!chan->verifClientisInChannel(client))
 	{
-		std::cout << "DEBUG HANDLEKICK : le client/op n'est pas dans channel du kick" << std::endl;
 		sendError(client->getFd(), "442", channelName, "You're not on that channel");
 		return;
 	}
-//////    
 	Client *target = chan->findClientByNick(targetNick);
     if (!target)
     {
         sendError(client->getFd(), "441", targetNick, "They aren't on that channel");
         return;
     }
-    std::cout << "[DEBUG] Target = " << targetNick << std::endl;
-    std::cout << "[DEBUG] reason = " << reason << std::endl;
     chan->commandKick(this,client, target, reason);
 }

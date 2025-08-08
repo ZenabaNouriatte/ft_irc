@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   HandleMode.cpp                                     :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: zmogne <zmogne@student.42.fr>              +#+  +:+       +#+        */
+/*   By: cschmid <cschmid@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/30 12:17:37 by cschmid           #+#    #+#             */
-/*   Updated: 2025/08/08 14:01:40 by zmogne           ###   ########.fr       */
+/*   Updated: 2025/08/08 15:36:12 by cschmid          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -60,7 +60,6 @@ bool Server::isValidModeCommand(Client *client, const Message &msg)
 		sendError(client->getFd(), "403", "MODE", "No such channel");
 		return (false);
 	}
-	std::cout << "[DEBUG] : Channel = " << msg.params[0] << std::endl;
 	return (true);
 }
 
@@ -104,10 +103,7 @@ void Server::handleModeWithParam(Client *client, Channel *chan,
 	int		limit;
 
 	if (paramIndex >= msg.params.size())
-	{
-		std::cout << "[DEBUG]  Pas assez de paramètres pour le mode " << c << std::endl;
 		return ;
-	}
 	std::string param = msg.params[paramIndex];
 	if (c == 'o')
 	{
@@ -142,15 +138,9 @@ void Server::handleModeNoParam(Client *client, Channel *chan, char c, char sign)
 	else if (c == 't')
 		chan->changeModeT(this, client, std::string(1, sign) + "t");
 	else if (c == 'k')
-	{
-		std::cout << "DEBUG C'est un k (sans param)" << std::endl;
 		chan->changeModeK(this, client, std::string(1, sign) + "k", "");
-	}
 	else if (c == 'l')
-	{
-		std::cout << "DEBUG C'est un l (sans param)" << std::endl;
 		chan->changeModeL(this, client, std::string(1, sign) + "l", 0);
-	}
 	else
-		std::cout << "DEBUG Mode inconnu : " << c << std::endl;
+		return;
 }

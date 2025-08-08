@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   HandleInvit.cpp                                    :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: zmogne <zmogne@student.42.fr>              +#+  +:+       +#+        */
+/*   By: cschmid <cschmid@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/31 09:42:56 by cschmid           #+#    #+#             */
-/*   Updated: 2025/08/07 20:45:00 by zmogne           ###   ########.fr       */
+/*   Updated: 2025/08/08 15:34:07 by cschmid          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -37,6 +37,5 @@ void Server::handleINVIT(Client *client, const Message &msg)
         sendError(client->getFd(), "401", targetNick, "No such nick");
         return;
     }
-    std::cout << "[DEBUG] Target = " << targetNick << std::endl;
     chan->commandInvite(this,client, target);
 }

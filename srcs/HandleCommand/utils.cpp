@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   utils.cpp                                          :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: zmogne <zmogne@student.42.fr>              +#+  +:+       +#+        */
+/*   By: cschmid <cschmid@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/31 13:57:45 by cschmid           #+#    #+#             */
-/*   Updated: 2025/08/08 12:39:26 by zmogne           ###   ########.fr       */
+/*   Updated: 2025/08/08 15:37:18 by cschmid          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -46,7 +46,7 @@ Client *Server::findClient(const std::string &nickname)
 	for (std::map<int,
 		Client *>::iterator it = _clients.begin(); it != _clients.end(); ++it)
 	{
-		Client *client = it->second; // valeur dans la map
+		Client *client = it->second;
 		if (client && client->getNickname() == nickname)
 			return (client);
 	}

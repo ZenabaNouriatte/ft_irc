@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Client.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: zmogne <zmogne@student.42.fr>              +#+  +:+       +#+        */
+/*   By: cschmid <cschmid@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/21 14:30:25 by cschmid           #+#    #+#             */
-/*   Updated: 2025/08/08 13:11:49 by zmogne           ###   ########.fr       */
+/*   Updated: 2025/08/08 15:37:29 by cschmid          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -44,8 +44,6 @@ void Client::setHasPass(bool value)
 
 void Client::setNickname(const std::string& nick)
 {
-
-    std::cout << " DEBUG Setting nickname from '" << _nickname << "' to '" << nick << "'" << std::endl;
     _nickname = nick; 
 }
 

@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   HandleJoin.cpp                                     :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: zmogne <zmogne@student.42.fr>              +#+  +:+       +#+        */
+/*   By: cschmid <cschmid@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/07 20:20:42 by zmogne            #+#    #+#             */
-/*   Updated: 2025/08/08 13:40:49 by zmogne           ###   ########.fr       */
+/*   Updated: 2025/08/08 15:35:13 by cschmid          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,10 +18,6 @@
 
 void Server::handleSingleJoin(Client *client, const std::string &channelName, const std::string &key)
 {
-    std::cout << "[DEBUG][JOIN] Handle JOIN request\n";
-	std::cout << "[DEBUG]  user    = " << client->getNickname() << "\n";
-	std::cout << "[DEBUG]  channel = " << channelName << "\n";
-	std::cout << "[DEBUG]  key     = " << (key.empty() ? "(no key)" : key) << "\n";
 	if (channelName.empty() || channelName[0] != '#')
 	{
 		sendError(client->getFd(), "403", channelName, "No such channel");
@@ -37,20 +33,10 @@ void Server::handleSingleJoin(Client *client, const std::string &channelName, co
 		isNewChannel = true;
 	
 	}
-	else //DEBUG 
-	{
-		std::cout << "DEBUG [JOIN] Channel '" << channelName << "' already exists."<< std::endl;
-	}
 	if (chan->verifClientisUser(client))
-    {
-        std::cout << " DEBUG Client [" << client->getFd() << "] already in channel '" << channelName << std::endl;
         return;
-    }
 	if (chan->addUser(this, client, key) == false)
-	{
-		std::cout << RED << " DEBUG Client [" << client->getFd() << "] JOIN failed" << RESET << std::endl;
 		return;
-	}
 	sendJoinMsg(client, chan);
 	sendTopic(client, chan);
 	sendNameList(client, chan);
@@ -58,15 +44,8 @@ void Server::handleSingleJoin(Client *client, const std::string &channelName, co
 	{
 		std::string infoMsg = ":" + _server_name + " PRIVMSG " + chan->getName() +
 							" :Channel " + channelName + " created on " + getCurrentDate();
-		std::cout << "[DEBUG] Sending channel creation message: " << infoMsg << std::endl;
 		chan->ChannelSend(infoMsg, NULL);
 	}
-	std::cout << "[DEBUG][JOIN] Client " << client->getNickname()
-			<< "[DEBUG] joined channel " << channelName
-			<< (key.empty() ? "[DEBUG] (no key)" : "[DEBUG] with key") << ".\n";
-	std::cout << GREEN << BOLD << "[DEBUG]Client successfully added to channel" << RESET << std::endl;
-
-	std::cout << "[DEBUG] Clients in channel after join:\n";
 	chan->printClientVectors();
 }
 
@@ -133,7 +112,6 @@ void Server::handleJOIN(Client *client, const Message &msg)
 		}
         if (ClientChannelCount(client) >= 10)
         {
-			std::cout << "DEBUG Client ["<< client->getFd() <<"] has 10 CHannels\n";
             sendError(client->getFd(), "405", channels[i], "You have joined too many channels");
             return;
         }
@@ -143,44 +121,26 @@ void Server::handleJOIN(Client *client, const Message &msg)
 
 void Server::leaveAllChannels(Client *client) 
 {
-    std::cout << BOLD << "DEBUG Client [" << client->getFd() << "] leaving all channels\n";
     for (std::vector<Channel*>::iterator it = _channels.begin(); it != _channels.end(); )
     {
         Channel* chan = *it;
-
-        std::cout << "[DEBUG]  -> Checking if client is in channel: " << chan->getName() << "\n";
-        std::cout << "[DEBUG]     client ptr = " << client << "\n";
-
-        std::cout << "[DEBUG]    users in channel:\n";
         chan->printUsers();
 
         if (chan->verifClientisUser(client) || chan->verifClientisOperator(client))
         {
-            std::cout << "[DEBUG]  -> client is present in channel!\n";
             chan->removeUser(client->getFd());
             chan->removeOperator(client);
 
             std::string partMsg = ":" + client->getPrefix() + " PART " + chan->getName() + " :Leaving all channels\r\n";
             chan->ChannelSend(partMsg, client);
 			client->send_msg(partMsg);
-
-            std::cout << "[DEBUG]  -> left channel " << chan->getName() << "\n";
         }
         int result = chan->getClientCount();
-
-        std::cout << "[DEBUG] Clients in channel before delete:\n";
         chan->printClientVectors();
-        std::cout << "[DEBUG] Get Client Count Result = " << result << std::endl;
         if (result == 0)
-        {
-            std::cout << "[DEBUG]  -> channel " << chan->getName() << " is now empty. Deleting it.\n";
             verifIfCloseChannel(chan);
-        }
         else
-        {
             ++it;
-        }
-		std::cout << "[DEBUG] fin leaveallchannels\n";
     }
 }
 

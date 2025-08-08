@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   utils.cpp                                          :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: zmogne <zmogne@student.42.fr>              +#+  +:+       +#+        */
+/*   By: cschmid <cschmid@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/31 14:07:32 by cschmid           #+#    #+#             */
-/*   Updated: 2025/08/07 18:37:26 by zmogne           ###   ########.fr       */
+/*   Updated: 2025/08/08 15:33:28 by cschmid          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,24 +22,18 @@ int Channel::affectNextOperator()
  		   Client* firstUser = _users.front();
 		   userToOperator(firstUser);
 		}
-		else {
-			std::cout << "[DEBUG] Ce channel semble bien vide" << std::endl;
+		else
 			return 1;
-		}
 	}
 		return 0;
 }
 
 void Channel::removeOperator(Client *user)
 {
-	std::cout << "[DEBUG] dans removeOperator" << std::endl;
 	std::vector<Client *>::iterator it = std::find(_operators.begin(),
 			_operators.end(), user);
 	if (it != _operators.end())
-	{
 		_operators.erase(it);
-	//	affectNextOperator();
-	}
 }
 
 void Channel::removeInvited(Client *user)
@@ -77,13 +71,8 @@ bool Channel::verifClientisInChannel(Client *client)
 bool Channel::verifClientisOperator(Client *client)
 {
 	if (std::find(_operators.begin(), _operators.end(), client) != _operators.end())
-	{
-		std::cout << "[DEBUG] verifClientisOperator : trouve dans operators" << std::endl;	
 		return (true);
-	}
 	return (false);
-	std::cout << "[DEBUG] verifClientisOperator : NON TROUVE dans le vector operators" << std::endl;	
-
 }
 
 bool Channel::verifClientisUser(Client *client)
@@ -111,20 +100,13 @@ void Channel::printUsers() const
 
 void Channel::ChannelSend(const std::string &message, Client *sender)
 {
-	// user
-	std::cout << "[DEBUG] in channelsend" << std::endl;
 	for (std::vector<Client *>::iterator it = _users.begin(); it != _users.end(); ++it)
 	{
-		std::cout << "[DEBUG] USER" << std::endl;
 		if (*it != sender)
 			(*it)->send_msg(message);
 	}
-
-	// operator
 	for (std::vector<Client *>::iterator it = _operators.begin(); it != _operators.end(); ++it)
 	{
-		std::cout << "[DEBUG] OPE" << std::endl;
-		// pouor ne pas aussi envoyer a user donc 2 fois
 		if (*it != sender)
 			(*it)->send_msg(message);
 	}
@@ -133,7 +115,6 @@ void Channel::ChannelSend(const std::string &message, Client *sender)
 
 void Channel::printClientVectors() const
 {
-	std::cout << "  [_users] Clients:\n";
 	for (std::vector<Client *>::const_iterator it = _users.begin(); it != _users.end(); ++it)
 		std::cout << "    - ptr: " << *it << " (" << (*it)->getNickname() << ")\n";
 
