@@ -1,4 +1,4 @@
-# IRC Server – Projet ft_irc
+# Serveur IRC temps réel en C++ – Projet ft_irc
 
 ## Présentation du projet
 
