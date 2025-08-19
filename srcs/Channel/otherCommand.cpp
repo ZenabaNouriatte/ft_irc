@@ -6,7 +6,7 @@
 /*   By: cschmid <cschmid@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/31 14:14:57 by cschmid           #+#    #+#             */
-/*   Updated: 2025/08/08 15:32:35 by cschmid          ###   ########.fr       */
+/*   Updated: 2025/08/08 17:20:30 by cschmid          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -96,10 +96,7 @@ void Channel::commandKick(Server *server, Client *client, Client *cible,
 			server->sendError2(client->getFd(), "441", cible->getNick(), this->_name, "They aren't on that channel");
 	}
 	else
-	{
 		server->sendError(client->getFd(), "482", this->_name, "You're not channel operator");
-		std::cout << "DEBUG commKick : client not an operator" << std::endl;
-	}
 }
 
 /*========================== INVIT ============================*/

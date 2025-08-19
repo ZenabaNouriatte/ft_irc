@@ -6,7 +6,7 @@
 /*   By: cschmid <cschmid@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/21 14:30:34 by cschmid           #+#    #+#             */
-/*   Updated: 2025/08/08 17:14:55 by cschmid          ###   ########.fr       */
+/*   Updated: 2025/08/08 17:20:32 by cschmid          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -291,7 +291,6 @@ void Server::handleQUIT(Client *client, const Message &msg)
 		}
 		++it;
 	}
-	std::cout << "DEBUG\n";
 	disconnectClient(client->getFd());
 }
 

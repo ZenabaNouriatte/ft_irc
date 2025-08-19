@@ -99,8 +99,5 @@ class Channel
 	void 					changeTopic(Client client, std::string topic);
 	Client* 				findClientByNick(const std::string &nick);
 	
-	// a supprimer
-	void printUsers() const;
-
 };
 
