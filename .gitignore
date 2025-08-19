@@ -5,6 +5,7 @@ a.out
 .json
 *.d
 *.log
+.vscode
 
 **/a.out
 **/*.o
