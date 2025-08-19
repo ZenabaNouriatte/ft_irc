@@ -10,7 +10,7 @@ Le serveur est capable de :
 - Gérer les commandes IRC de base (`PASS`, `NICK`, `USER`, `JOIN`, `PRIVMSG`, `PING`...)
 - Créer dynamiquement des channels et permettre aux clients de communiquer entre eux
 
-## 🖥Fonctionnement
+## ✳️ Fonctionnement
 
 ### 1. Lancement du serveur
 
@@ -39,7 +39,7 @@ JOIN #canal
 PRIVMSG #canal :Bonjour à tous !
 ```
 
-## En image ...
+## ✳️ En image ...
 
 1. **Connexion d'un client et message de bienvenue**
 ![Connexion et message de bienvenue](screenshots/Screenshot%20from%202025-08-19%2009-58-18.png)
@@ -76,7 +76,7 @@ Le projet est organisé en plusieurs classes principales :
 - Chaque commande IRC (`JOIN`, `PRIVMSG`, `PING`...) est traitée par une fonction dédiée
 - **Exemple :** `handleJoin()` parse les arguments, crée un channel si nécessaire, et y ajoute le client
 
-##  Axes d'amélioration
+## ✳️ Axes d'amélioration
 
 ### Gestion d'erreurs avec `try`/`catch`
 - Remplacer la propagation silencieuse d'erreurs par des exceptions contrôlées
